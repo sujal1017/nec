@@ -1,0 +1,15 @@
+{
+    "carts": [
+      {
+        "id": "cart1",
+        "name": "Personal Cart",
+        "items": [{ "id": 1, "quantity": 1 }]
+      },
+      {
+        "id": "cart2",
+        "name": "Work Cart",
+        "items": []
+      }
+    ]
+  }
+  

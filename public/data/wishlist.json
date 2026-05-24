@@ -1,0 +1,15 @@
+{
+    "wishlists": [
+      {
+        "id": "wishlist1",
+        "name": "Tech Gadgets",
+        "items": [1, 2]
+      },
+      {
+        "id": "wishlist2",
+        "name": "Gaming Setup",
+        "items": []
+      }
+    ]
+  }
+  

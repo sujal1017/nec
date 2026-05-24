@@ -1,0 +1,10 @@
+[
+    { "name": "Electronics", "image": "/images/category/electronics.png" },
+    { "name": "Clothing & Accessories", "image": "/images/category/clothing.png" },
+    { "name": "Home", "image": "/images/category/home.png" },
+    { "name": "Beauty", "image": "/images/category/beauty.png" },
+    { "name": "Sports & Outdoors", "image": "/images/category/sports.png" },
+    { "name": "Toys", "image": "/images/category/toys.png" },
+    {"name": "Books", "image": "/images/category/books.jpeg" }
+  ]
+  

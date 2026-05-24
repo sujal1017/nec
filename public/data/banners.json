@@ -1,0 +1,15 @@
+{
+    "banners": [
+      {
+        "id": 1,
+        "image": "/images/sale-banner.jpg",
+        "alt": "50% Off Sale"
+      },
+      {
+        "id": 2,
+        "image": "/images/deals-banner.jpg",
+        "alt": "Top Deals"
+      }
+    ]
+  }
+  

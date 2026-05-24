@@ -1,0 +1,106 @@
+@media screen and (max-width :810px){
+
+	#login-container{
+		background-color: transparent;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		width: 100%;
+		gap: 20px;
+	}
+
+
+	#left-drawer{
+		display: none;
+		width: 100%;
+		background-color: lightblue;
+	}
+	#right-drawer{
+		display: flex;
+		width: 100%;
+		box-shadow: 5px 10px 475px white,-5px -10px 475px gray;
+		border-radius: 20px;
+		color: darkblue;
+		
+	}
+	#create-free-account{
+		font-size: smaller;
+		text-align: center;
+	}
+}
+
+/* FOR MOBILES */
+
+@media screen and (max-width :426px){
+	#login-container{
+		/* background-color: palegoldenrod; */
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		width: 100%;
+		gap: 20px;
+		text-align: center;
+		color: brown;
+	}
+
+
+	#left-drawer{
+		display: none;
+		width: 70%;
+		margin: auto	;
+	}
+	#right-drawer{
+		display: flex;
+		width: 90%;
+		justify-content: center;
+		margin: auto;
+		align-items: center;
+		color: brown;
+		/* border: 5px solid black; */
+		border-radius: 20px;
+		box-shadow: 5px 10px 875px gray,-5px -10px 875px gray;
+		/* background-color: yellow; */
+	}
+	#right-drawer-inside{
+		width: 100%;
+
+		/* background-color: wheat; */
+		margin: auto;
+		/* visibility: collapse; */
+	}
+	#create-free-account{
+		font-size: smaller;
+	}
+	#email-field-div{
+		display: flex;
+		height: 40px;
+		width: 100%;
+		
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+	#email-field{
+		width: 100%;
+		margin: auto;
+		height: 40px;
+		padding: 10px 10px;
+		
+	}
+	#email-field:focus{
+		width: 120%;
+		margin-left: -10%;
+	}
+	#password-field{
+		width: 100%;
+		margin: auto;
+		height: 40px;
+		padding: 10px 10px;
+		
+	}
+
+}

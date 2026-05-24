@@ -1,0 +1,1603 @@
+[
+  {
+    "id": 1,
+    "name": "Apple iPhone 15 Pro Max",
+    "category": "Electronics",
+    "brand": "Apple",
+    "price": 149999,
+    "inStock": true,
+    "isAuction": true,
+    "auctionDetails": {
+      "currentBid": 120000,
+      "minimumBid": 125000,
+      "bids": 12,
+      "timeLeft": "2d 5h 30m",
+      "bidders": [
+        {
+          "name": "Rahul Sharma",
+          "bidAmount": 120000,
+          "time": "2024-03-20T14:30:00"
+        },
+        {
+          "name": "Priya Patel",
+          "bidAmount": 115000,
+          "time": "2024-03-20T13:45:00"
+        }
+      ]
+    },
+    "rating": 4.8,
+    "image": "/images/products/iphone-15-pro-max-1.jpg",
+    "images": [
+      "/images/products/iphone-15-pro-max-1.jpg",
+      "/images/products/iphone-15-pro-max-2.jpg",
+      "/images/products/fitbit.png",
+      "/images/products/iphone-15-pro-max-2.jpg"
+    ],
+    "description": "Experience innovation at its finest with the Apple iPhone 15 Pro Max. Crafted from aerospace-grade titanium, this flagship device is lightweight yet exceptionally durable. The 6.7-inch Super Retina XDR display offers true-to-life colors, deep blacks, and stunning brightness, perfect for gaming, streaming, and content creation. Powered by the all-new A17 Bionic chip, it delivers lightning-fast performance, superior power efficiency, and next-level AI enhancements. Capture cinematic shots with the revolutionary 48MP main sensor, telephoto lens, and advanced image processing. The iPhone 15 Pro Max now features USB-C fast charging for seamless connectivity and quicker power-ups. Dive into the future with iOS 17, offering smarter widgets, personalized lock screens, and improved privacy tools. Whether you're a professional or a tech enthusiast, this device redefines what a smartphone can do.",
+    "features": [
+      "6.7-inch Super Retina XDR display",
+      "Titanium frame for durability",
+      "48MP Main Camera with Telephoto lens",
+      "USB-C fast charging",
+      "iOS 17 with advanced AI features"
+    ],
+    "seller": {
+      "sellerName": "TechBazaar India",
+      "sellerRating": 4.6,
+      "returnPolicy": "10-day replacement only",
+      "warranty": "1 year manufacturer warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Rahul Sharma",
+        "rating": 5,
+        "date": "2023-10-15",
+        "title": "Best iPhone ever!",
+        "comment": "The titanium build feels amazing and the camera is incredible. Battery life is also impressive. Worth every penny!",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Priya Patel",
+        "rating": 4,
+        "date": "2023-10-10",
+        "title": "Great upgrade from iPhone 13",
+        "comment": "The USB-C port is a welcome change. Camera improvements are noticeable, especially in low light. Only giving 4 stars because of the high price.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Arjun Mehta",
+        "rating": 5,
+        "date": "2023-10-05",
+        "title": "Excellence in every aspect",
+        "comment": "The A17 chip is incredibly fast. Gaming performance is outstanding. The titanium frame makes it feel premium yet lightweight.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What is the main material of the iPhone 15 Pro Max?",
+        "answer": "It is crafted from aerospace-grade titanium for durability."
+      },
+      {
+        "question": "Does the iPhone 15 Pro Max support USB-C charging?",
+        "answer": "Yes, it features USB-C fast charging."
+      },
+      {
+        "question": "What is the display size of the iPhone 15 Pro Max?",
+        "answer": "It has a 6.7-inch Super Retina XDR display."
+      }
+    ],
+    "options": {
+      "color": ["Black", "White", "Blue", "Titanium"],
+      "storage": ["128GB", "256GB", "512GB", "1TB"]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Sony WH-1000XM5 Noise Cancelling Headphones",
+    "category": "Electronics",
+    "brand": "Sony",
+    "price": 29999,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/sony-wh1000xm5-1.jpg",
+    "images": [
+      "/images/products/sony-wh1000xm5-1.jpg",
+      "/images/products/sony-wh1000xm5-2.jpg"
+    ],
+    "description": "Immerse yourself in a world of pure sound with the Sony WH-1000XM5, the industry-leading noise cancelling headphones. With dual processors and eight microphones, they adapt to your environment and provide truly uninterrupted audio. These over-ear headphones offer a crystal-clear call experience, intuitive touch controls, and multi-device pairing for effortless switching. Enjoy up to 30 hours of battery life and quick charge capabilities that give you hours of playback with just a few minutes of charging. Perfect for travel, work, or relaxation, they redefine wireless listening.",
+    "features": [
+      "Adaptive noise cancellation",
+      "30-hour battery life with fast charging",
+      "High-resolution audio support",
+      "Multi-device pairing",
+      "Touch controls for easy navigation"
+    ],
+    "seller": {
+      "sellerName": "AudioExpress India",
+      "sellerRating": 4.8,
+      "returnPolicy": "7-day return & refund",
+      "warranty": "1 year brand warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Vikram Singh",
+        "rating": 5,
+        "date": "2023-09-20",
+        "title": "Best noise cancellation ever",
+        "comment": "These headphones are incredible! The noise cancellation is so good that I can't hear anything around me. Sound quality is also amazing.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Ananya Reddy",
+        "rating": 4,
+        "date": "2023-09-15",
+        "title": "Great for travel",
+        "comment": "Perfect for long flights. Battery life is excellent and the comfort is great even after wearing for hours. Only issue is the high price.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Karthik Nair",
+        "rating": 5,
+        "date": "2023-09-10",
+        "title": "Worth every penny",
+        "comment": "The sound quality is exceptional. Bass is deep but not overwhelming, and the highs are crystal clear. Best headphones I've ever owned.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "How long does the battery last on the Sony WH-1000XM5?",
+        "answer": "Up to 30 hours on a full charge."
+      },
+      {
+        "question": "Can the Sony WH-1000XM5 connect to multiple devices?",
+        "answer": "Yes, it supports multi-device pairing."
+      },
+      {
+        "question": "Are the Sony WH-1000XM5 headphones wireless?",
+        "answer": "Yes, they are wireless over-ear headphones."
+      }
+    ],
+    "options": {
+      "color": ["Black", "Silver"]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Nike Air Jordan 1 Retro High OG Shoes",
+    "category": "Clothing & Accessories",
+    "brand": "Nike",
+    "price": 17999,
+    "inStock": true,
+    "rating": 4.9,
+    "image": "/images/products/nike-air-jordan-1.jpg",
+    "images": [
+      "/images/products/nike-air-jordan-1.jpg",
+      "/images/products/nike-air-jordan-2.jpg"
+    ],
+    "description": "Step into iconic style with the Nike Air Jordan 1 Retro High OG. Revered by sneakerheads and athletes alike, this legendary silhouette is built with premium leather and offers a heritage look that pays homage to MJ's first signature shoe. The high-top design delivers ankle support and standout presence, while the responsive cushioning keeps you comfortable all day long. Whether you're collecting or styling, these kicks are a statement piece. Perfect for casual wear, court action, or street fashion.",
+    "features": [
+      "Premium leather upper",
+      "Iconic Air Jordan design",
+      "Responsive cushioning for comfort",
+      "Durable rubber outsole for traction"
+    ],
+    "seller": {
+      "sellerName": "SneakerWorld",
+      "sellerRating": 4.9,
+      "returnPolicy": "15-day return policy",
+      "warranty": "No manufacturer warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Aditya Kumar",
+        "rating": 5,
+        "date": "2023-08-25",
+        "title": "Classic design, perfect fit",
+        "comment": "These are the real deal! The leather quality is excellent and they fit perfectly. The classic design never goes out of style.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Neha Gupta",
+        "rating": 5,
+        "date": "2023-08-20",
+        "title": "Must-have for sneakerheads",
+        "comment": "As a collector, these are a must-have. The craftsmanship is impeccable and they look even better in person than in photos.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Rohan Desai",
+        "rating": 4,
+        "date": "2023-08-15",
+        "title": "Great shoes, expensive",
+        "comment": "The quality is outstanding and they're very comfortable. Just wish they weren't so expensive, but that's the price for iconic style.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What material is used for the Nike Air Jordan 1 Retro High OG?",
+        "answer": "It is made with premium leather."
+      },
+      {
+        "question": "Are these shoes suitable for sports?",
+        "answer": "Yes, they offer ankle support and responsive cushioning."
+      },
+      {
+        "question": "Is the Air Jordan 1 a collectible item?",
+        "answer": "Yes, it is highly sought after by sneaker collectors."
+      }
+    ],
+    "options": {
+      "color": ["White", "Black", "Red"],
+      "size": ["7", "8", "9", "10", "11"]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Samsung Galaxy Watch 6",
+    "category": "Electronics",
+    "brand": "Samsung",
+    "price": 34999,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/samsung-watch6-1.jpg",
+    "images": [
+      "/images/products/samsung-watch6-1.jpg",
+      "/images/products/samsung-watch6-2.jpg"
+    ],
+    "description": "Track your wellness and stay connected in style with the Samsung Galaxy Watch 6. Featuring a vivid 1.4-inch Super AMOLED display, it offers intuitive touch controls and customizable watch faces. Monitor your heart rate, ECG, SpO2 levels, and sleep patterns seamlessly. Stay powered with up to 40 hours of battery life and water-resistant design that's ready for any adventure. Integrated with Samsung Pay and the Galaxy ecosystem, it's the perfect companion for Android users who want functionality wrapped in elegance.",
+    "features": [
+      "1.4-inch Super AMOLED display",
+      "ECG and SpO2 monitoring",
+      "Up to 40 hours battery life",
+      "Water-resistant design",
+      "Samsung Pay support"
+    ],
+    "seller": {
+      "sellerName": "GadgetKing",
+      "sellerRating": 4.5,
+      "returnPolicy": "7-day exchange only",
+      "warranty": "1 year Samsung India warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Suresh Menon",
+        "rating": 5,
+        "date": "2023-07-30",
+        "title": "Perfect fitness companion",
+        "comment": "The health tracking features are excellent. ECG and SpO2 monitoring work great, and the battery life is impressive. Best smartwatch I've owned.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Divya Sharma",
+        "rating": 4,
+        "date": "2023-07-25",
+        "title": "Great for Samsung users",
+        "comment": "Seamless integration with my Samsung phone. The display is beautiful and the UI is intuitive. Only giving 4 stars because it's a bit expensive.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Amit Patel",
+        "rating": 5,
+        "date": "2023-07-20",
+        "title": "Worth the upgrade",
+        "comment": "Upgraded from Watch 4 and the improvements are noticeable. Better battery life, faster performance, and more accurate health tracking.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What health features does the Galaxy Watch 6 offer?",
+        "answer": "It includes ECG, SpO2, and heart rate monitoring."
+      },
+      {
+        "question": "Is the Galaxy Watch 6 water-resistant?",
+        "answer": "Yes, it is water-resistant for daily use."
+      },
+      {
+        "question": "Does it support Samsung Pay?",
+        "answer": "Yes, Samsung Pay is supported."
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Dell XPS 15 Laptop",
+    "category": "Electronics",
+    "brand": "Dell",
+    "price": 189999,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/dell-xps-15-1.jpg",
+    "images": [
+      "/images/products/dell-xps-15-1.jpg",
+      "/images/products/dell-xps-15-2.jpg"
+    ],
+    "description": "Push the boundaries of performance with the Dell XPS 15, a powerhouse built for creators and professionals. Its 15.6-inch 4K Ultra HD touchscreen provides immersive clarity, while the Intel Core i9 processor and NVIDIA RTX 4060 GPU deliver high-speed multitasking and smooth graphics rendering. With 32GB RAM and 1TB SSD, experience lightning-fast load times and ample storage. Encased in a sleek aluminum body, it also features a fingerprint scanner and Windows Hello for secure login. Ideal for designers, developers, and tech aficionados.",
+    "features": [
+      "15.6-inch 4K Ultra HD touchscreen",
+      "Intel Core i9 13th Gen processor",
+      "NVIDIA GeForce RTX 4060 GPU",
+      "32GB RAM, 1TB SSD storage",
+      "Fingerprint scanner & Windows Hello"
+    ],
+    "seller": {
+      "sellerName": "TechBliss",
+      "sellerRating": 4.7,
+      "returnPolicy": "10-day replacement only",
+      "warranty": "1 year onsite warranty by Dell"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Rajiv Verma",
+        "rating": 5,
+        "date": "2023-06-15",
+        "title": "Best laptop for creative work",
+        "comment": "The 4K display is stunning and the performance is incredible. Perfect for video editing and 3D rendering. Worth every penny for professionals.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Meera Kapoor",
+        "rating": 4,
+        "date": "2023-06-10",
+        "title": "Powerful but expensive",
+        "comment": "The performance is outstanding and the build quality is premium. Battery life could be better for the price, but overall a great machine.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Vikram Malhotra",
+        "rating": 5,
+        "date": "2023-06-05",
+        "title": "Perfect for developers",
+        "comment": "As a software developer, this laptop handles everything I throw at it. The keyboard is excellent and the performance is top-notch.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What is the display resolution of the Dell XPS 15?",
+        "answer": "It features a 15.6-inch 4K Ultra HD touchscreen."
+      },
+      {
+        "question": "Does the XPS 15 have a dedicated GPU?",
+        "answer": "Yes, it comes with an NVIDIA RTX 4060 GPU."
+      },
+      {
+        "question": "Is there a fingerprint scanner on the XPS 15?",
+        "answer": "Yes, it includes a fingerprint scanner for security."
+      }
+    ],
+    "options": {
+      "color": ["Silver", "Black"],
+      "storage": ["512GB", "1TB", "2TB"]
+    }
+  },
+  {
+    "id": 6,
+    "name": "Bose QuietComfort Earbuds II",
+    "category": "Electronics",
+    "brand": "Bose",
+    "price": 24999,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/bose-qc-earbuds-1.jpg",
+    "images": [
+      "/images/products/bose-qc-earbuds-1.jpg",
+      "/images/products/bose-qc-earbuds-2.jpg"
+    ],
+    "description": "Rediscover peace and premium audio with the Bose QuietComfort Earbuds II. These compact earbuds offer world-class noise cancellation using CustomTune technology that adapts to your ears for unparalleled immersion. With up to 24 hours of battery life and an IPX4 water resistance rating, they're perfect for long commutes, workouts, or just zoning out. Touch-sensitive controls and Bluetooth 5.3 ensure seamless interaction and connectivity. Designed for audiophiles and comfort-lovers alike.",
+    "features": [
+      "CustomTune sound calibration",
+      "Up to 24 hours battery life with case",
+      "IPX4 water resistance",
+      "Touch-sensitive controls",
+      "Bluetooth 5.3 for stable connectivity"
+    ],
+    "seller": {
+      "sellerName": "SoundScape Electronics",
+      "sellerRating": 4.6,
+      "returnPolicy": "7-day return",
+      "warranty": "1 year international Bose warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Arun Singhania",
+        "rating": 5,
+        "date": "2023-05-20",
+        "title": "Best noise cancellation in earbuds",
+        "comment": "The noise cancellation is incredible for earbuds. They fit perfectly and the sound quality is excellent. Perfect for my daily commute.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Priyanka Mehta",
+        "rating": 4,
+        "date": "2023-05-15",
+        "title": "Great sound, comfortable fit",
+        "comment": "The sound quality is amazing and they're very comfortable to wear for long periods. Battery life is good but not exceptional.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Karan Johar",
+        "rating": 5,
+        "date": "2023-05-10",
+        "title": "Worth the premium price",
+        "comment": "These are expensive but the quality justifies the price. The CustomTune feature really makes a difference in sound quality.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "How long does the battery last on Bose QC Earbuds II?",
+        "answer": "Up to 24 hours with the charging case."
+      },
+      {
+        "question": "Are the Bose QC Earbuds II water-resistant?",
+        "answer": "Yes, they have an IPX4 water resistance rating."
+      },
+      {
+        "question": "What technology is used for noise cancellation?",
+        "answer": "They use CustomTune sound calibration for noise cancellation."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Adidas Ultraboost 22 Running Shoes",
+    "category": "Clothing & Accessories",
+    "brand": "Adidas",
+    "price": 15999,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/adidas-ultraboost-1.jpg",
+    "images": [
+      "/images/products/adidas-ultraboost-1.jpg",
+      "/images/products/adidas-ultraboost-2.jpg"
+    ],
+    "description": "Unleash your inner athlete with the Adidas Ultraboost 22, designed for superior energy return, comfort, and flexibility. The Boost midsole cushions your every step, while the Primeknit upper wraps your foot like a second skin. The Continental rubber outsole ensures durability and traction on all surfaces. Whether you're running a marathon or walking around town, these shoes adapt to your lifestyle with unmatched ease.",
+    "features": [
+      "Boost midsole technology",
+      "Primeknit upper for breathability",
+      "Continental rubber outsole",
+      "Lightweight and flexible",
+      "Responsive cushioning for long runs"
+    ],
+    "seller": {
+      "sellerName": "StrideSports India",
+      "sellerRating": 4.7,
+      "returnPolicy": "15-day return or size exchange",
+      "warranty": "6 months manufacturer warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Ravi Kumar",
+        "rating": 5,
+        "date": "2023-04-25",
+        "title": "Perfect for long runs",
+        "comment": "These shoes are incredibly comfortable for long-distance running. The Boost technology provides excellent cushioning and energy return.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Anjali Desai",
+        "rating": 4,
+        "date": "2023-04-20",
+        "title": "Great comfort, stylish design",
+        "comment": "Very comfortable for all-day wear. The design is sleek and modern. Only giving 4 stars because they're a bit expensive.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Siddharth Rao",
+        "rating": 5,
+        "date": "2023-04-15",
+        "title": "Best running shoes I've owned",
+        "comment": "The Primeknit upper is so comfortable and breathable. Perfect for both running and casual wear. Worth the investment.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What is the main cushioning technology in Ultraboost 22?",
+        "answer": "It uses Boost midsole technology for comfort."
+      },
+      {
+        "question": "Are these shoes suitable for long-distance running?",
+        "answer": "Yes, they are designed for long runs and daily wear."
+      },
+      {
+        "question": "Is the upper material breathable?",
+        "answer": "Yes, the Primeknit upper is highly breathable."
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Samsung 55-inch 4K Smart TV",
+    "category": "Electronics",
+    "brand": "Samsung",
+    "price": 54999,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/samsung-4k-tv-1.jpg",
+    "images": [
+      "/images/products/samsung-4k-tv-1.jpg",
+      "/images/products/samsung-4k-tv-2.jpg"
+    ],
+    "description": "Transform your living room into a cinematic paradise with the Samsung 55-inch 4K Smart TV. Powered by Quantum HDR and a crystal-clear 120Hz refresh rate, this TV delivers vibrant visuals and ultra-smooth motion for sports and movies alike. Enjoy immersive Dolby Atmos sound, access popular streaming apps with Tizen OS, and control it all with voice assistants like Alexa and Bixby. It's the future of entertainment, now in your home.",
+    "features": [
+      "Quantum HDR 4K resolution",
+      "120Hz refresh rate for smooth visuals",
+      "Dolby Atmos surround sound",
+      "Tizen Smart OS with streaming apps",
+      "Voice control with Bixby & Alexa"
+    ],
+    "seller": {
+      "sellerName": "ElectroMart",
+      "sellerRating": 4.5,
+      "returnPolicy": "10-day replacement",
+      "warranty": "1 year Samsung warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Vikram Malhotra",
+        "rating": 5,
+        "date": "2023-03-30",
+        "title": "Stunning picture quality",
+        "comment": "The 4K resolution and HDR make everything look incredible. The sound quality is also impressive. Best TV I've ever owned.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Neha Sharma",
+        "rating": 4,
+        "date": "2023-03-25",
+        "title": "Great smart TV features",
+        "comment": "The Tizen OS is smooth and intuitive. All my streaming apps work perfectly. The picture quality is excellent for the price.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Rajesh Patel",
+        "rating": 5,
+        "date": "2023-03-20",
+        "title": "Perfect for gaming",
+        "comment": "The 120Hz refresh rate makes gaming incredibly smooth. The low input lag is a game-changer. Highly recommend for gamers.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What is the refresh rate of the Samsung 4K Smart TV?",
+        "answer": "It has a 120Hz refresh rate for smooth visuals."
+      },
+      {
+        "question": "Does it support voice assistants?",
+        "answer": "Yes, it works with Alexa and Bixby."
+      },
+      {
+        "question": "What operating system does the TV use?",
+        "answer": "It runs on Tizen Smart OS."
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "GoPro Hero 11 Black",
+    "category": "Electronics",
+    "brand": "GoPro",
+    "price": 41999,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/gopro-hero11-1.jpg",
+    "images": [
+      "/images/products/gopro-hero11-1.jpg",
+      "/images/products/gopro-hero11-2.jpg"
+    ],
+    "description": "Capture your world like never before with the GoPro Hero 11 Black. Shoot stunning 5.3K videos, record in slow motion, or stream live—all in one compact, rugged camera. With HyperSmooth 5.0 stabilization, even your wildest adventures will look buttery smooth. Waterproof up to 33ft and designed to withstand extreme conditions, it's perfect for travelers, athletes, and content creators who demand the best.",
+    "features": [
+      "5.3K60 Ultra HD video recording",
+      "HyperSmooth 5.0 stabilization",
+      "Waterproof up to 33ft",
+      "Live streaming & webcam mode",
+      "Long-lasting battery life"
+    ],
+    "seller": {
+      "sellerName": "CamZone",
+      "sellerRating": 4.6,
+      "returnPolicy": "7-day return",
+      "warranty": "1 year GoPro warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Amit Singh",
+        "rating": 5,
+        "date": "2023-02-15",
+        "title": "Best action camera ever",
+        "comment": "The video quality is incredible and the stabilization is mind-blowing. Perfect for my adventure sports videos. Worth every penny!",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Priya Reddy",
+        "rating": 4,
+        "date": "2023-02-10",
+        "title": "Great for travel vlogging",
+        "comment": "The 5.3K resolution makes my travel videos look professional. Battery life could be better, but overall an excellent camera.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Rahul Verma",
+        "rating": 5,
+        "date": "2023-02-05",
+        "title": "Perfect for content creators",
+        "comment": "As a YouTuber, this camera has transformed my content. The image quality and stabilization are outstanding. Highly recommend!",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What is the maximum video resolution of GoPro Hero 11?",
+        "answer": "It can record up to 5.3K60 Ultra HD video."
+      },
+      {
+        "question": "Is the GoPro Hero 11 waterproof?",
+        "answer": "Yes, it is waterproof up to 33ft."
+      },
+      {
+        "question": "Does it support live streaming?",
+        "answer": "Yes, live streaming and webcam mode are available."
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Apple MacBook Air M2",
+    "category": "Electronics",
+    "brand": "Apple",
+    "price": 119999,
+    "inStock": false,
+    "rating": 4.9,
+    "image": "/images/products/macbook-air-m2-1.jpg",
+    "images": [
+      "/images/products/macbook-air-m2-1.jpg",
+      "/images/products/macbook-air-m2-2.jpg"
+    ],
+    "description": "The Apple MacBook Air M2 is elegance, performance, and efficiency rolled into one. Featuring the powerful Apple M2 chip, this lightweight device delivers blazing speeds and all-day battery life. The 13.6-inch Liquid Retina display provides vibrant visuals and crystal-clear text, while MagSafe charging ensures safety and convenience. Perfect for professionals and students alike, the MacBook Air M2 handles everything from editing to multitasking with seamless grace.",
+    "features": [
+      "Apple M2 chip with 8-core CPU",
+      "13.6-inch Liquid Retina display",
+      "18-hour battery life",
+      "MagSafe fast charging",
+      "macOS Ventura with powerful tools"
+    ],
+    "seller": {
+      "sellerName": "Apple Store India",
+      "sellerRating": 4.8,
+      "returnPolicy": "10-day return",
+      "warranty": "1 year Apple warranty + 90 days phone support"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Aditya Kapoor",
+        "rating": 5,
+        "date": "2023-01-20",
+        "title": "Incredible performance",
+        "comment": "The M2 chip is incredibly fast and efficient. Battery life is amazing - I can work all day without charging. Best laptop I've ever used.",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Meera Patel",
+        "rating": 5,
+        "date": "2023-01-15",
+        "title": "Perfect for students",
+        "comment": "Lightweight, powerful, and the battery lasts forever. Perfect for taking notes and working on assignments. The display is beautiful.",
+        "verified": true
+      },
+      {
+        "id": 3,
+        "userName": "Vikram Malhotra",
+        "rating": 4,
+        "date": "2023-01-10",
+        "title": "Great laptop, expensive",
+        "comment": "The performance is outstanding and the build quality is premium. Just wish it had more ports, but that's the trade-off for the slim design.",
+        "verified": false
+      }
+    ],
+    "faqs": [
+      {
+        "question": "What chip powers the MacBook Air M2?",
+        "answer": "It is powered by the Apple M2 chip."
+      },
+      {
+        "question": "How long does the battery last on the MacBook Air M2?",
+        "answer": "Up to 18 hours on a single charge."
+      },
+      {
+        "question": "Does the MacBook Air M2 support MagSafe charging?",
+        "answer": "Yes, it features MagSafe fast charging."
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "OnePlus 12 5G Smartphone",
+    "category": "Electronics",
+    "brand": "OnePlus",
+    "price": 69999,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/oneplus-12-1.jpg",
+    "images": [
+      "/images/products/oneplus-12-1.jpg",
+      "/images/products/oneplus-12-2.jpg"
+    ],
+    "description": "The OnePlus 12 5G offers flagship performance with a Snapdragon 8 Gen 2 processor, 120Hz AMOLED display, and ultra-fast charging. Experience smooth multitasking and stunning photography with its triple camera setup.",
+    "features": [
+      "Snapdragon 8 Gen 2 processor",
+      "120Hz AMOLED display",
+      "5000mAh battery with 100W charging",
+      "Triple rear camera system",
+      "5G connectivity"
+    ],
+    "seller": {
+      "sellerName": "TechBazaar India",
+      "sellerRating": 4.6,
+      "returnPolicy": "10-day replacement only",
+      "warranty": "1 year manufacturer warranty"
+    },
+    "reviews": [
+      {
+        "id": 1,
+        "userName": "Sanjay Rao",
+        "rating": 5,
+        "date": "2024-03-01",
+        "title": "Flagship killer!",
+        "comment": "Super fast, great camera, and the charging is insane!",
+        "verified": true
+      },
+      {
+        "id": 2,
+        "userName": "Megha Jain",
+        "rating": 4,
+        "date": "2024-03-02",
+        "title": "Great value",
+        "comment": "Excellent phone for the price. Display is gorgeous.",
+        "verified": true
+      }
+    ],
+    "faqs": [
+      {"question": "Does the OnePlus 12 support 5G?","answer": "Yes, it supports 5G connectivity."},
+      {"question": "What is the battery capacity?","answer": "It has a 5000mAh battery."},
+      {"question": "Does it have fast charging?","answer": "Yes, 100W fast charging is supported."}
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Canon EOS M50 Mark II Mirrorless Camera",
+    "category": "Electronics",
+    "brand": "Canon",
+    "price": 58999,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/canon-m50-1.jpg",
+    "images": [
+      "/images/products/canon-m50-1.jpg",
+      "/images/products/canon-m50-2.jpg"
+    ],
+    "description": "Capture stunning photos and 4K videos with the Canon EOS M50 Mark II. Lightweight, compact, and perfect for creators and vloggers.",
+    "features": [
+      "24.1MP APS-C CMOS sensor",
+      "4K video recording",
+      "Dual Pixel autofocus",
+      "Vari-angle touchscreen",
+      "Wi-Fi and Bluetooth connectivity"
+    ],
+    "seller": {
+      "sellerName": "CamZone",
+      "sellerRating": 4.6,
+      "returnPolicy": "7-day return",
+      "warranty": "1 year GoPro warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Ritika S.", "rating": 5, "date": "2024-02-10", "title": "Perfect for vlogging", "comment": "Lightweight and the autofocus is amazing!", "verified": true},
+      {"id": 2, "userName": "Aakash P.", "rating": 4, "date": "2024-02-12", "title": "Great camera", "comment": "Image quality is top notch.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Does it support 4K video?","answer": "Yes, it records in 4K."},
+      {"question": "Is the screen touch-enabled?","answer": "Yes, it has a vari-angle touchscreen."},
+      {"question": "Does it have Wi-Fi?","answer": "Yes, Wi-Fi and Bluetooth are built-in."}
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Fitbit Versa 4 Fitness Smartwatch",
+    "category": "Electronics",
+    "brand": "Fitbit",
+    "price": 17999,
+    "inStock": true,
+    "rating": 4.5,
+    "image": "/images/products/fitbit-versa4-1.jpg",
+    "images": [
+      "/images/products/fitbit-versa4-1.jpg",
+      "/images/products/fitbit-versa4-2.jpg"
+    ],
+    "description": "Track your health and fitness with the Fitbit Versa 4. Features heart rate monitoring, sleep tracking, and built-in GPS.",
+    "features": [
+      "Heart rate & SpO2 monitoring",
+      "Built-in GPS",
+      "6+ day battery life",
+      "Water resistant to 50m",
+      "Sleep tracking"
+    ],
+    "seller": {
+      "sellerName": "GadgetKing",
+      "sellerRating": 4.5,
+      "returnPolicy": "7-day exchange only",
+      "warranty": "1 year manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Deepak M.", "rating": 5, "date": "2024-01-15", "title": "Great for fitness", "comment": "Tracks everything I need. Battery lasts long!", "verified": true},
+      {"id": 2, "userName": "Sneha R.", "rating": 4, "date": "2024-01-18", "title": "Good value", "comment": "Accurate tracking and comfortable to wear.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it water resistant?","answer": "Yes, up to 50 meters."},
+      {"question": "Does it have GPS?","answer": "Yes, built-in GPS is included."},
+      {"question": "How long does the battery last?","answer": "Up to 6+ days."}
+    ]
+  },
+  {
+    "id": 14,
+    "name": "HP Envy x360 Convertible Laptop",
+    "category": "Electronics",
+    "brand": "HP",
+    "price": 84999,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/hp-envy-x360-1.jpg",
+    "images": [
+      "/images/products/hp-envy-x360-1.jpg",
+      "/images/products/hp-envy-x360-2.jpg"
+    ],
+    "description": "The HP Envy x360 is a versatile 2-in-1 laptop with a touchscreen, AMD Ryzen 7 processor, and long battery life. Perfect for work and play.",
+    "features": [
+      "AMD Ryzen 7 processor",
+      "14-inch FHD touchscreen",
+      "Convertible 2-in-1 design",
+      "16GB RAM, 512GB SSD",
+      "Windows 11 Home"
+    ],
+    "seller": {
+      "sellerName": "TechBliss",
+      "sellerRating": 4.7,
+      "returnPolicy": "10-day replacement only",
+      "warranty": "1 year onsite warranty by Dell"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Rohit S.", "rating": 5, "date": "2024-01-05", "title": "Superb laptop", "comment": "Fast, light, and the touchscreen is very responsive.", "verified": true},
+      {"id": 2, "userName": "Priya K.", "rating": 4, "date": "2024-01-07", "title": "Great for students", "comment": "Perfect for college work and entertainment.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it a touchscreen laptop?","answer": "Yes, it has a 14-inch FHD touchscreen."},
+      {"question": "What processor does it use?","answer": "AMD Ryzen 7."},
+      {"question": "Is it convertible?","answer": "Yes, it is a 2-in-1 convertible laptop."}
+    ]
+  },
+  {
+    "id": 15,
+    "name": "JBL Flip 6 Bluetooth Speaker",
+    "category": "Electronics",
+    "brand": "JBL",
+    "price": 11999,
+    "inStock": true,
+    "rating": 4.4,
+    "image": "/images/products/jbl-flip6-1.jpg",
+    "images": [
+      "/images/products/jbl-flip6-1.jpg",
+      "/images/products/jbl-flip6-2.jpg"
+    ],
+    "description": "Enjoy powerful sound anywhere with the JBL Flip 6 portable Bluetooth speaker. Waterproof, dustproof, and with 12 hours of playtime.",
+    "features": [
+      "Bold JBL Original Pro Sound",
+      "12 hours of playtime",
+      "IP67 waterproof and dustproof",
+      "Bluetooth 5.1",
+      "PartyBoost for multiple speaker pairing"
+    ],
+    "seller": {
+      "sellerName": "SoundScape Electronics",
+      "sellerRating": 4.6,
+      "returnPolicy": "7-day return",
+      "warranty": "1 year international Bose warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Aman T.", "rating": 5, "date": "2023-12-20", "title": "Amazing sound!", "comment": "Loud, clear, and the battery lasts all day.", "verified": true},
+      {"id": 2, "userName": "Nisha V.", "rating": 4, "date": "2023-12-22", "title": "Great for outdoors", "comment": "Waterproof and easy to carry.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it waterproof?","answer": "Yes, IP67 rated waterproof and dustproof."},
+      {"question": "How long does the battery last?","answer": "Up to 12 hours."},
+      {"question": "Can I pair multiple speakers?","answer": "Yes, with PartyBoost feature."}
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Puma RS-X3 Puzzle Sneakers",
+    "category": "Clothing & Accessories",
+    "brand": "Puma",
+    "price": 8999,
+    "inStock": true,
+    "rating": 4.5,
+    "image": "/images/products/puma-rsx3-1.jpg",
+    "images": [
+      "/images/products/puma-rsx3-1.jpg",
+      "/images/products/puma-rsx3-2.jpg"
+    ],
+    "description": "Step up your sneaker game with the Puma RS-X3 Puzzle. Bold colors, chunky design, and ultimate comfort for everyday wear.",
+    "features": [
+      "Mesh and textile upper",
+      "Bold color-blocking",
+      "Lightweight PU midsole",
+      "Rubber outsole for grip",
+      "Cushioned comfort"
+    ],
+    "seller": {
+      "sellerName": "SneakerWorld",
+      "sellerRating": 4.9,
+      "returnPolicy": "15-day return policy",
+      "warranty": "No manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Kunal S.", "rating": 5, "date": "2024-03-10", "title": "Super stylish", "comment": "Love the colors and the comfort is top notch!", "verified": true},
+      {"id": 2, "userName": "Riya M.", "rating": 4, "date": "2024-03-12", "title": "Trendy and comfy", "comment": "Great for daily wear.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Are these sneakers lightweight?","answer": "Yes, they are lightweight and comfortable."},
+      {"question": "What is the upper material?","answer": "Mesh and textile upper."},
+      {"question": "Is the outsole durable?","answer": "Yes, it has a durable rubber outsole."}
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Levi's 511 Slim Fit Jeans",
+    "category": "Clothing & Accessories",
+    "brand": "Levi's",
+    "price": 3999,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/levis-511-1.jpg",
+    "images": [
+      "/images/products/levis-511-1.jpg",
+      "/images/products/levis-511-2.jpg"
+    ],
+    "description": "Classic Levi's 511 Slim Fit Jeans for men. Comfortable, stylish, and perfect for any occasion.",
+    "features": [
+      "Slim fit through seat and thigh",
+      "Stretch denim for comfort",
+      "5-pocket styling",
+      "Sits below waist",
+      "Machine washable"
+    ],
+    "seller": {
+      "sellerName": "StrideSports India",
+      "sellerRating": 4.7,
+      "returnPolicy": "15-day return or size exchange",
+      "warranty": "6 months manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Aakash S.", "rating": 5, "date": "2024-02-20", "title": "Perfect fit!", "comment": "Fits perfectly and very comfortable.", "verified": true},
+      {"id": 2, "userName": "Neha T.", "rating": 4, "date": "2024-02-22", "title": "Good quality", "comment": "Material is soft and stretchable.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Are these jeans stretchable?","answer": "Yes, made with stretch denim."},
+      {"question": "What is the fit type?","answer": "Slim fit through seat and thigh."},
+      {"question": "Are they machine washable?","answer": "Yes, they are machine washable."}
+    ],
+    "options": {
+      "color": ["Blue", "Black", "Grey"],
+      "size": ["28", "30", "32", "34", "36", "38"]
+    }
+  },
+  {
+    "id": 18,
+    "name": "H&M Cotton T-Shirt (Pack of 3)",
+    "category": "Clothing & Accessories",
+    "brand": "H&M",
+    "price": 1499,
+    "inStock": true,
+    "rating": 4.3,
+    "image": "/images/products/hm-tshirt-1.jpg",
+    "images": [
+      "/images/products/hm-tshirt-1.jpg",
+      "/images/products/hm-tshirt-2.jpg"
+    ],
+    "description": "Soft and comfortable cotton t-shirts from H&M. Pack of 3 assorted colors. Perfect for daily wear.",
+    "features": [
+      "100% cotton",
+      "Pack of 3 assorted colors",
+      "Regular fit",
+      "Breathable fabric",
+      "Machine washable"
+    ],
+    "seller": {
+      "sellerName": "SneakerWorld",
+      "sellerRating": 4.9,
+      "returnPolicy": "15-day return policy",
+      "warranty": "No manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Manish K.", "rating": 5, "date": "2024-01-10", "title": "Great value", "comment": "Soft, comfortable, and great for daily use.", "verified": true},
+      {"id": 2, "userName": "Priya S.", "rating": 4, "date": "2024-01-12", "title": "Nice colors", "comment": "Colors are vibrant and fabric is good.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "How many t-shirts in the pack?","answer": "Pack contains 3 t-shirts."},
+      {"question": "What is the fabric?","answer": "100% cotton."},
+      {"question": "Are they regular fit?","answer": "Yes, regular fit."}
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Ray-Ban Wayfarer Sunglasses",
+    "category": "Clothing & Accessories",
+    "brand": "Ray-Ban",
+    "price": 6999,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/rayban-wayfarer-1.jpg",
+    "images": [
+      "/images/products/rayban-wayfarer-1.jpg",
+      "/images/products/rayban-wayfarer-2.jpg"
+    ],
+    "description": "Iconic Ray-Ban Wayfarer sunglasses. Timeless style, UV protection, and perfect for any outfit.",
+    "features": [
+      "Classic Wayfarer design",
+      "UV400 protection",
+      "Durable acetate frame",
+      "Unisex style",
+      "Comes with case"
+    ],
+    "seller": {
+      "sellerName": "StrideSports India",
+      "sellerRating": 4.7,
+      "returnPolicy": "15-day return or size exchange",
+      "warranty": "6 months manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Rohit D.", "rating": 5, "date": "2023-12-05", "title": "Classic look", "comment": "Stylish and comfortable. Love the case!", "verified": true},
+      {"id": 2, "userName": "Sneha P.", "rating": 4, "date": "2023-12-07", "title": "Good quality", "comment": "Frame is sturdy and fits well.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Do they offer UV protection?","answer": "Yes, UV400 protection."},
+      {"question": "Are they unisex?","answer": "Yes, suitable for all genders."},
+      {"question": "Is a case included?","answer": "Yes, comes with a case."}
+    ]
+  },
+  {
+    "id": 20,
+    "name": "Allen Solly Formal Shirt",
+    "category": "Clothing & Accessories",
+    "brand": "Allen Solly",
+    "price": 1999,
+    "inStock": true,
+    "rating": 4.4,
+    "image": "/images/products/allen-solly-shirt-1.jpg",
+    "images": [
+      "/images/products/allen-solly-shirt-1.jpg",
+      "/images/products/allen-solly-shirt-2.jpg"
+    ],
+    "description": "Look sharp at work with Allen Solly's formal shirt. Premium cotton, slim fit, and available in multiple colors.",
+    "features": [
+      "Premium cotton fabric",
+      "Slim fit",
+      "Button-down collar",
+      "Available in multiple colors",
+      "Machine washable"
+    ],
+    "seller": {
+      "sellerName": "SneakerWorld",
+      "sellerRating": 4.9,
+      "returnPolicy": "15-day return policy",
+      "warranty": "No manufacturer warranty"
+    },
+    "reviews": [
+      {"id": 1, "userName": "Amit S.", "rating": 5, "date": "2023-11-15", "title": "Perfect for office", "comment": "Fits well and looks professional.", "verified": true},
+      {"id": 2, "userName": "Rina G.", "rating": 4, "date": "2023-11-17", "title": "Good quality", "comment": "Fabric is soft and comfortable.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it slim fit?","answer": "Yes, it is a slim fit shirt."},
+      {"question": "Is it machine washable?","answer": "Yes, it is machine washable."},
+      {"question": "What fabric is used?","answer": "Premium cotton fabric."}
+    ]
+  },
+  {
+    "id": 21,
+    "name": "Prestige Induction Cooktop",
+    "category": "Home",
+    "brand": "Prestige",
+    "price": 2999,
+    "inStock": true,
+    "rating": 4.5,
+    "image": "/images/products/prestige-cooktop-1.jpg",
+    "images": ["/images/products/prestige-cooktop-1.jpg"],
+    "description": "Cook efficiently with the Prestige Induction Cooktop. Features automatic voltage regulator and anti-magnetic wall.",
+    "features": ["Automatic voltage regulator", "Anti-magnetic wall", "Soft push buttons", "Energy saving technology", "Easy to clean surface"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Rashmi S.", "rating": 5, "date": "2024-04-01", "title": "Very convenient", "comment": "Heats up quickly and is easy to use.", "verified": true},
+      {"id": 2, "userName": "Amit K.", "rating": 4, "date": "2024-04-02", "title": "Good value", "comment": "Saves energy and cooks fast.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it easy to clean?","answer": "Yes, the surface is easy to wipe clean."},
+      {"question": "Does it have auto shut-off?","answer": "Yes, for safety."},
+      {"question": "What is the warranty?","answer": "1 year manufacturer warranty."}
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Milton Thermosteel Flask 1L",
+    "category": "Home",
+    "brand": "Milton",
+    "price": 899,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/milton-flask-1.jpg",
+    "images": ["/images/products/milton-flask-1.jpg"],
+    "description": "Keep your drinks hot or cold for hours with the Milton Thermosteel Flask. Leak-proof and easy to carry.",
+    "features": ["1L capacity", "Leak-proof design", "Keeps drinks hot/cold for 24 hours", "Stainless steel body", "Easy to carry"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Priya D.", "rating": 5, "date": "2024-03-15", "title": "Excellent insulation", "comment": "Keeps my tea hot all day!", "verified": true},
+      {"id": 2, "userName": "Ravi N.", "rating": 4, "date": "2024-03-16", "title": "Good quality", "comment": "No leaks and easy to clean.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it dishwasher safe?","answer": "Yes, it is dishwasher safe."},
+      {"question": "How long does it keep drinks hot?","answer": "Up to 24 hours."},
+      {"question": "Is it leak-proof?","answer": "Yes, fully leak-proof."}
+    ]
+  },
+  {
+    "id": 23,
+    "name": "Philips Air Purifier Series 1000",
+    "category": "Home",
+    "brand": "Philips",
+    "price": 8999,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/philips-airpurifier-1.jpg",
+    "images": ["/images/products/philips-airpurifier-1.jpg"],
+    "description": "Breathe clean air with the Philips Air Purifier. Removes 99.97% of airborne pollutants and allergens.",
+    "features": ["Removes 99.97% pollutants", "HEPA filter", "Low noise operation", "Air quality indicator", "Energy efficient"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Sunita M.", "rating": 5, "date": "2024-02-20", "title": "Works well", "comment": "Noticeable difference in air quality.", "verified": true},
+      {"id": 2, "userName": "Karan S.", "rating": 4, "date": "2024-02-22", "title": "Quiet and effective", "comment": "Runs quietly and easy to use.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Does it have a HEPA filter?","answer": "Yes, true HEPA filter included."},
+      {"question": "Is it noisy?","answer": "No, it operates quietly."},
+      {"question": "What is the warranty?","answer": "1 year manufacturer warranty."}
+    ]
+  },
+  {
+    "id": 24,
+    "name": "Cello Opalware Dinner Set (18 Pieces)",
+    "category": "Home",
+    "brand": "Cello",
+    "price": 2499,
+    "inStock": true,
+    "rating": 4.4,
+    "image": "/images/products/cello-dinnerset-1.jpg",
+    "images": ["/images/products/cello-dinnerset-1.jpg"],
+    "description": "Elegant and durable, the Cello Opalware Dinner Set is perfect for family meals and special occasions.",
+    "features": ["18-piece set", "Break-resistant", "Microwave safe", "Dishwasher safe", "Lightweight"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Meena J.", "rating": 5, "date": "2024-01-10", "title": "Beautiful set", "comment": "Looks great and easy to clean.", "verified": true},
+      {"id": 2, "userName": "Rohit P.", "rating": 4, "date": "2024-01-12", "title": "Good for daily use", "comment": "Lightweight and sturdy.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it microwave safe?","answer": "Yes, it is microwave safe."},
+      {"question": "How many pieces?","answer": "18 pieces in the set."},
+      {"question": "Is it break-resistant?","answer": "Yes, it is break-resistant."}
+    ]
+  },
+  {
+    "id": 25,
+    "name": "Godrej Aer Matic Room Freshener",
+    "category": "Home",
+    "brand": "Godrej",
+    "price": 499,
+    "inStock": true,
+    "rating": 4.2,
+    "image": "/images/products/godrej-aer-1.jpg",
+    "images": ["/images/products/godrej-aer-1.jpg"],
+    "description": "Automatic room freshener with flexible timer settings. Keeps your home smelling fresh for up to 60 days.",
+    "features": ["Automatic spray", "Flexible timer", "Long-lasting fragrance", "Easy refill", "Battery operated"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Nisha S.", "rating": 5, "date": "2023-12-05", "title": "Smells great!", "comment": "Keeps my living room fresh all day.", "verified": true},
+      {"id": 2, "userName": "Vikas T.", "rating": 4, "date": "2023-12-07", "title": "Easy to use", "comment": "Simple to set up and works well.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "How long does one refill last?","answer": "Up to 60 days."},
+      {"question": "Is it battery operated?","answer": "Yes, runs on batteries."},
+      {"question": "Are refills available?","answer": "Yes, easily available."}
+    ]
+  },
+  {
+    "id": 26,
+    "name": "Atomic Habits by James Clear",
+    "category": "Books",
+    "brand": "Penguin",
+    "price": 499,
+    "inStock": true,
+    "rating": 4.9,
+    "image": "/images/products/books-1.jpg",
+    "images": ["/images/products/books-1.jpg"],
+    "description": "A proven framework for improving every day. Atomic Habits will reshape the way you think about progress and success.",
+    "features": ["Paperback", "320 pages", "Self-help", "Bestseller", "English"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Riya S.", "rating": 5, "date": "2024-03-10", "title": "Life changing!", "comment": "This book helped me build better habits.", "verified": true},
+      {"id": 2, "userName": "Amit P.", "rating": 5, "date": "2024-03-12", "title": "Must read", "comment": "Simple, practical advice for everyone.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is this the latest edition?","answer": "Yes, 2023 edition."},
+      {"question": "Is it available in hardcover?","answer": "No, only paperback."},
+      {"question": "What language is it in?","answer": "English."}
+    ]
+  },
+  {
+    "id": 27,
+    "name": "The Alchemist by Paulo Coelho",
+    "category": "Books",
+    "brand": "HarperCollins",
+    "price": 399,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/books-2.jpg",
+    "images": ["/images/products/books-2.jpg"],
+    "description": "A fable about following your dream. The Alchemist is a modern classic and a global phenomenon.",
+    "features": ["Paperback", "208 pages", "Fiction", "Inspirational", "English"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Sneha M.", "rating": 5, "date": "2024-02-15", "title": "Beautiful story", "comment": "Inspiring and magical.", "verified": true},
+      {"id": 2, "userName": "Karan J.", "rating": 4, "date": "2024-02-16", "title": "Great read", "comment": "Loved the message of the book.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is this book in English?","answer": "Yes, English language edition."},
+      {"question": "Is it a novel?","answer": "Yes, a fiction novel."},
+      {"question": "Is it suitable for teens?","answer": "Yes, suitable for all ages."}
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Ikigai: The Japanese Secret to a Long and Happy Life",
+    "category": "Books",
+    "brand": "Penguin",
+    "price": 350,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/books-3.jpg",
+    "images": ["/images/products/books-3.jpg"],
+    "description": "Discover the Japanese secret to living a long, happy, and meaningful life with Ikigai.",
+    "features": ["Paperback", "208 pages", "Self-help", "International Bestseller", "English"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Meera K.", "rating": 5, "date": "2024-01-20", "title": "Very inspiring", "comment": "Makes you rethink your purpose.", "verified": true},
+      {"id": 2, "userName": "Rohit S.", "rating": 4, "date": "2024-01-22", "title": "Good insights", "comment": "Easy to read and motivating.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is this a self-help book?","answer": "Yes, it's a self-help book."},
+      {"question": "Is it in English?","answer": "Yes, English edition."},
+      {"question": "How many pages?","answer": "208 pages."}
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Wings of Fire by A.P.J. Abdul Kalam",
+    "category": "Books",
+    "brand": "Universities Press",
+    "price": 299,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/books-4.jpg",
+    "images": ["/images/products/books-4.jpg"],
+    "description": "An autobiography of Dr. A.P.J. Abdul Kalam, former President of India and a renowned scientist.",
+    "features": ["Paperback", "180 pages", "Autobiography", "Inspirational", "English"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Arjun V.", "rating": 5, "date": "2023-12-10", "title": "Truly inspiring", "comment": "A must-read for every Indian.", "verified": true},
+      {"id": 2, "userName": "Nisha R.", "rating": 5, "date": "2023-12-12", "title": "Great autobiography", "comment": "Motivating and well-written.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is this an autobiography?","answer": "Yes, by Dr. Kalam."},
+      {"question": "Is it suitable for students?","answer": "Yes, highly recommended for students."},
+      {"question": "Is it in English?","answer": "Yes, English edition."}
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Rich Dad Poor Dad by Robert Kiyosaki",
+    "category": "Books",
+    "brand": "Plata Publishing",
+    "price": 399,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/books-5.jpg",
+    "images": ["/images/products/books-5.jpg"],
+    "description": "Personal finance classic that teaches the importance of financial literacy, investing, and building wealth.",
+    "features": ["Paperback", "336 pages", "Finance", "Bestseller", "English"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Deepak S.", "rating": 5, "date": "2023-11-10", "title": "Very practical", "comment": "Changed my perspective on money.", "verified": true},
+      {"id": 2, "userName": "Priya M.", "rating": 4, "date": "2023-11-12", "title": "Good advice", "comment": "Easy to understand concepts.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is this a finance book?","answer": "Yes, about personal finance."},
+      {"question": "Is it a bestseller?","answer": "Yes, international bestseller."},
+      {"question": "Is it in English?","answer": "Yes, English edition."}
+    ]
+  },
+  {
+    "id": 31,
+    "name": "L'Oreal Paris Total Repair 5 Shampoo",
+    "category": "Beauty",
+    "brand": "L'Oreal Paris",
+    "price": 349,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/beauty-1.jpg",
+    "images": ["/images/products/beauty-1.jpg"],
+    "description": "Repairs 5 signs of damaged hair. Leaves hair strong, smooth, shiny, and healthy.",
+    "features": ["Repairs damaged hair", "For all hair types", "Keratin XS technology", "Daily use", "400ml bottle"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Megha S.", "rating": 5, "date": "2024-03-10", "title": "Great for hair", "comment": "My hair feels softer and healthier.", "verified": true},
+      {"id": 2, "userName": "Ritu K.", "rating": 4, "date": "2024-03-12", "title": "Nice fragrance", "comment": "Cleans well and smells good.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for daily use?","answer": "Yes, safe for daily use."},
+      {"question": "Does it work for all hair types?","answer": "Yes, suitable for all hair types."},
+      {"question": "What is the bottle size?","answer": "400ml."}
+    ],
+    "options": {
+      "volume": ["200ml", "400ml"]
+    }
+  },
+  {
+    "id": 32,
+    "name": "Nivea Soft Light Moisturizer",
+    "category": "Beauty",
+    "brand": "Nivea",
+    "price": 199,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/beauty-2.jpg",
+    "images": ["/images/products/beauty-2.jpg"],
+    "description": "Non-greasy, quick-absorbing moisturizer for face, hands, and body. Enriched with Vitamin E and Jojoba Oil.",
+    "features": ["Non-greasy", "Quick absorption", "Vitamin E & Jojoba Oil", "For all skin types", "200ml tub"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Aarti P.", "rating": 5, "date": "2024-02-10", "title": "Very moisturizing", "comment": "Leaves skin soft and smooth.", "verified": true},
+      {"id": 2, "userName": "Kiran D.", "rating": 4, "date": "2024-02-12", "title": "Good for winter", "comment": "Works well in dry weather.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for face?","answer": "Yes, can be used on face, hands, and body."},
+      {"question": "Is it greasy?","answer": "No, it's non-greasy."},
+      {"question": "What is the tub size?","answer": "200ml."}
+    ]
+  },
+  {
+    "id": 33,
+    "name": "Maybelline Colossal Kajal",
+    "category": "Beauty",
+    "brand": "Maybelline",
+    "price": 179,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/beauty-3.jpg",
+    "images": ["/images/products/beauty-3.jpg"],
+    "description": "Smudge-proof, waterproof kajal for bold, black eyes. Lasts up to 24 hours.",
+    "features": ["Smudge-proof", "Waterproof", "Lasts 24 hours", "Dermatologically tested", "Easy to apply"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Neha S.", "rating": 5, "date": "2024-01-10", "title": "Best kajal", "comment": "Stays all day, doesn't smudge.", "verified": true},
+      {"id": 2, "userName": "Rashmi T.", "rating": 4, "date": "2024-01-12", "title": "Easy to use", "comment": "Glides smoothly and is very dark.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it waterproof?","answer": "Yes, fully waterproof."},
+      {"question": "How long does it last?","answer": "Up to 24 hours."},
+      {"question": "Is it safe for sensitive eyes?","answer": "Yes, dermatologically tested."}
+    ]
+  },
+  {
+    "id": 34,
+    "name": "Dove Cream Beauty Bathing Bar (Pack of 4)",
+    "category": "Beauty",
+    "brand": "Dove",
+    "price": 220,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/beauty-4.jpg",
+    "images": ["/images/products/beauty-4.jpg"],
+    "description": "Mild, moisturizing soap bar for soft, smooth skin. Suitable for daily use.",
+    "features": ["Moisturizing cream", "Mild formula", "Pack of 4", "For all skin types", "Dermatologically tested"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Sonal G.", "rating": 5, "date": "2023-12-10", "title": "Gentle on skin", "comment": "Leaves skin soft and not dry.", "verified": true},
+      {"id": 2, "userName": "Rina M.", "rating": 4, "date": "2023-12-12", "title": "Good for daily use", "comment": "Nice fragrance and lathers well.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for sensitive skin?","answer": "Yes, very gentle."},
+      {"question": "How many bars in the pack?","answer": "Pack of 4."},
+      {"question": "Is it moisturizing?","answer": "Yes, contains moisturizing cream."}
+    ]
+  },
+  {
+    "id": 35,
+    "name": "Himalaya Purifying Neem Face Wash",
+    "category": "Beauty",
+    "brand": "Himalayas",
+    "price": 180,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/beauty-5.jpg",
+    "images": ["/images/products/beauty-5.jpg"],
+    "description": "Removes impurities and helps clear pimples. Herbal formula with neem and turmeric.",
+    "features": ["Neem & turmeric", "Soap-free", "Prevents pimples", "For all skin types", "100ml tube"],
+    "seller": {"sellerName": "TechBazaar India", "sellerRating": 4.6, "returnPolicy": "10-day replacement only", "warranty": "N/A"},
+    "reviews": [
+      {"id": 1, "userName": "Aman S.", "rating": 5, "date": "2023-11-10", "title": "Works well", "comment": "Keeps my skin clear.", "verified": true},
+      {"id": 2, "userName": "Priya L.", "rating": 4, "date": "2023-11-12", "title": "Good for oily skin", "comment": "Reduces pimples and oiliness.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it herbal?","answer": "Yes, contains neem and turmeric."},
+      {"question": "Is it good for pimples?","answer": "Yes, helps prevent pimples."},
+      {"question": "What is the tube size?","answer": "100ml."}
+    ]
+  },
+  {
+    "id": 36,
+    "name": "Yonex GR 303 Badminton Racket",
+    "category": "Sports & Outdoors",
+    "brand": "Yonex",
+    "price": 599,
+    "inStock": true,
+    "rating": 4.5,
+    "image": "/images/products/sports-1.jpg",
+    "images": ["/images/products/sports-1.jpg"],
+    "description": "Lightweight badminton racket for beginners and intermediate players. Durable aluminum frame.",
+    "features": ["Aluminum frame", "Lightweight", "Full cover included", "Ideal for beginners", "Standard grip"],
+    "seller": {"sellerName": "SportsHub India", "sellerRating": 4.7, "returnPolicy": "7-day replacement only", "warranty": "6 months manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Amit S.", "rating": 5, "date": "2024-03-15", "title": "Great for practice", "comment": "Very light and easy to handle.", "verified": true},
+      {"id": 2, "userName": "Priya R.", "rating": 4, "date": "2024-03-16", "title": "Good value", "comment": "Affordable and sturdy.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for kids?","answer": "Yes, suitable for ages 10 and above."},
+      {"question": "Does it come with a cover?","answer": "Yes, full cover included."},
+      {"question": "Is it pre-strung?","answer": "Yes, ready to use."}
+    ],
+    "options": {
+      "size": ["Standard"]
+    }
+  },
+  {
+    "id": 37,
+    "name": "Nivia Football (Size 5)",
+    "category": "Sports & Outdoors",
+    "brand": "Nivia",
+    "price": 499,
+    "inStock": true,
+    "rating": 4.4,
+    "image": "/images/products/sports-2.jpg",
+    "images": ["/images/products/sports-2.jpg"],
+    "description": "Durable football for training and recreational play. Suitable for all weather conditions.",
+    "features": ["Size 5", "All-weather", "Machine stitched", "Durable outer", "Ideal for practice"],
+    "seller": {"sellerName": "SportsHub India", "sellerRating": 4.7, "returnPolicy": "7-day replacement only", "warranty": "3 months manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Rahul K.", "rating": 5, "date": "2024-02-10", "title": "Good quality", "comment": "Lasts long even on rough ground.", "verified": true},
+      {"id": 2, "userName": "Sneha T.", "rating": 4, "date": "2024-02-12", "title": "Value for money", "comment": "Affordable and sturdy.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for tournaments?","answer": "Best for practice and recreational play."},
+      {"question": "Is it waterproof?","answer": "Yes, suitable for all weather."},
+      {"question": "What is the weight?","answer": "Standard size 5 weight."}
+    ]
+  },
+  {
+    "id": 38,
+    "name": "Cosco Yoga Mat 6mm",
+    "category": "Sports & Outdoors",
+    "brand": "Cosco",
+    "price": 799,
+    "inStock": true,
+    "rating": 4.7,
+    "image": "/images/products/sports-3.jpg",
+    "images": ["/images/products/sports-3.jpg"],
+    "description": "Non-slip yoga mat with 6mm thickness for extra comfort. Ideal for yoga, pilates, and workouts.",
+    "features": ["6mm thick", "Non-slip surface", "Lightweight", "Easy to clean", "Carry strap included"],
+    "seller": {"sellerName": "SportsHub India", "sellerRating": 4.7, "returnPolicy": "7-day replacement only", "warranty": "6 months manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Meera L.", "rating": 5, "date": "2024-01-20", "title": "Very comfortable", "comment": "Soft and non-slippery.", "verified": true},
+      {"id": 2, "userName": "Karan S.", "rating": 4, "date": "2024-01-22", "title": "Good grip", "comment": "Doesn't move during exercise.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it washable?","answer": "Yes, easy to clean."},
+      {"question": "Does it come with a strap?","answer": "Yes, carry strap included."},
+      {"question": "What is the size?","answer": "Standard yoga mat size."}
+    ]
+  },
+  {
+    "id": 39,
+    "name": "SG Cricket Bat (Full Size)",
+    "category": "Sports & Outdoors",
+    "brand": "SG",
+    "price": 1299,
+    "inStock": true,
+    "rating": 4.6,
+    "image": "/images/products/sports-4.jpg",
+    "images": ["/images/products/sports-4.jpg"],
+    "description": "Full-size cricket bat made from high-quality willow. Ideal for club and school matches.",
+    "features": ["Full size", "Willow wood", "Lightweight", "Thick edges", "Comfortable grip"],
+    "seller": {"sellerName": "SportsHub India", "sellerRating": 4.7, "returnPolicy": "7-day replacement only", "warranty": "6 months manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Vikas P.", "rating": 5, "date": "2023-12-10", "title": "Great balance", "comment": "Feels good in hand.", "verified": true},
+      {"id": 2, "userName": "Rina D.", "rating": 4, "date": "2023-12-12", "title": "Good for practice", "comment": "Perfect for beginners.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Is it suitable for leather balls?","answer": "Yes, can be used with leather balls."},
+      {"question": "Is it lightweight?","answer": "Yes, easy to handle."},
+      {"question": "Does it come with a cover?","answer": "No, cover not included."}
+    ]
+  },
+  {
+    "id": 40,
+    "name": "Wildcraft Hiking Backpack 35L",
+    "category": "Sports & Outdoors",
+    "brand": "Wildcraft",
+    "price": 1899,
+    "inStock": true,
+    "rating": 4.8,
+    "image": "/images/products/sports-5.jpg",
+    "images": ["/images/products/sports-5.jpg"],
+    "description": "35L hiking backpack with multiple compartments and rain cover. Lightweight and durable.",
+    "features": ["35L capacity", "Rain cover included", "Multiple compartments", "Padded straps", "Lightweight"],
+    "seller": {"sellerName": "SportsHub India", "sellerRating": 4.7, "returnPolicy": "7-day replacement only", "warranty": "1 year manufacturer warranty"},
+    "reviews": [
+      {"id": 1, "userName": "Sonal P.", "rating": 5, "date": "2023-11-10", "title": "Perfect for trekking", "comment": "Spacious and comfortable.", "verified": true},
+      {"id": 2, "userName": "Deepak M.", "rating": 5, "date": "2023-11-12", "title": "Great quality", "comment": "Very durable and light.", "verified": true}
+    ],
+    "faqs": [
+      {"question": "Does it have a rain cover?","answer": "Yes, included."},
+      {"question": "Is it suitable for air travel?","answer": "Yes, cabin size."},
+      {"question": "What is the capacity?","answer": "35 liters."}
+    ]
+  }
+]

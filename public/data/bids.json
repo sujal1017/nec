@@ -1,0 +1,52 @@
+{
+  "bids": [
+    {
+      "id": 1,
+      "productId": 1,
+      "productName": "Apple iPhone 15 Pro Max",
+      "productImage": "/images/products/iphone-15-pro-max-1.jpg",
+      "currentBid": 120000,
+      "yourBid": 125000,
+      "timeLeft": "2d 5h 30m",
+      "status": "leading",
+      "bids": 12,
+      "endDate": "2024-03-22T20:00:00",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "productId": 2,
+      "productName": "Sony WH-1000XM5",
+      "productImage": "/images/products/sony-wh1000xm5-1.jpg",
+      "finalPrice": 28000,
+      "yourBid": 27500,
+      "status": "lost",
+      "endDate": "2024-03-15T15:00:00",
+      "isActive": false
+    },
+    {
+      "id": 3,
+      "productId": 3,
+      "productName": "Nike Air Jordan 1",
+      "productImage": "/images/products/nike-air-jordan-1.jpg",
+      "currentBid": 15000,
+      "yourBid": 16000,
+      "timeLeft": "1d 3h 45m",
+      "status": "outbid",
+      "bids": 8,
+      "endDate": "2024-03-21T18:00:00",
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "productId": 4,
+      "productName": "Samsung Galaxy Watch 6",
+      "productImage": "/images/products/samsung-watch6-1.jpg",
+      "finalPrice": 32000,
+      "yourBid": 32000,
+      "status": "won",
+      "endDate": "2024-03-10T12:00:00",
+      "isActive": false
+    }
+  ]
+} 

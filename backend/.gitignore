@@ -1,0 +1,59 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*/__pycache__
+*/migrations
+*.so
+*.dylib
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Django
+*.sqlite3
+db.sqlite3
+*.log
+*.pot
+*.pyc
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.vscode/
+.env
+
+# IDEs and text editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Django static files (optional)
+static/
+
+# Local settings (optional)
+local_settings.py
+
+# Coverage reports
+.coverage
+coverage.xml
+nosetests.xml
+*.cover
+
+# mypy
+.mypy_cache/
+
+# Pytest
+.cache/

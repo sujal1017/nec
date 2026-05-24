@@ -1,0 +1,55 @@
+{
+    "shoes": [
+      {
+        "title": "Nike Air Max 1 SP x Concepts Mellow 2022",
+        "brand": "Nike",
+        "color": "Multicoloured",
+        "mpn": "DN1803-300",
+        "size": "9.5",
+        "image": "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Frunnerclick.com%2Fwp-content%2Fuploads%2F2015%2F03%2FNike-Lunarglide-6-running-shoe-review.png&f=1&nofb=1&ipt=20b4daed50176d8c43e40266740f2e7b887b244e17bd1811d71013b874a29288"
+      },
+      {
+        "title": "New Balance Fresh Foam X 880v14",
+        "brand": "New Balance",
+        "color": "Blue Oasis True Red",
+        "mpn": "M880L14",
+        "size": "8",
+        "image": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.nicepng.com%2Fpng%2Ffull%2F53-538072_nike-shoe-png.png&f=1&nofb=1&ipt=238c77da941dfe85f349e1fbc65bdf8252aae3ae2f0d3a1cfd82dc29f76e816f"
+      },
+      {
+        "title": "Jordan 4 Retro Mid Midnight Navy",
+        "brand": "Jordan",
+        "color": "White",
+        "mpn": "DH6927-140",
+        "size": "10",
+        "image": "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fpluspng.com%2Fimg-png%2Fnike-shoe-png-nike-shoes-png-clipart-800.png&f=1&nofb=1&ipt=564492d98870aa3fbb7dabf7818dc33b0d5c2fa4bca73c4e2970a4a1b5627ecc"
+      }
+    ],
+    "iphone": [
+      {
+        "title": "iPhone 14 Pro Max 128GB - Space Black",
+        "brand": "Apple",
+        "color": "Space Black",
+        "model": "A2651",
+        "storage": "128GB",
+        "image": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-spaceblack"
+      },
+      {
+        "title": "iPhone 13 Mini 256GB - Blue",
+        "brand": "Apple",
+        "color": "Blue",
+        "model": "A2481",
+        "storage": "256GB",
+        "image": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-mini-blue-select-2021"
+      },
+      {
+        "title": "iPhone 12 64GB - Purple",
+        "brand": "Apple",
+        "color": "Purple",
+        "model": "A2403",
+        "storage": "64GB",
+        "image": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-purple-select-2021"
+      }
+    ]
+  }
+  

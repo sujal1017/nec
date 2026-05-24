@@ -1,0 +1,151 @@
+{
+  "profile": {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "phone": "9876543210",
+    "avatar": "/images/avatar.png"
+  },
+  "orders": [
+    {
+      "id": "ORD100001",
+      "date": "2025-03-15",
+      "total": 153299,
+      "status": "Delivered",
+      "items": [
+        {
+          "name": "Apple iPhone 15 Pro Max",
+          "image": "/images/products/iphone-15-pro-max-1.jpg",
+          "price": 149999
+        },
+        {
+          "name": "Phone Case",
+          "image": "/images/phone-case.jpg",
+          "price": 300
+        },
+        {
+          "name": "Wireless Headphones",
+          "image": "/images/headphones.jpg",
+          "price": 3000
+        }
+      ]
+    },
+    {
+      "id": "ORD100002",
+      "date": "2025-03-18",
+      "total": 29999,
+      "status": "Shipped",
+      "items": [
+        {
+          "name": "Sony WH-1000XM5 Noise Cancelling Headphones",
+          "image": "/images/products/sony-wh1000xm5-1.jpg",
+          "price": 29999
+        }
+      ]
+    },
+    {
+      "id": "ORD100003",
+      "date": "2025-03-20",
+      "total": 17999,
+      "status": "Out for Delivery",
+      "items": [
+        {
+          "name": "Nike Air Jordan 1 Retro High OG Shoes",
+          "image": "/images/products/nike-air-jordan-1.jpg",
+          "price": 17999
+        }
+      ]
+    },
+    {
+      "id": "ORD100004",
+      "date": "2025-03-22",
+      "total": 69998,
+      "status": "Processing",
+      "items": [
+        {
+          "name": "Samsung Galaxy Watch 6",
+          "image": "/images/products/samsung-watch6-1.jpg",
+          "price": 34999
+        },
+        {
+          "name": "Bose QuietComfort Earbuds II",
+          "image": "/images/products/bose-qc-earbuds-1.jpg",
+          "price": 24999
+        },
+        {
+          "name": "Phone Case",
+          "image": "/images/phone-case.jpg",
+          "price": 1000
+        }
+      ]
+    },
+    {
+      "id": "ORD100005",
+      "date": "2025-03-25",
+      "total": 189999,
+      "status": "Delivered",
+      "items": [
+        {
+          "name": "Dell XPS 15 Laptop",
+          "image": "/images/products/dell-xps-15-1.jpg",
+          "price": 189999
+        }
+      ]
+    },
+    {
+      "id": "ORD100006",
+      "date": "2025-03-28",
+      "total": 15999,
+      "status": "Cancelled",
+      "items": [
+        {
+          "name": "Adidas Ultraboost 22 Running Shoes",
+          "image": "/images/products/adidas-ultraboost-1.jpg",
+          "price": 15999
+        }
+      ]
+    },
+    {
+      "id": "ORD100007",
+      "date": "2025-04-01",
+      "total": 96998,
+      "status": "Delivered",
+      "items": [
+        {
+          "name": "Samsung 55-inch 4K Smart TV",
+          "image": "/images/products/samsung-4k-tv-1.jpg",
+          "price": 54999
+        },
+        {
+          "name": "GoPro Hero 11 Black",
+          "image": "/images/products/gopro-hero11-1.jpg",
+          "price": 41999
+        }
+      ]
+    },
+    {
+      "id": "ORD100008",
+      "date": "2025-04-03",
+      "total": 119999,
+      "status": "Processing",
+      "items": [
+        {
+          "name": "Apple MacBook Air M2",
+          "image": "/images/products/macbook-air-m2-1.jpg",
+          "price": 119999
+        }
+      ]
+    }
+  ],
+  "addresses": [
+    {
+      "id": 1,
+      "title": "Home",
+      "address": "123 Main Street, City, State, 560001"
+    },
+    {
+      "id": 2,
+      "title": "Work",
+      "address": "Tech Park, Block B, Office 210, City, 560002"
+    }
+  ]
+}

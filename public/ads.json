@@ -1,0 +1,21 @@
+[
+    {
+      "id": 1,
+      "title": "Super Sale on Electronics!",
+      "image": "/images/ad1.jpg",
+      "description": "Grab the latest gadgets at unbeatable prices!"
+    },
+    {
+      "id": 2,
+      "title": "Limited Offer: Fashion Deals",
+      "image": "/images/ad2.jpg",
+      "description": "Upgrade your wardrobe with our exclusive clothing offers!"
+    },
+    {
+      "id": 3,
+      "title": "New Arrivals in Footwear",
+      "image": "/images/ad3.jpg",
+      "description": "Step into style with our latest shoe collection!"
+    }
+  ]
+  

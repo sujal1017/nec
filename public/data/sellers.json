@@ -1,0 +1,202 @@
+[
+  {
+    "id": "TechBazaar",
+    "name": "TechBazaar India",
+    "rating": 4.6,
+    "totalSales": 15000,
+    "joinedDate": "2020-01-15",
+    "verificationStatus": "verified",
+    "description": "Leading retailer of premium electronics and gadgets in India",
+    "businessHours": "Mon-Sat: 9:00 AM - 8:00 PM",
+    "shippingTime": "1-3 business days",
+    "returnPolicy": "10-day replacement only",
+    "warranty": "1 year manufacturer warranty",
+    "location": "Mumbai, Maharashtra",
+    "badges": ["Premium Seller", "Fast Shipper", "Top Electronics Retailer"],
+    "customerSupport": {
+      "email": "support@techbazaar.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 24 hours"
+    }
+  },
+  {
+    "id": "AudioExpress",
+    "name": "AudioExpress India",
+    "rating": 4.8,
+    "totalSales": 8500,
+    "joinedDate": "2019-06-20",
+    "verificationStatus": "verified",
+    "description": "Specialized in high-end audio equipment and accessories",
+    "businessHours": "Mon-Sat: 10:00 AM - 7:00 PM",
+    "shippingTime": "2-4 business days",
+    "returnPolicy": "7-day return & refund",
+    "warranty": "1 year brand warranty",
+    "location": "Bangalore, Karnataka",
+    "badges": ["Audio Expert", "Authorized Dealer", "Premium Support"],
+    "customerSupport": {
+      "email": "care@audioexpress.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 12 hours"
+    }
+  },
+  {
+    "id": "SneakerWorld",
+    "name": "SneakerWorld",
+    "rating": 4.9,
+    "totalSales": 12000,
+    "joinedDate": "2018-11-30",
+    "verificationStatus": "verified",
+    "description": "Your destination for authentic sneakers and streetwear",
+    "businessHours": "Mon-Sun: 10:00 AM - 9:00 PM",
+    "shippingTime": "3-5 business days",
+    "returnPolicy": "15-day return policy",
+    "warranty": "100% authenticity guarantee",
+    "location": "Delhi, NCR",
+    "badges": ["Authentic Products", "Streetwear Expert", "Top Fashion Seller"],
+    "customerSupport": {
+      "email": "help@sneakerworld.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 48 hours"
+    }
+  },
+  {
+    "id": "TechBliss",
+    "name": "TechBliss",
+    "rating": 4.7,
+    "totalSales": 11000,
+    "joinedDate": "2019-08-20",
+    "verificationStatus": "verified",
+    "description": "Premium technology products and accessories",
+    "businessHours": "Mon-Sat: 9:00 AM - 7:00 PM",
+    "shippingTime": "1-2 business days",
+    "returnPolicy": "10-day replacement only",
+    "warranty": "1 year onsite warranty",
+    "location": "Chennai, Tamil Nadu",
+    "badges": ["Tech Expert", "Premium Service", "Quick Support"],
+    "customerSupport": {
+      "email": "care@techbliss.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 12 hours"
+    }
+  },
+  {
+    "id": "GadgetKing",
+    "name": "GadgetKing",
+    "rating": 4.5,
+    "totalSales": 9500,
+    "joinedDate": "2019-03-15",
+    "verificationStatus": "verified",
+    "description": "Your one-stop shop for all gadgets and smart devices",
+    "businessHours": "Mon-Sat: 10:00 AM - 8:00 PM",
+    "shippingTime": "2-3 business days",
+    "returnPolicy": "7-day exchange only",
+    "warranty": "1 year manufacturer warranty",
+    "location": "Hyderabad, Telangana",
+    "badges": ["Gadget Expert", "Authorized Dealer", "Fast Delivery"],
+    "customerSupport": {
+      "email": "support@gadgetking.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 24 hours"
+    }
+  },
+  {
+    "id": "SoundScape",
+    "name": "SoundScape Electronics",
+    "rating": 4.6,
+    "totalSales": 8000,
+    "joinedDate": "2019-11-10",
+    "verificationStatus": "verified",
+    "description": "Specialized in premium audio equipment and accessories",
+    "businessHours": "Mon-Sat: 10:00 AM - 8:00 PM",
+    "shippingTime": "2-4 business days",
+    "returnPolicy": "7-day return",
+    "warranty": "1 year international warranty",
+    "location": "Pune, Maharashtra",
+    "badges": ["Audio Specialist", "Global Warranty", "Expert Support"],
+    "customerSupport": {
+      "email": "support@soundscape.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 24 hours"
+    }
+  },
+  {
+    "id": "StrideSports",
+    "name": "StrideSports India",
+    "rating": 4.7,
+    "totalSales": 7500,
+    "joinedDate": "2020-02-15",
+    "verificationStatus": "verified",
+    "description": "Your destination for premium sports and fitness gear",
+    "businessHours": "Mon-Sun: 9:00 AM - 9:00 PM",
+    "shippingTime": "3-5 business days",
+    "returnPolicy": "15-day return or size exchange",
+    "warranty": "6 months manufacturer warranty",
+    "location": "Kolkata, West Bengal",
+    "badges": ["Sports Expert", "Size Exchange", "Fitness Specialist"],
+    "customerSupport": {
+      "email": "help@stridesports.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 48 hours"
+    }
+  },
+  {
+    "id": "ElectroMart",
+    "name": "ElectroMart",
+    "rating": 4.5,
+    "totalSales": 12000,
+    "joinedDate": "2018-12-20",
+    "verificationStatus": "verified",
+    "description": "Leading electronics retailer with premium products",
+    "businessHours": "Mon-Sat: 10:00 AM - 8:00 PM",
+    "shippingTime": "2-3 business days",
+    "returnPolicy": "10-day replacement",
+    "warranty": "1 year manufacturer warranty",
+    "location": "Ahmedabad, Gujarat",
+    "badges": ["Electronics Expert", "Authorized Dealer", "Quick Delivery"],
+    "customerSupport": {
+      "email": "support@electromart.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 24 hours"
+    }
+  },
+  {
+    "id": "CamZone",
+    "name": "CamZone",
+    "rating": 4.6,
+    "totalSales": 6500,
+    "joinedDate": "2020-04-10",
+    "verificationStatus": "verified",
+    "description": "Specialized in premium cameras and photography equipment",
+    "businessHours": "Mon-Sat: 10:00 AM - 7:00 PM",
+    "shippingTime": "2-4 business days",
+    "returnPolicy": "7-day return",
+    "warranty": "1 year manufacturer warranty",
+    "location": "Jaipur, Rajasthan",
+    "badges": ["Camera Expert", "Photography Specialist", "Premium Support"],
+    "customerSupport": {
+      "email": "care@camzone.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 24 hours"
+    }
+  },
+  {
+    "id": "AppleStore",
+    "name": "Apple Store India",
+    "rating": 4.8,
+    "totalSales": 20000,
+    "joinedDate": "2018-01-15",
+    "verificationStatus": "verified",
+    "description": "Official Apple products and accessories",
+    "businessHours": "Mon-Sun: 10:00 AM - 9:00 PM",
+    "shippingTime": "1-2 business days",
+    "returnPolicy": "10-day return",
+    "warranty": "1 year Apple warranty + 90 days phone support",
+    "location": "Multiple locations across India",
+    "badges": ["Official Store", "Apple Certified", "Premium Service"],
+    "customerSupport": {
+      "email": "support@apple.in",
+      "phone": "+91-XXXXXXXXXX",
+      "responseTime": "within 12 hours"
+    }
+  }
+] 
