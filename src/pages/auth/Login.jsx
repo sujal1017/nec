@@ -97,7 +97,7 @@ const Login = () => {
     setLoading(true);
     setApiError("");
     try {
-      const authData = await login(formData);
+      await login(formData);
       navigate("/", { replace: true });
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {

@@ -32,7 +32,7 @@ export const useKeycloakAuth = () => {
 
       persistAuth(authData, true);
       setAuth(authData);
-      navigate(authData.userType === "business" ? "/seller/dashboard" : "/products", {
+      navigate("/", {
         replace: true,
       });
       return authData;

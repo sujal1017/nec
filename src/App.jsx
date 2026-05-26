@@ -18,7 +18,7 @@ const OrdersPage = lazy(() => import("./pages/OrderSection"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const PaymentGateway = lazy(() => import("./pages/PaymentGateway"));
 const Bids = lazy(() => import("./pages/Bids"));
-const SellerDashboard = lazy(() => import("./Sellerside/Front-end/Maindashboard"));
+const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
 const Help = lazy(() => import("./pages/Contact"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
