@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.text import slugify
 from django.utils import timezone
 from Customer.models import Customer
 from django.core.exceptions import ValidationError
@@ -70,14 +71,38 @@ class OptionValue(models.Model):
 
 
 class Product(models.Model):
+    STATUS_DRAFT = "draft"
+    STATUS_ACTIVE = "active"
+    STATUS_INACTIVE = "inactive"
+    STATUS_ARCHIVED = "archived"
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_INACTIVE, "Inactive"),
+        (STATUS_ARCHIVED, "Archived"),
+    )
+
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=280, blank=True, db_index=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
     stock = models.PositiveIntegerField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, related_name='products')
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='products')
+    seller_profile = models.ForeignKey(
+        "Seller.SellerProfile",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="products",
+    )
+    sku = models.CharField(max_length=80, blank=True, db_index=True)
+    image = models.URLField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE, db_index=True)
+    is_featured = models.BooleanField(default=False)
     options = models.ManyToManyField(OptionValue, default=dict, blank=True)
     features = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -85,6 +110,22 @@ class Product(models.Model):
     @property
     def in_stock(self):
         return self.stock > 0
+
+    @property
+    def stock_quantity(self):
+        return self.stock
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)[:240] or "product"
+            slug = base_slug
+            counter = 2
+            while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                suffix = f"-{counter}"
+                slug = f"{base_slug[: 280 - len(suffix)]}{suffix}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return self.name

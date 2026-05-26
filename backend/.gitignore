@@ -4,7 +4,7 @@
 *.pyd
 __pycache__
 */__pycache__
-*/migrations
+*/migrations/__pycache__/
 *.so
 *.dylib
 *.egg

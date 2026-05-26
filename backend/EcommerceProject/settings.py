@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     #custom apps
     'Customer',
+    'Seller',
     'Product',
     'Orders',
     'Cart',

@@ -66,17 +66,19 @@ def create_order_from_cart(request):
     )
 
     for ci in cart_items:
-     prod = get_object_or_404(Product, id=ci.product_id)
-    image_url = prod.images.first().image if hasattr(prod, "images") and prod.images.exists() else None
+        prod = get_object_or_404(Product, id=ci.product_id)
+        image_url = prod.image or (prod.images.first().image if hasattr(prod, "images") and prod.images.exists() else None)
 
-    OrderItem.objects.create(
-        order=order,
-        product_id=prod.id,
-        name=prod.name,
-        price=ci.price,
-        quantity=ci.quantity,
-        image=image_url,
-        selected_options=ci.selected_options,
+        OrderItem.objects.create(
+            order=order,
+            product_id=prod.id,
+            product=prod,
+            seller=prod.seller_profile,
+            name=prod.name,
+            price=ci.price,
+            quantity=ci.quantity,
+            image=image_url,
+            selected_options=ci.selected_options,
         )
 
     # Auto payment creation

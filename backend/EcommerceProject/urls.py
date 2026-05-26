@@ -26,4 +26,5 @@ urlpatterns = [
     path("cart/", include("Cart.urls")),
     path("wishlist/", include("WishList.urls")),
     path("banners/", BannersListView.as_view()),
+    path("api/seller/", include("Seller.urls")),
 ]
