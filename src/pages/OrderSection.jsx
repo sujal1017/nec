@@ -21,6 +21,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
 import { BaseUrl } from "../config";
+import OrderTrackingTimeline from "../components/orders/OrderTrackingTimeline";
 
 const OrdersPage = ({ darkMode, setDarkMode }) => {
   const [orders, setOrders] = useState([]);
@@ -201,7 +202,7 @@ const OrdersPage = ({ darkMode, setDarkMode }) => {
                     />
                     <CardContent>
                       <Typography
-                        onClick={() => navigate(`/product/${item.id}`)}
+                        onClick={() => navigate(`/product/${item.product_id}`)}
                         sx={{
                           cursor: "pointer",
                           textDecoration: "underline",
@@ -218,6 +219,8 @@ const OrdersPage = ({ darkMode, setDarkMode }) => {
                   </Card>
                 ))}
 
+                <Divider sx={{ my: 2 }} />
+                <OrderTrackingTimeline orderId={order.id} />
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="body2">
                   Delivery Address: {[

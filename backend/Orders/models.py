@@ -82,6 +82,33 @@ class OrderItem(models.Model):
         return f"{self.name} (x{self.quantity})"
 
 
+class OrderTrackingEvent(models.Model):
+    STATUS_ORDERED = "ORDER_PLACED"
+    STATUS_PACKED = "PACKED"
+    STATUS_SHIPPED = "SHIPPED"
+    STATUS_OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY"
+    STATUS_DELIVERED = "DELIVERED"
+    STATUS_CHOICES = [
+        (STATUS_ORDERED, "Order Placed"),
+        (STATUS_PACKED, "Packed"),
+        (STATUS_SHIPPED, "Shipped"),
+        (STATUS_OUT_FOR_DELIVERY, "Out For Delivery"),
+        (STATUS_DELIVERED, "Delivered"),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tracking_events")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES)
+    timestamp = models.DateTimeField(default=timezone.now)
+    note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        unique_together = ("order", "status")
+        ordering = ["timestamp"]
+
+    def __str__(self):
+        return f"Order #{self.order_id}: {self.status}"
+
+
 class Payment(models.Model):
     PAYMENT_STATUS = [
         ("PENDING", "Pending"),

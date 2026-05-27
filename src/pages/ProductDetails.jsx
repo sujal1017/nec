@@ -57,11 +57,16 @@ import { use } from "react";
 import axios from "axios";
 import { BaseUrl } from "../config";
 import { width } from "@mui/system";
+import CompareButton from "../components/product/CompareButton";
+import ProductMiniRail from "../components/product/ProductMiniRail";
+import RecentlyViewedSection from "../components/product/RecentlyViewedSection";
+import { fetchRecommendations, recordProductView } from "../services/searchService";
 
 const ProductDetails = ({ darkMode, setDarkMode }) => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const [visibleRelatedCount, setVisibleRelatedCount] = useState(8);
   const [loading, setLoading] = useState(true);
   const [cartUpdated, setCartUpdated] = useState(false);
@@ -346,9 +351,10 @@ useEffect(() => {
       if (res.status === 200) {
         setProduct(res.data || null);
 
-        setRelatedProducts(res.data.related_products);
+        setRelatedProducts(res.data.related_products || []);
+        setSimilarProducts(res.data.similar_products || []);
 
-        const bought = (res.data.related_products || []).slice(0, 1);
+        const bought = (res.data.frequently_bought_together || res.data.related_products || []).slice(0, 3);
         setBoughtTogether(bought);
 
 
@@ -370,6 +376,18 @@ useEffect(() => {
   useEffect(() => {
     // 1. product fetch करना
     fetchData();
+    recordProductView(id);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchRecommendations(id)
+      .then((data) => {
+        setRelatedProducts(data.relatedProducts || []);
+        setSimilarProducts(data.similarProducts || []);
+        setBoughtTogether((data.frequentlyBoughtTogether || []).slice(0, 3));
+      })
+      .catch(() => {});
   }, [id]);
 
   useEffect(() => {
@@ -1351,6 +1369,9 @@ useEffect(() => {
                     </>
                   )}
                 </Box>
+                <Box sx={{ mt: 2 }}>
+                  <CompareButton productId={product.id} size="medium" />
+                </Box>
               </Box>
             </Box>
 
@@ -1693,7 +1714,7 @@ useEffect(() => {
                 {/* Total and Button below */}
                 <Paper elevation={0} sx={{ mt: 3, p: 2, bgcolor: theme.palette.background.default, borderRadius: 3, textAlign: 'center', boxShadow: 'none' }}>
                   <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, color: theme.palette.primary.dark, fontSize: '1.2rem' }}>
-                    Total: ₹{(product.price + boughtTogether[0].price).toLocaleString('en-IN')}
+                    Total: ₹{[product, ...boughtTogether].reduce((sum, item) => sum + Number(item.price || 0), 0).toLocaleString('en-IN')}
                   </Typography>
                   <Button
                     variant="contained"
@@ -1701,11 +1722,14 @@ useEffect(() => {
                     onClick={() => { setAddBothToCart(true); handleOpenCartDialog(); }}
                     sx={{ px: 4, py: 1.5, fontWeight: 700, fontSize: '1.1rem', borderRadius: 2, boxShadow: 2, mt: 1, letterSpacing: 0.5 }}
                   >
-                    Add Both to Cart
+                    Add All To Cart
                   </Button>
                 </Paper>
               </Paper>
             )}
+
+            <ProductMiniRail title="Similar Products" products={similarProducts} limit={6} />
+            <RecentlyViewedSection excludeId={product.id} />
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (

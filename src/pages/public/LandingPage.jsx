@@ -20,6 +20,7 @@ import SellerQuickActions from "../../components/landing/SellerQuickActions";
 import TrendingProducts from "../../components/landing/TrendingProducts";
 import TrustSection from "../../components/landing/TrustSection";
 import ProductRail from "../../components/landing/ProductRail";
+import RecentlyViewedSection from "../../components/product/RecentlyViewedSection";
 import { useAuth } from "../../context/AuthContext";
 import { getLandingContent } from "../../services/landingService";
 
@@ -143,6 +144,8 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
             products={content.trendingProducts}
             loading={loading}
           />
+
+          <RecentlyViewedSection />
 
           <ProductRail
             title="Deals & Offers"

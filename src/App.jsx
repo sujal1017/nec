@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { lightTheme, darkTheme } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
+import { CompareProvider } from "./context/CompareContext";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import LoadingFallback from "./components/shared/LoadingFallback";
 
@@ -24,6 +25,7 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
 
 const getInitialDarkMode = () => {
   const stored = localStorage.getItem("darkMode");
@@ -45,6 +47,7 @@ const App = () => {
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
       <AuthProvider>
+        <CompareProvider>
         <Router>
           <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
             <Box sx={{ flexGrow: 1 }}>
@@ -61,6 +64,7 @@ const App = () => {
 
                   <Route path="/products" element={<ProductListing {...pageProps} />} />
                   <Route path="/product/:id" element={<ProductDetail {...pageProps} />} />
+                  <Route path="/compare" element={<ComparePage {...pageProps} />} />
 
                   <Route element={<ProtectedRoute allowedRoles={["personal", "business"]} />}>
                     <Route path="/cart" element={<Cart {...pageProps} />} />
@@ -86,6 +90,7 @@ const App = () => {
             </Box>
           </Box>
         </Router>
+        </CompareProvider>
       </AuthProvider>
     </ThemeProvider>
   );
