@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from decimal import Decimal
 from django.utils import timezone
+from django.db import transaction
 
 from Cart.models import Cart, CartItem
+from Customer.models import CustomerAddress
 from Product.models import Product
 from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory, OrderTrackingEvent
 from .serializers import (
@@ -17,6 +19,48 @@ from .serializers import (
     BidHistorySerializer,
     OrderTrackingEventSerializer,
 )
+
+
+def product_image_url(product):
+    if product.thumbnail:
+        try:
+            return product.thumbnail.url
+        except ValueError:
+            pass
+    if product.image:
+        return product.image
+    image_obj = product.images.filter(is_main=True).first() or product.images.first()
+    if not image_obj:
+        return ""
+    if image_obj.image:
+        try:
+            return image_obj.image.url
+        except ValueError:
+            return str(image_obj.image)
+    return image_obj.image_url or ""
+
+
+def save_customer_address(user, shipping_data):
+    address1 = shipping_data.get("addressLine1", "").strip()
+    city = shipping_data.get("city", "").strip()
+    state = shipping_data.get("state", "").strip()
+    zip_code = shipping_data.get("pin_code", "").strip()
+    if not address1 or not city or not state or not zip_code:
+        return None
+
+    address, _ = CustomerAddress.objects.get_or_create(
+        custId=user,
+        address1=address1,
+        city=city,
+        state=state,
+        zipCode=zip_code,
+        defaults={
+            "label": "Checkout address",
+            "address2": shipping_data.get("addressLine2", ""),
+            "country": shipping_data.get("country", "India"),
+        },
+    )
+    return address
 
 # CREATE ORDER FROM CART
 @api_view(["POST"])
@@ -38,60 +82,62 @@ def create_order_from_cart(request):
     }
     """
     user = request.user
+    cart_ids = request.data.get("cartIds") or request.data.get("cart_ids") or []
     cart_id = request.data.get("cart_id")
-    if not cart_id:
-        return Response({"error": "cart_id is required"}, status=400)
+    if cart_id:
+        cart_ids = [cart_id]
+    if not cart_ids:
+        return Response({"error": "cartIds is required"}, status=400)
 
-    cart = get_object_or_404(Cart, id=cart_id, user=user)
-    cart_items = CartItem.objects.filter(cart=cart)
+    carts = Cart.objects.filter(id__in=cart_ids, user=user)
+    if carts.count() != len(set([str(cart_id) for cart_id in cart_ids])):
+        return Response({"error": "One or more carts were not found."}, status=400)
+    cart_items = CartItem.objects.filter(cart__in=carts)
     if not cart_items.exists():
         return Response({"error": "Cart is empty"}, status=400)
 
-    shipping_data = request.data.get("shippingAddress")
+    shipping_data = request.data.get("shippingAddress") or request.data.get("shipping_address")
     if not shipping_data:
         return Response({"error": "Shipping address required"}, status=400)
-
-    ship_ser = ShippingAddressSerializer(data=shipping_data)
-    ship_ser.is_valid(raise_exception=True)
-    shipping_address = ship_ser.save(user=user)
+    shipping_data = {
+        "first_name": shipping_data.get("first_name") or shipping_data.get("firstName") or "",
+        "last_name": shipping_data.get("last_name") or shipping_data.get("lastName") or "",
+        "email": shipping_data.get("email") or "",
+        "addressLine1": shipping_data.get("addressLine1") or shipping_data.get("address_line1") or "",
+        "addressLine2": shipping_data.get("addressLine2") or shipping_data.get("address_line2") or "",
+        "city": shipping_data.get("city") or "",
+        "state": shipping_data.get("state") or "",
+        "country": shipping_data.get("country") or "India",
+        "pin_code": shipping_data.get("pin_code") or shipping_data.get("pinCode") or shipping_data.get("postal_code") or "",
+    }
 
     payment_method = request.data.get("payment_method", "COD")
-    total = sum([item.price * item.quantity for item in cart_items])
+    valid_methods = {choice[0] for choice in Payment._meta.get_field("mode").choices}
+    if payment_method not in valid_methods:
+        return Response({"error": "Invalid payment method."}, status=400)
 
-    order = Order.objects.create(
-        user=user,
-        cart=cart,
-        shipping_address=shipping_address,
-        payment_method=payment_method,
-        total_amount=Decimal(total),
-    )
+    with transaction.atomic():
+        ship_ser = ShippingAddressSerializer(data=shipping_data)
+        ship_ser.is_valid(raise_exception=True)
+        shipping_address = ship_ser.save(user=user)
+        save_customer_address(user, shipping_data)
 
-    for ci in cart_items:
-        prod = get_object_or_404(Product, id=ci.product_id)
-        image_url = prod.image or (prod.images.first().image if hasattr(prod, "images") and prod.images.exists() else None)
-
-        OrderItem.objects.create(
-            order=order,
-            product_id=prod.id,
-            product=prod,
-            seller=prod.seller_profile,
-            name=prod.name,
-            price=ci.price,
-            quantity=ci.quantity,
-            image=image_url,
-            selected_options=ci.selected_options,
+        total = sum([item.price * item.quantity for item in cart_items])
+        order = Order.objects.create(
+            user=user,
+            cart=carts.first(),
+            shipping_address=shipping_address,
+            payment_method=payment_method,
+            total_amount=Decimal(total),
         )
 
-    # Auto payment creation
-    payment_status = "COMPLETED" if payment_method in ["ONLINE", "WALLET"] else "PENDING"
-    Payment.objects.create(
-        order=order,
-        mode=payment_method,
-        amount=Decimal(total),
-        transaction_id=f"AUTO-{timezone.now().strftime('%Y%m%d%H%M%S')}",
-        status=payment_status,
-    )
+        for ci in cart_items:
+            prod = get_object_or_404(Product, id=ci.product_id)
+            if prod.stock < ci.quantity:
+                return Response({"error": f"{prod.name} does not have enough stock."}, status=400)
+            image_url = product_image_url(prod)
 
+<<<<<<< HEAD
     order.status = "PAID" if payment_status == "COMPLETED" else "PENDING"
     order.save()
     OrderTrackingEvent.objects.get_or_create(
@@ -100,6 +146,33 @@ def create_order_from_cart(request):
         defaults={"note": "Your order has been placed."},
     )
     cart.delete()
+=======
+            OrderItem.objects.create(
+                order=order,
+                product=prod,
+                seller=prod.seller_profile,
+                name=prod.name,
+                price=ci.price,
+                quantity=ci.quantity,
+                image=image_url,
+                selected_options=ci.selected_options,
+            )
+            prod.stock = max(0, prod.stock - ci.quantity)
+            prod.save(update_fields=["stock"])
+
+        payment_status = "COMPLETED" if payment_method in ["UPI", "Credit/Debit Card", "PayPal"] else "PENDING"
+        Payment.objects.create(
+            order=order,
+            mode=payment_method,
+            amount=Decimal(total),
+            transaction_id=f"AUTO-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+            status=payment_status,
+        )
+
+        order.status = "PAID" if payment_status == "COMPLETED" else "PENDING"
+        order.save()
+        carts.delete()
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
     return Response({"message": "Order created successfully", "order": OrderSerializer(order).data}, status=201)
 

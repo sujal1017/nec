@@ -45,7 +45,7 @@ class OrderTrackingEventSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ["id", "order", "modeOfPayment", "status", "amount", "transaction_id", "created_at"]
+        fields = ["id", "order", "mode", "status", "amount", "transaction_id", "created_at"]
 
 
 # Bid History

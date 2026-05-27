@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CartViewSet, CartItemViewSet, MoveAllToCartViewSet
+from .views import CartViewSet, CartItemViewSet, MoveAllToCartViewSet, api_cart_add, api_cart_list, api_cart_remove, api_cart_update
 
 # Cart actions
 cart_list = CartViewSet.as_view({"get": "list", "post": "create"})
@@ -13,6 +13,10 @@ cart_update_quantity = CartItemViewSet.as_view({"patch": "update_quantity"})
 move_all_to_cart = MoveAllToCartViewSet.as_view({"post": "create"})
 
 urlpatterns = [
+    path("", api_cart_list, name="api-cart-list"),
+    path("add/", api_cart_add, name="api-cart-add"),
+    path("update/", api_cart_update, name="api-cart-update"),
+    path("remove/", api_cart_remove, name="api-cart-remove"),
     path("getCartPage/", cart_list, name="get-cart-page"),
     path("addNewCart/", cart_list, name="add-new-cart"),
     path("removeCart/<int:pk>", cart_delete, name="remove-cart"),

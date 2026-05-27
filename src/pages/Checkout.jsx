@@ -1,497 +1,271 @@
-
-
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Divider,
-  Paper,
-  Button,
-  Grid,
-  Avatar,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Paper,
+  Radio,
+  RadioGroup,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { createOrder, fetchCheckoutProfile } from "../services/commerceService";
+import { handleImageFallback } from "../utils/images";
+import { useAuth } from "../context/AuthContext";
 
-import axios from "axios";
-import {BaseUrl} from "../config";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  CircularProgress
-} from "@mui/material";
+const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+const DELIVERY_CHARGE = 49;
 
-const countryList = [
-  "India",
-  "United States",
-  "Canada",
-  "Australia",
-  "United Kingdom",
-  "Germany",
-  "France",
-  "Japan",
-  "China",
-  "Brazil",
-  "South Africa",
-];
+const splitName = (name = "") => {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] || "",
+    lastName: parts.slice(1).join(" "),
+  };
+};
 
-
+const formatApiError = (error) => {
+  const data = error?.response?.data;
+  if (!data) return "Order could not be placed.";
+  if (typeof data === "string") return data;
+  if (data.error || data.detail || data.message) return data.error || data.detail || data.message;
+  return Object.entries(data)
+    .map(([field, value]) => `${field}: ${Array.isArray(value) ? value.join(", ") : String(value)}`)
+    .join(" | ");
+};
 
 const Checkout = ({ darkMode, setDarkMode }) => {
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-const [selectedAddressId, setSelectedAddressId] = useState(null);
-
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const selectedCarts = state?.selectedCarts || [];
-
-  const [loading, setLoading] = useState(false);
-
+  const [placing, setPlacing] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [savedAddresses, setSavedAddresses] = useState([]);
-
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "error" });
   const [address, setAddress] = useState({
     firstName: "",
     lastName: "",
     email: "",
     addressLine1: "",
     addressLine2: "",
-    pinCode: "",
     city: "",
     state: "",
+    pinCode: "",
     country: "India",
   });
 
-useEffect(() => {
+  useEffect(() => {
+    const profileName = splitName(user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(" "));
+    setAddress((current) => ({
+      ...current,
+      firstName: current.firstName || profileName.firstName,
+      lastName: current.lastName || profileName.lastName,
+      email: current.email || user?.email || "",
+    }));
 
-  setLoading(true);
-
-  const fetchData = async () => {
-    try {
-
-      console.log("Fetching profile data...");
-      const res = await axios.get(`${BaseUrl}/customer/profile/`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      console.log("Profile data response:", res.data);
-      if (res.status === 200) {
-
-        const { savedAddresses } = res.data.profileData;
-
-        const newSavedAddress = savedAddresses.map(addr => ({
-          id: addr.id,
-          label: addr.label,
-          firstName: addr.firstName || "",
-          lastName: addr.lastName || "",
-          email: addr.email || "",
-          addressLine1: addr.address1,
-          addressLine2: addr.address2,
-          city: addr.city,
-          state: addr.state,
-          country: addr.country,
-          pinCode: addr.zipCode,
-          full: `${addr.address1}, ${addr.address2}, ${addr.city}, ${addr.state}, ${addr.country}, ${addr.zipCode}`
+    let alive = true;
+    fetchCheckoutProfile()
+      .then((data) => {
+        if (!alive) return;
+        const profile = data?.profileData?.profile || {};
+        const apiName = splitName(profile.name || "");
+        const addresses = data?.profileData?.savedAddresses || [];
+        const mappedAddresses = addresses.map((item) => ({
+          id: item.id,
+          label: item.label || "Saved address",
+          firstName: profileName.firstName || apiName.firstName,
+          lastName: profileName.lastName || apiName.lastName,
+          email: profile.email || user?.email || "",
+          addressLine1: item.address1 || "",
+          addressLine2: item.address2 || "",
+          city: item.city || "",
+          state: item.state || "",
+          country: item.country || "India",
+          pinCode: item.zipCode || "",
         }));
-
-        setSavedAddresses(newSavedAddress || []);
-
-        if (newSavedAddress.length > 0) {
-          setDialogOpen(true); // open dialog automatically
+        setSavedAddresses(mappedAddresses);
+        setAddress((current) => ({
+          ...current,
+          firstName: current.firstName || apiName.firstName,
+          lastName: current.lastName || apiName.lastName,
+          email: current.email || profile.email || "",
+        }));
+        if (mappedAddresses.length) {
+          setSelectedAddressId(String(mappedAddresses[0].id));
+          setAddress((current) => ({ ...current, ...mappedAddresses[0] }));
         }
-      }
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/signin", { replace: true, state: { from: "/checkout" } });
+      })
+      .finally(() => alive && setProfileLoading(false));
 
+    return () => {
+      alive = false;
+    };
+  }, [navigate, user]);
+
+  const items = useMemo(() => selectedCarts.flatMap((cart) => cart.items || []), [selectedCarts]);
+  const subtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
+  const delivery = subtotal > 0 && subtotal < 999 ? DELIVERY_CHARGE : 0;
+  const total = subtotal + delivery;
+
+  const updateAddress = (field) => (event) => setAddress((current) => ({ ...current, [field]: event.target.value }));
+  const selectSavedAddress = (event) => {
+    const id = event.target.value;
+    setSelectedAddressId(id);
+    const selected = savedAddresses.find((item) => String(item.id) === String(id));
+    if (selected) setAddress((current) => ({ ...current, ...selected }));
+  };
+
+  const isValid = ["firstName", "lastName", "email", "addressLine1", "city", "state", "pinCode", "country"].every((field) => String(address[field] || "").trim());
+
+  const placeOrder = async () => {
+    if (!items.length) {
+      navigate("/cart");
+      return;
+    }
+    setPlacing(true);
+    try {
+      const data = await createOrder({
+        cartIds: selectedCarts.map((cart) => cart.id),
+        shippingAddress: {
+          firstName: address.firstName,
+          lastName: address.lastName,
+          email: address.email,
+          addressLine1: address.addressLine1,
+          addressLine2: address.addressLine2,
+          city: address.city,
+          state: address.state,
+          pinCode: address.pinCode,
+          country: address.country,
+        },
+        payment_method: paymentMethod,
+      });
+      navigate("/order-success", { replace: true, state: { order: data.order } });
     } catch (error) {
-
-  if (error.response?.status === 401) {
-
-   console.log("Profile data response:", res.data);
-    // redirect to signin
-    navigate("/signin");
-    return;
-  }
-
-  console.error("Profile fetch error:", error);
-} finally {
-      setLoading(false);
+      setSnackbar({ open: true, message: formatApiError(error), severity: "error" });
+    } finally {
+      setPlacing(false);
     }
   };
 
-  fetchData();
-
-}, []);
-
-const handleAddressSelect = (id) => {
-
-  const selected = savedAddresses.find(
-    (addr) => String(addr.id) === String(id)
-  );
-
-  if (!selected) return;
-
-  setSelectedAddressId(id);
-
-  setAddress({
-    firstName: selected.firstName || "",
-    lastName: selected.lastName || "",
-    email: selected.email || "",
-    addressLine1: selected.addressLine1 || "",
-    addressLine2: selected.addressLine2 || "",
-    pinCode: selected.pinCode || "",
-    city: selected.city || "",
-    state: selected.state || "",
-    country: selected.country || "India"
-  });
-
-  setDialogOpen(false);
-};
-
-
-  const allItems = selectedCarts.flatMap((cart) => cart.items);
-const cartArray = selectedCarts?.map(cart => cart.id) || [];
-
-
-
-  const handleInputChange = (e) => {
-    setAddress({ ...address, [e.target.name]: e.target.value });
-  };
-
-
-
-const handlePlaceOrder = () => {
-  // Convert your address state to the desired format
-  const formattedAddress = {
-    full_name: `${address.firstName} ${address.lastName}`.trim(),
-
-    addressLine1 : address.addressLine1,
-    addressLine2 : address.addressLine2,
-    country: address.country,
-    email: address.email,
-    city: address.city,
-    state: address.state,
-    pin_code: address.pinCode,
-    phone: address.phone || "", // optional field if you add phone input later
-  };
-
-  const conformOrder = {
-    cartIds: cartArray,
-    items: allItems,
-    shippingAddress: formattedAddress,
-  };
-
-  navigate("/payment", {
-    state: {
-      order: conformOrder,
-      totalAmount: totalAmount,
-    },
-  });
-};
-
-
-// const handlePlaceOrder = async() => {
-// try {
-   
-//   const res = await axios.post(`${BaseUrl}/createOrder`, {
-//     cartIds: cartArray,
-//     items: allItems,
-//     shippingAddress: address,
-//   }, {
-//     headers: {
-//       Authorization: `Bearer ${localStorage.getItem("token")}`,
-//     }
-//   });
-//   if (res.status === 201) {
-//     navigate("/orders");
-//   } 
-//   else {
-//     alert("Failed to create order");
-//     console.error("Failed to create order");
-//   } 
-// } catch (error) {
-//   console.log("error:",error)
-// } 
-// };
-  const totalAmount = allItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  if (loading) {
-  return (
-    <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
-      }}
-    >
-      <CircularProgress size={60} />
-    </Box>
-  );
-}
-
   return (
     <>
-      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} sx={{ mb: '10px' }} />
-      <Box sx={{ p: { xs: 2, md: 4 }, minHeight: "100vh", mt: '100px' }}>
-        <Typography variant="h5" fontWeight="bold" mb={3}>
-          Review Orders
-        </Typography>
-
-        <Grid container spacing={3}>
-          {/* Left: Items and Address */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 3, mb: 3 }}>
-              {allItems.map((item, index) => (
-                <Box
-                  key={`${item.id}-${index}`}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    mb: 2,
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar
-                      variant="square"
-                      src={item.image}
-                      alt={item.name}
-                      sx={{ width: 80, height: 80, borderRadius: 1 }}
-                    />
-                    <Box>
-                      <Typography fontWeight="500">{item.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Qty: {item.quantity}
-                      </Typography>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
+        <Typography variant="h4" fontWeight={900} sx={{ mb: 3 }}>Checkout</Typography>
+        {!items.length ? (
+          <Alert severity="warning" action={<Button onClick={() => navigate("/cart")}>Go to cart</Button>}>No cart items selected for checkout.</Alert>
+        ) : (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Stack spacing={3}>
+                <Paper variant="outlined" sx={{ p: 3, borderRadius: 1 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                    <Typography variant="h6" fontWeight={900}>Shipping Address</Typography>
+                    {profileLoading ? <CircularProgress size={22} /> : null}
+                  </Stack>
+                  {savedAddresses.length ? (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>Quick order with saved address</Typography>
+                      <RadioGroup value={selectedAddressId} onChange={selectSavedAddress}>
+                        <Grid container spacing={1.5}>
+                          {savedAddresses.map((item) => (
+                            <Grid item xs={12} sm={6} key={item.id}>
+                              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1, height: "100%" }}>
+                                <FormControlLabel
+                                  value={String(item.id)}
+                                  control={<Radio />}
+                                  label={
+                                    <Box>
+                                      <Typography fontWeight={900}>{item.label}</Typography>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {[item.addressLine1, item.addressLine2, item.city, item.state, item.country, item.pinCode].filter(Boolean).join(", ")}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                  sx={{ alignItems: "flex-start", m: 0 }}
+                                />
+                              </Paper>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </RadioGroup>
                     </Box>
-                  </Box>
-                  <Typography fontWeight="bold">
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                  ) : null}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}><TextField required fullWidth label="First name" value={address.firstName} onChange={updateAddress("firstName")} /></Grid>
+                    <Grid item xs={12} sm={6}><TextField required fullWidth label="Last name" value={address.lastName} onChange={updateAddress("lastName")} /></Grid>
+                    <Grid item xs={12}><TextField required fullWidth label="Email" type="email" value={address.email} onChange={updateAddress("email")} /></Grid>
+                    <Grid item xs={12}><TextField required fullWidth label="Address line 1" value={address.addressLine1} onChange={updateAddress("addressLine1")} /></Grid>
+                    <Grid item xs={12}><TextField fullWidth label="Address line 2" value={address.addressLine2} onChange={updateAddress("addressLine2")} /></Grid>
+                    <Grid item xs={12} sm={4}><TextField required fullWidth label="City" value={address.city} onChange={updateAddress("city")} /></Grid>
+                    <Grid item xs={12} sm={4}><TextField required fullWidth label="State" value={address.state} onChange={updateAddress("state")} /></Grid>
+                    <Grid item xs={12} sm={4}><TextField required fullWidth label="PIN code" value={address.pinCode} onChange={updateAddress("pinCode")} /></Grid>
+                    <Grid item xs={12} sm={4}><TextField required fullWidth label="Country" value={address.country} onChange={updateAddress("country")} /></Grid>
+                  </Grid>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
+                    This address is saved to your account after placing the order.
                   </Typography>
-                </Box>
-              ))}
-              <Divider sx={{ my: 2 }} />
-              <Typography fontWeight="bold" textAlign="right">
-                Total: ₹{totalAmount.toFixed(2)}
-              </Typography>
-            </Paper>
+                </Paper>
 
-            {/* Address Form */}
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Shipping Address
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    name="firstName"
-                    label="First Name"
-                    value={address.firstName}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    name="lastName"
-                    label="Last Name"
-                    value={address.lastName}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="email"
-                    label="Email Address"
-                    type="email"
-                    value={address.email}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="addressLine1"
-                    label="Address Line 1"
-                    value={address.addressLine1}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="addressLine2"
-                    label="Address Line 2"
-                    value={address.addressLine2}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    name="pinCode"
-                    label="Pin Code"
-                    value={address.pinCode}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    name="city"
-                    label="city"
-                    value={address.city}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    name="state"
-                    label="State"
-                    value={address.state}
-                    onChange={handleInputChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    select
-                    name="country"
-                    label="Country"
-                    value={address.country}
-                    onChange={handleInputChange}
-                  >
-                    {countryList.map((country) => (
-                      <MenuItem key={country} value={country}>
-                        {country}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-              </Grid>
-            </Paper>
+                <Paper variant="outlined" sx={{ p: 3, borderRadius: 1 }}>
+                  <Typography variant="h6" fontWeight={900}>Payment Method</Typography>
+                  <RadioGroup value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
+                    <FormControlLabel value="COD" control={<Radio />} label="Cash on Delivery" />
+                    <FormControlLabel value="UPI" control={<Radio />} label="UPI placeholder" />
+                    <FormControlLabel value="Credit/Debit Card" control={<Radio />} label="Card placeholder" />
+                  </RadioGroup>
+                </Paper>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: 1, position: { md: "sticky" }, top: 96 }}>
+                <Typography variant="h6" fontWeight={900}>Order Summary</Typography>
+                <Divider sx={{ my: 2 }} />
+                <Stack spacing={2} sx={{ maxHeight: 340, overflow: "auto" }}>
+                  {items.map((item) => (
+                    <Stack direction="row" spacing={1.5} key={`${item.id}-${item.product_id}`}>
+                      <Box component="img" src={item.image} alt={item.name} onError={handleImageFallback} sx={{ width: 64, height: 64, objectFit: "cover", borderRadius: 1 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography fontWeight={800} noWrap>{item.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">Qty {item.quantity}</Typography>
+                      </Box>
+                      <Typography fontWeight={800}>{currency.format(item.price * item.quantity)}</Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+                <Divider sx={{ my: 2 }} />
+                <Stack spacing={1}>
+                  <Stack direction="row" justifyContent="space-between"><Typography>Subtotal</Typography><Typography>{currency.format(subtotal)}</Typography></Stack>
+                  <Stack direction="row" justifyContent="space-between"><Typography>Delivery</Typography><Typography>{delivery ? currency.format(delivery) : "Free"}</Typography></Stack>
+                  <Stack direction="row" justifyContent="space-between"><Typography fontWeight={900}>Total</Typography><Typography fontWeight={900}>{currency.format(total)}</Typography></Stack>
+                </Stack>
+                <Button fullWidth size="large" variant="contained" sx={{ mt: 3 }} disabled={!isValid || placing} onClick={placeOrder}>
+                  {placing ? "Placing order..." : "Place Order"}
+                </Button>
+              </Paper>
+            </Grid>
           </Grid>
-
-          {/* Right: Summary */}
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-                Item ({allItems.length})
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                <Typography variant="subtitle1">Subtotal</Typography>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  ₹{totalAmount.toFixed(2)}
-                </Typography>
-              </Box>
-
-<Button
-  variant="contained"
-  onClick={handlePlaceOrder}   // ✅ just reference, not call
-  fullWidth
-  sx={{ mt: 3 }}
-  disabled={
-    !address.firstName ||
-    !address.lastName ||
-    !address.email ||
-    !address.addressLine1 ||
-    !address.pinCode ||
-    !address.city ||
-    !address.state ||
-    !address.country
-  }
->
-  Confirm and Pay Now
-</Button>
-
-
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                display="block"
-                textAlign="center"
-                mt={2}
-              >
-                Purchase protected by YourSite Money Back Guarantee
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Dialog
-  open={dialogOpen}
-  onClose={() => setDialogOpen(false)}
-  fullWidth
-  maxWidth="sm"
->
-  <DialogTitle>Select Saved Address</DialogTitle>
-
-  <DialogContent>
-
-    {savedAddresses.length === 0 ? (
-      <Typography>No saved addresses found</Typography>
-    ) : (
-
-      <RadioGroup
-        value={selectedAddressId}
-        onChange={(e) => handleAddressSelect(e.target.value)}
-      >
-
-        {savedAddresses.map(addr => (
-
-          <Paper
-            key={addr.id}
-            sx={{
-              p: 2,
-              mb: 2,
-              borderRadius: 2
-            }}
-          >
-
-            <FormControlLabel
-              value={addr.id}
-              control={<Radio />}
-              label={
-                <Box>
-
-                  <Typography fontWeight="bold">
-                    {addr.label}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    {addr.full}
-                  </Typography>
-
-                </Box>
-              }
-            />
-
-          </Paper>
-
-        ))}
-
-      </RadioGroup>
-
-    )}
-
-  </DialogContent>
-</Dialog>
-
-
+        )}
+      </Container>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar((current) => ({ ...current, open: false }))}>
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
       <Footer />
     </>
   );

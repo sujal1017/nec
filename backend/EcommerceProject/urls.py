@@ -31,6 +31,8 @@ urlpatterns = [
     path("api/landing/", LandingContentView.as_view()),
     path("api/categories/", CategoryListView.as_view()),
     path("api/products/", include("Product.urls")),
+    path("api/cart/", include("Cart.urls")),
+    path("api/orders/", include("Orders.urls")),
     path("api/seller/", include("Seller.urls")),
 ]
 

@@ -37,7 +37,7 @@ class ShippingAddress(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.address_line1}, {self.city}"
+        return f"{self.addressLine1}, {self.city}"
 
 
 class Order(models.Model):

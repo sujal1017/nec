@@ -16,6 +16,7 @@ const ProductDetail = lazy(() => import("./pages/ProductDetails"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const OrdersPage = lazy(() => import("./pages/OrderSection"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const PaymentGateway = lazy(() => import("./pages/PaymentGateway"));
 const Bids = lazy(() => import("./pages/Bids"));
@@ -64,7 +65,11 @@ const App = () => {
 
                   <Route path="/products" element={<ProductListing {...pageProps} />} />
                   <Route path="/product/:id" element={<ProductDetail {...pageProps} />} />
+<<<<<<< HEAD
                   <Route path="/compare" element={<ComparePage {...pageProps} />} />
+=======
+                  <Route path="/products/:id" element={<ProductDetail {...pageProps} />} />
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
                   <Route element={<ProtectedRoute allowedRoles={["personal", "business"]} />}>
                     <Route path="/cart" element={<Cart {...pageProps} />} />
@@ -75,6 +80,7 @@ const App = () => {
                     <Route path="/profile/settings" element={<Profile {...pageProps} />} />
                     <Route path="/wishlist" element={<Wishlist {...pageProps} />} />
                     <Route path="/orders" element={<OrdersPage {...pageProps} />} />
+                    <Route path="/order-success" element={<OrderSuccess {...pageProps} />} />
                     <Route path="/checkout" element={<Checkout {...pageProps} />} />
                     <Route path="/payment" element={<PaymentGateway {...pageProps} />} />
                   </Route>

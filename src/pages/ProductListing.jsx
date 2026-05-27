@@ -19,9 +19,13 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { BaseUrl } from "../config";
+<<<<<<< HEAD
 import CompareButton from "../components/product/CompareButton";
 import ProductMiniRail from "../components/product/ProductMiniRail";
 import { fetchTrendingSearches } from "../services/searchService";
+=======
+import { handleImageFallback, resolveImageUrl } from "../utils/images";
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
 const DEFAULT_LIMIT = 20;
 const MAX_PRICE = 200000;
@@ -34,8 +38,11 @@ const INITIAL_FILTERS = {
 	maxPrice: MAX_PRICE,
 	rating: 0,
 	availability: null,
+<<<<<<< HEAD
 	condition: [],
 	location: [],
+=======
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 	search: "",
 	color: [],
 	storage: [],
@@ -159,7 +166,15 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (inStock === 'true') {
 			filters.availability = true;
 		}
+<<<<<<< HEAD
 		filters.search = params.get('search') || "";
+=======
+
+		const search = params.get('search');
+		if (search) {
+			filters.search = search;
+		}
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 		
 		// Parse dynamic options
 		params.forEach((value, key) => {
@@ -268,6 +283,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (body.rating && typeof body.rating === "number")
 			params.rating = body.rating;
 		if (body.availability === true) params.in_stock = "true";
+<<<<<<< HEAD
 		if (Array.isArray(body.condition) && body.condition.length)
 			params.condition = body.condition.join(",");
 		if (Array.isArray(body.location) && body.location.length)
@@ -276,6 +292,9 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			params.search = body.search;
 			params.smart = "true";
 		}
+=======
+		if (body.search) params.search = body.search;
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
 		// dynamic option_* params for any array keys not in base filter keys
 		const baseKeys = new Set([
@@ -285,8 +304,11 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			"maxPrice",
 			"rating",
 			"availability",
+<<<<<<< HEAD
 			"condition",
 			"location",
+=======
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 			"search",
 			"offset",
 			"limit",
@@ -473,7 +495,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const applyFilters = async () => {
 		// set pagination back to 0
 		setOffset(0);
-		const body = {
+			const body = {
 			offset: 0,
 			limit,
 			categories: filters.categories,
@@ -482,8 +504,11 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			maxPrice: filters.maxPrice,
 			rating: filters.rating,
 			availability: filters.availability,
+<<<<<<< HEAD
 			condition: filters.condition,
 			location: filters.location,
+=======
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 			search: filters.search,
 			color: filters.color,
 			storage: filters.storage,
@@ -1270,13 +1295,10 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 														: "border-gray-200 bg-white text-gray-900 hover:border-gray-300"
 												}`}
 											>
-											<img
-													src={
-														product.image.startsWith('https') 
-															? product.image 
-															: `${API_BASE_URL}${product.image}`
-													}
+									<img
+													src={resolveImageUrl(product.image)}
 													alt={product.name || 'Product'}
+												onError={handleImageFallback}
 												className={`w-full aspect-[4/3] object-cover object-center block ${
 														isDarkMode ? "bg-gray-900" : "bg-gray-100"
 													}`}

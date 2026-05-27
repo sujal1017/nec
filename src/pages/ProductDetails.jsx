@@ -1,57 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-  Typography,
-  CircularProgress,
-  Button,
-  Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControlLabel,
-  Checkbox,
-  TextField,
-  MenuItem,
-  Select,
-  Snackbar,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Rating,
-  Avatar,
-  Chip,
-  Stack,
   Alert,
-  Paper,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Divider,
+  Grid,
   IconButton,
-
+  Paper,
+  Rating,
+  Skeleton,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import CloseIcon from "@mui/icons-material/Close";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import GavelIcon from '@mui/icons-material/Gavel';
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import RateReviewIcon from "@mui/icons-material/RateReview";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import BoltIcon from "@mui/icons-material/Bolt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+<<<<<<< HEAD
 import { useTheme } from "@mui/material/styles";
 import { use } from "react";
 import axios from "axios";
@@ -388,706 +362,91 @@ useEffect(() => {
         setBoughtTogether((data.frequentlyBoughtTogether || []).slice(0, 3));
       })
       .catch(() => {});
+=======
+import { addToCart, fetchProduct } from "../services/commerceService";
+import { handleImageFallback, resolveImageUrl } from "../utils/images";
+import { useAuth } from "../context/AuthContext";
+
+const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+
+const flattenImages = (product) => {
+  const images = [];
+  if (product?.image) images.push(product.image);
+  if (product?.images && typeof product.images === "object") {
+    Object.values(product.images).flat().forEach((image) => images.push(resolveImageUrl(image)));
+  }
+  return Array.from(new Set(images.filter(Boolean)));
+};
+
+const ProductDetails = ({ darkMode, setDarkMode }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fetchProduct(id)
+      .then((data) => {
+        if (!alive) return;
+        setProduct(data);
+        setSelectedImage(flattenImages(data)[0] || data.image);
+      })
+      .catch(() => setSnackbar({ open: true, message: "Product could not be loaded.", severity: "error" }))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
   }, [id]);
 
-  useEffect(() => {
-    if (!product) return;
+  const images = useMemo(() => flattenImages(product), [product]);
+  const related = product?.related_products || [];
+  const effectivePrice = Number(product?.discount_price || product?.price || 0);
+  const inStock = product?.in_stock !== false;
 
-    if (product.options) {
-      const initial = {};
-
-      // 2. हर option का पहला value select करना
-      Object.keys(product.options).forEach(key => {
-        if (product.options[key]?.length > 0) {
-          initial[key] = product.options[key][0];
-        }
-      });
-
-      setSelectedOptions(initial);
-
-      // 3. अगर color है तो उसकी images set करना
-      if (initial.color) {
-        const filtered = product.images?.[initial.color] || product.images?.default || [];
-        console.log('Filtered images for color:', initial.color, filtered);
-        // Remove duplicate images
-        const uniqueImages = [...new Set(filtered)];
-        setDisplayedImages(uniqueImages);
-      } else {
-        console.log('Product images (no color option):', product.images);
-        // Remove duplicate images
-        const uniqueImages = [...new Set(product.images || [])];
-        setDisplayedImages(uniqueImages);
-      }
-    } else {
-      console.log('Product images (no options):', product.images);
-      // Remove duplicate images
-      const uniqueImages = [...new Set(product.images || [])];
-      setDisplayedImages(uniqueImages);
-    }
-  }, [product]);
-
-  // Reset current index when displayed images change
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [displayedImages]);
-
-
-  const handleOpen = (index) => {
-    setCurrentIndex(index);
-    setOpen(true);
-  };
-
-  const handleClose = () => setOpen(false);
-
-  const handleNext = () => {
-    setCurrentIndex((prev) =>
-      prev === displayedImages.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? displayedImages.length - 1 : prev - 1
-    );
-  };
-
-  const postReview = async () => {
-    if (!newTitle?.trim() || !newComment?.trim()) return;
-
-    const newReview = {
-      productId: product?.id,
-      title: newTitle.trim(),
-      comment: newComment.trim(),
-      rating: newRating
-    };
-
-    try {
-
-      const res = await axios.post(`${BaseUrl}/postReview`, newReview,
-        {
-          headers: {
-            Authorization: `bearer ${localStorage.getItem('token')}`
-          }
-        }
-      ); // API call to post review
-
-      if (res.status === 201) {
-        setSnackbar({
-          open: true,
-          message: '📝 Review submitted! Thank you for your feedback.',
-          severity: 'success',
-        });
-        setReviewDialogOpen(false);
-        setNewTitle('');
-        setNewComment('');
-        setReviews(prev => {
-          const exists = prev.some(r => r.id === res.data.newReview.id);
-          let updated;
-
-          if (exists) {
-            // Replace old review
-            updated = prev.map(r =>
-              r.id === res.data.newReview.id ? res.data.newReview : r
-            );
-          } else {
-            // Add new review
-            updated = [...prev, res.data.newReview];
-          }
-
-          // Sort by date (newest first)
-          return updated.sort((a, b) => new Date(b.date) - new Date(a.date));
-        });
-
-
-
-        // ✅ Optionally refresh reviews list here
-        // fetchReviews(); or update local state
-      } else {
-        throw new Error('Unexpected response status');
-      }
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      setSnackbar({
-        open: true,
-        message: '❌ Failed to submit review. Please try again later.',
-        severity: 'error',
-      });
-    }
-  };
-
-  // get more review from server using API Call
-  const AddMoreReviews = async () => {
-    try {
-      setShowmoreReviewLoading(true);
-      const res = await axios.get(`${BaseUrl}/moreReviews?productId=${id}&page=${reviewPageNo}&limit=5`);
-      if (res.status === 200) {
-        const newReviews = res.data.reviewsData || [];
-        setReviews(prev => {
-          const combined = [...prev, ...newReviews];
-          const unique = Array.from(new Map(combined.map(r => [r.id, r])).values());
-          return unique;
-        });
-
-      }
-    } catch (error) {
-      console.log("error", error)
-    }
-    finally {
-      setShowmoreReviewLoading(false);
-    }
-  }
-
-  const addMoreRelatedProduct = async () => {
-    try {
-      setShowmoreRPLoading(true);
-      const res = await axios.get(`${BaseUrl}/moreRelatedProducts?prdouctId=${id}&offset=${RP_PageNo}&limit=10`);
-      if (res.status === 200) {
-        setRelatedProducts(prev => [...prev, ...res.data.relatedProductsData]);
-        setRP_PageNo(prev => prev + 1); // Increment offset for next fetch
-        setSnackbar({ open: true, message: "Products loaded successfully!", severity: "success" });
-      } else {
-        setSnackbar({ open: true, message: "Failed to load products", severity: "error" });
-      }
-    } catch (error) {
-      setSnackbar({ open: true, message: "Error fetching products", severity: "error" });
-      console.error("Error:", error);
-    }
-    finally {
-      setShowmoreRPLoading(false);
-    }
-  };
-
-  // Handle option selection
-  const handleOptionSelect = (key, value) => {
-    setSelectedOptions(prev => {
-      const newOptions = { ...prev, [key]: value };
-
-      // अगर color बदला है तो images filter करो
-      if (key === "color") {
-        const filtered = product.images?.[value] || product.images?.default || [];
-        // Remove duplicate images
-        const uniqueImages = [...new Set(filtered)];
-        setDisplayedImages(uniqueImages);
-      }
-
-      return newOptions;
-    });
-  };
-
-  const allOptionsSelected = product && product.options
-    ? Object.entries(product.options).every(([key, vals]) => selectedOptions[key])
-    : true;
-
-  // When opening cart dialog, pre-fill new cart name
-  const handleOpenCartDialog = async () => {
-    console.log("in handleOpenCartDialog");
-    setCartBtnLoading(true);
-    await fetchCartsData();
-    setCartDialogOpen(true);
-    setTimeout(() => {
-      console.log("carts :", carts);
-    }, 3000);
-    console.log("out handleOpenCartDialog");
-
-  };
-
-  const handleAddBothToCart = () => {
-    setAddBothToCart(true);
-    handleOpenCartDialog();
-  };
-
-  const createNewCart = async () => {
-    let name = newCartName.trim();
-    if (!name) return;
-
-    // Check for duplicate names (case-insensitive)
-    const nameExists = carts.some(
-      (cart) => cart.name.toLowerCase() === name.toLowerCase()
-    );
-    if (nameExists) {
-      setSnackbar({
-        open: true,
-        message: '⚠️ A cart with this name already exists!',
-        severity: 'warning',
-      });
+  const handleAddToCart = async (goToCart = false) => {
+    if (!isAuthenticated) {
+      navigate("/signin", { state: { from: `/product/${id}` } });
       return;
     }
-
-    const newCart = { name };
-
+    setAdding(true);
     try {
-      setLoadingNewCart(true);
-      const res = await axios.post(
-        `${BaseUrl}/cart/addNewCart/`,
-        newCart,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          }
-        }
-      );
-
-      // 401 Unauthorized
-      if (res.status === 401) {
-        setSnackbar({
-          open: true,
-          message: "❌ Unauthorized! Please login again.",
-          severity: "error",
-        });
-        navigate('/signin');
-        return;
-      }
-
-      // 201 Created
-      if (res.status === 201) {
-        const savedCart = res.data.cart;
-        setCarts([...carts, savedCart]);
-        setSelectedCart(savedCart.id);
-        setNewCartName("");
-        setSnackbar({
-          open: true,
-          message: "✅ Cart created successfully!",
-          severity: "success",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: `❌ Failed to create cart. Status: ${res.status}`,
-          severity: "error",
-        });
-      }
+      await addToCart({ productId: product.id, quantity });
+      window.dispatchEvent(new Event("storage"));
+      if (goToCart) navigate("/cart");
+      else setSnackbar({ open: true, message: "Added to cart.", severity: "success" });
     } catch (error) {
-      console.error(error);
-      setSnackbar({
-        open: true,
-        message: "❌ Failed to create cart. Please try again.",
-        severity: "error",
-      });
-    }
-    finally {
-      setLoadingNewCart(false);
-    }
-  };
-
-  const addToSelectedCart = async () => {
-    if (!selectedCart || !product) return;
-
-    const items = [
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity,
-        selectedOptions: { ...selectedOptions },
-      },
-    ];
-
-    // Add "bought together" items if applicable
-    if (addBothToCart && boughtTogether.length > 0) {
-      boughtTogether.forEach(bt => {
-        items.push({
-          id: bt.id,
-          name: bt.name,
-          price: bt.price,
-          image: bt.image,
-          quantity: 1
-        });
-      });
-    }
-
-    const postCart = {
-      Cartid: selectedCart,
-      product:items, // only need id and items when adding to existing cart
-    };
-
-    try {
-      console.log("📦 Payload =>", postCart);
-
-      setCartLoading(true);
-      const res = await axios.post(
-        `${BaseUrl}/cart/addToCart/${selectedCart}/`,
-        postCart,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // example if using token
-          },
-          validateStatus: () => true, // prevent axios from throwing
-        }
-      );
-
-
-      if (res.status === 200) {
-        setCartDialogOpen(false);
-        setSnackbar({
-          open: true,
-          message: '🎉 Added to cart! Ready to checkout or keep shopping?',
-          severity: 'success',
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: `❌ Failed to add to cart. Status: ${res.status}`,
-          severity: 'error',
-        });
-        setCartDialogOpen(false);
-      }
-    } catch (error) {
-      console.error('Server is down', error);
-      setSnackbar({
-        open: true,
-        message: '🚨 Server is down! Please try again later.',
-        severity: 'error',
-      });
-      setCartDialogOpen(false);
-    }
-    finally {
-
-      setCartLoading(false);
-    }
-  };
-
-
-  const handlePlaceBid = async () => {
-    if (parseInt(bidAmount) < product.auction.current_highest_bid) {
-      setSnackbar({
-        open: true,
-        message: "⚠️ Your bid is below the minimum amount.",
-        severity: "warning",
-      });
-      return;
-    }
-
-    try {
-      setBidPlacedLoading(true);
-
-      const res = await axios.post(
-        `${BaseUrl}/orders/auctions/${product.auction.id}/bid/`,
-        {
-          productId: product.id,
-          amount: parseInt(bidAmount),
-          selectedOptions: selectedOptions
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          validateStatus: () => true,
-        }
-      );
-
-      // 401 Unauthorized
-      if (res.status === 401) {
-        setSnackbar({
-          open: true,
-          message: "❌ Unauthorized! Please login again.",
-          severity: "error",
-        });
-        setTimeout(() => {
-          navigate("/signin");
-        }, 2000);
-        return;
-      }
-
-      // 200 OK
-      if (res.status === 200) {
-        setBidPlaced(true);
-        setBidDialogOpen(false);
-        setSnackbar({
-          open: true,
-          message: "✅ Bid placed successfully!",
-          severity: "success",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: `❌ Failed to place bid. Status: ${res.status}`,
-          severity: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error while placing bid:", error);
-      setSnackbar({
-        open: true,
-        message: "❌ Failed to place bid. Please try again.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: error?.response?.data?.detail || "Could not add to cart.", severity: "error" });
     } finally {
-      setBidPlacedLoading(false);
+      setAdding(false);
     }
   };
-
-
-
-
-  // Add a scrollToTop handler
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          minHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        {/* Loader GIF */}
-        <img
-          src="/images/productDetailsLoader.gif"
-          alt="Loading..."
-          style={{ width: "150px", height: "150px" }}
-        />
-
-        {/* Dynamic text with fade + dots */}
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: "bold",
-            color: "gray",
-            animation: "fade 2s ease-in-out infinite",
-          }}
-        >
-          Product details are loading
-          <span className="dots">...</span>
-        </Typography>
-
-        <style>
-          {`
-            /* Dots animation */
-            .dots {
-              display: inline-block;
-              width: 1.5em;
-              text-align: left;
-              animation: dots 1.5s steps(3, end) infinite;
-            }
-            @keyframes dots {
-              0%, 20% { content: ""; }
-              40% { content: "."; }
-              60% { content: ".."; }
-              80%, 100% { content: "..."; }
-            }
-  
-            /* Fade animation */
-            @keyframes fade {
-              0% { opacity: 0.2; }
-              50% { opacity: 1; }
-              100% { opacity: 0.2; }
-            }
-          `}
-        </style>
-      </Box>
-    );
-  }
-
-  // if (!product) {
-  //   return (
-  //     <Typography sx={{ minHeight: "80vh", textAlign: "center", mt: 5, fontSize: "1.5rem", color: "gray", height: "100h" }}>
-  //       Product not found.
-  //     </Typography>
-  //   );
-  // }
-
-
-  // Dynamic slider settings that update when displayedImages changes
-  const getSliderSettings = () => ({
-    dots: displayedImages.length > 1,
-    infinite: displayedImages.length > 1, // Only infinite if more than 1 image
-    speed: 500,
-    slidesToShow: 1, // Show only ONE image at a time
-    slidesToScroll: 1,
-    arrows: displayedImages.length > 1, // Only show arrows if more than 1 image
-    autoplay: false,
-  });
-
-  const handleOpenWishlistDialog = () => {
-    setWishlistLoading(true);
-    fetchWishlistData();
-
-    // If no cart exists, generate a default cart name
-    if (!selectedCart && carts.length === 0) {
-      setNewCartName("my wishlist 1");
-    }
-  };
-
-  const addToSelectedWishlists = async () => {
-    try {
-      console.log("Selected Wishlists:", selectedWishlists);
-      setAddToWishlistLoading(true);
-      const addToWishlist = {
-        wishlistId: selectedWishlists,   // array or single id
-        id: id,  
-        name:product.name,
-        price:product.price,
-        image:product.image,                 // product id
-        selected_options: selectedOptions // object of options
-      };
-
-      console.log("📦 Payload =>", addToWishlist);
-
-      const res = await axios.post(
-        `${BaseUrl}/wishlist/addToWishlist/${selectedWishlists}`,
-        {product : addToWishlist},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}` // replace with your token
-          }
-        }
-      );
-
-      if (res.status === 200 || res.status === 201) {
-        console.log("✅ Product added to wishlist:", res.data);
-      } else if (res.status === 401) {
-        navigate("/signin");  // fixed spelling
-      } else {
-        console.error("❌ Unexpected response:", res);
-      }
-    } catch (err) {
-      console.error("🚨 Error while adding to wishlist:", err);
-    } finally {
-      setAddToWishlistLoading(false);
-      setWishlistDialogOpen(false);
-      setSelectedWishlists([]);
-    }
-  };
-
-  const createNewWishlist = async () => {
-    const trimmedName = newWishlistName.trim();
-    if (!trimmedName) return;
-
-    // Check for duplicates
-    const alreadyExists = wishlists.some((w) => w.name === trimmedName);
-    if (alreadyExists) {
-      setTimeout(() => {
-        setSnackbar({
-          open: true,
-          message: '⚠️ A wishlist with this name already exists! Please choose a different name.',
-          severity: 'failed',
-        });
-      }, 200);
-      return;
-    }
-
-    try {
-      setCreatewishlistLoading(true);
-
-      const res = await axios.post(
-        `${BaseUrl}/wishlist/createNewWishlist`,
-        { name: trimmedName },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      // Check for 401 inside try
-      if (res.status === 401) {
-
-        setSnackbar({
-          open: true,
-          message: '⚠️ Session expired. Please sign in again.',
-          severity: 'warning',
-        });
-        setTimeout(() => {
-          navigate("/signin");
-        }, 2000);
-        return;
-      }
-
-      if (res.status === 201) {
-        setWishlists((prev) => [...prev, res.data.wishlist]);
-        setSelectedWishlists((prev) => [...prev, res.data.wishlist.id]);
-        setNewWishlistName("");
-        setSnackbar({
-          open: true,
-          message: '✅ Wishlist created successfully!',
-          severity: 'success',
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      setSnackbar({
-        open: true,
-        message: '⚠️ Something went wrong while creating wishlist.',
-        severity: 'failed',
-      });
-    } finally {
-      setCreatewishlistLoading(false);
-    }
-  };
-
 
   return (
     <>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Box component={Paper} elevation={0} sx={{ width: '100vw', padding: { xs: 1, sm: 4, md: 8, lg: 12 }, bgcolor: theme.palette.background.paper, borderRadius: { xs: 0, md: 3 } }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-            <CircularProgress />
-          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}><Skeleton variant="rounded" height={520} /></Grid>
+            <Grid item xs={12} md={6}><Skeleton variant="rounded" height={520} /></Grid>
+          </Grid>
         ) : !product ? (
-          <Box sx={{ textAlign: 'center', mt: 4, height: "80vh" }}>
-            <Typography variant="h5" color="error">Product not found</Typography>
-          </Box>
+          <Alert severity="error">Product not found.</Alert>
         ) : (
           <>
-            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
-              {/* Product Images */}
-              <Box sx={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
-                {displayedImages && displayedImages.length > 0 ? (
-                  displayedImages.length === 1 ? (
-                    // Show single image without slider
-                    <Box sx={{ display: "flex", justifyContent: "center", width: "90%", maxWidth: 500 }}>
-                      <img
-                        src={displayedImages[0]}
-                        alt="Product"
-                        onClick={() => handleOpen(0)}
-                        style={{
-                          width: "100%",
-                          maxWidth: 500,
-                          height: "auto",
-                          objectFit: "contain",
-                          backgroundColor: "inherit",
-                          borderRadius: 10,
-                          padding: 10,
-                          cursor: "pointer",
-                        }}
-                      />
-                    </Box>
-                  ) : (
-                    // Show slider for multiple images
-                    <Slider 
-                      {...getSliderSettings()} 
-                      key={`slider-${displayedImages.length}-${displayedImages[0]}`} // Force re-render when images change
-                      style={{ width: "90%", maxWidth: 500 }}
-                    >
-                      {displayedImages.map((image, index) => (
-                        <Box key={index} sx={{ display: "flex", justifyContent: "center" }} onClick={() => handleOpen(index)}>
-                          <img
-                            src={image}
-                            alt={`Product ${index}`}
-                            style={{
-                              width: "100%",
-                              maxWidth: 500,
-                              height: "auto",
-                              objectFit: "contain",
-                              backgroundColor: "inherit",
-                              borderRadius: 10,
-                              padding: 10,
-                            }}
-                          />
-                        </Box>
-                      ))}
-                    </Slider>
-                  )
-                ) : (
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={6}>
+                <Paper variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
                   <Box
+<<<<<<< HEAD
                     sx={{
                       width: "100%",
                       maxWidth: 500,
@@ -1556,136 +915,35 @@ useEffect(() => {
                         boxShadow: 3, // MUI shadow level (try 1–6 for subtle, 10+ for stronger)
                       }}
                     >
+=======
+                    component="img"
+                    src={selectedImage || product.image}
+                    alt={product.name}
+                    onError={handleImageFallback}
+                    sx={{ width: "100%", height: { xs: 320, md: 520 }, objectFit: "contain", bgcolor: "grey.50" }}
+                  />
+                  <Stack direction="row" spacing={1} sx={{ mt: 2, overflowX: "auto" }}>
+                    {images.map((image) => (
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
                       <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          mb: 2,
-                        }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          <Avatar sx={{ bgcolor: "primary.main" }}>
-                            {review.username.charAt(0)}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="subtitle1" fontWeight="bold">
-                              {review.userame}
-                              {review.verified && (
-                                <Chip
-                                  icon={<VerifiedIcon />}
-                                  label="Verified Purchase"
-                                  size="small"
-                                  color="primary"
-                                  sx={{ ml: 1 }}
-                                />
-                              )}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(review.date).toLocaleDateString("en-IN", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Rating value={review.rating} readOnly size="small" />
-                      </Box>
-                      <Typography variant="h6" gutterBottom>
-                        {review.title}
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary">
-                        {review.comment}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-
-                  {reviews.length < product.reviewsCount && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={AddMoreReviews}
-                      disabled={showmoreReviewLoading}
-                    >
-                      {showmoreReviewLoading ? "Loading..." : "Show More"}
-                    </Button>
-                  )}
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Usually Bought Together */}
-            {boughtTogether.length > 0 && (
-              <Paper elevation={4} sx={{ mt: 6, p: { xs: 2, md: 4 }, borderRadius: 4, bgcolor: theme.palette.background.paper, boxShadow: 3, maxWidth: 700, mx: 'auto' }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main, textAlign: 'center' }}>
-                  Frequently Bought Together
-                </Typography>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2,
-                    width: '100%',
-                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                  }}
-                >
-                  {/* Product 1 */}
-                  <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={scrollToTop}>
-                    <Box sx={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 160, maxWidth: 200, bgcolor: theme.palette.background.default, borderRadius: 3, boxShadow: 1, p: 2, border: `1px solid ${theme.palette.divider}`, transition: 'box-shadow 0.2s', cursor: 'pointer',
-                      '&:hover': { boxShadow: 4, borderColor: theme.palette.primary.light },
-                    }}>
-                      <CardMedia
+                        key={image}
                         component="img"
-                        image={product.image}
+                        src={image}
                         alt={product.name}
-                        sx={{ width: 80, height: 80, objectFit: 'contain', mb: 1 }}
-                      />
-                      <Typography
-                        variant="subtitle2"
-                        fontWeight="bold"
+                        loading="lazy"
+                        onClick={() => setSelectedImage(image)}
+                        onError={handleImageFallback}
                         sx={{
-                          textAlign: 'center',
-                          mb: 0.5,
-                          overflow: 'hidden',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          minHeight: '2.8em',
-                          maxHeight: '2.8em',
-                          lineHeight: 1.4,
-                          fontSize: '1rem',
-                          color: theme.palette.text.primary,
+                          width: 72,
+                          height: 72,
+                          objectFit: "cover",
+                          borderRadius: 1,
+                          cursor: "pointer",
+                          border: image === selectedImage ? "2px solid" : "1px solid",
+                          borderColor: image === selectedImage ? "primary.main" : "divider",
                         }}
-                      >
-                        {product.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ₹{product.price.toLocaleString('en-IN')}
-                      </Typography>
-                    </Box>
-                  </Link>
-                  {/* Plus Icon */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', px: { xs: 30, sm: 3 } }}>
-                    <Typography variant="h3" color="primary" fontWeight="bold">+</Typography>
-                  </Box>
-                  {/* Product 2 */}
-                  <Link to={`/product/${boughtTogether[0].id}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={scrollToTop}>
-                    <Box sx={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 160, maxWidth: 200, bgcolor: theme.palette.background.default, borderRadius: 3, boxShadow: 1, p: 2, border: `1px solid ${theme.palette.divider}`, transition: 'box-shadow 0.2s', cursor: 'pointer',
-                      '&:hover': { boxShadow: 4, borderColor: theme.palette.primary.light },
-                    }}>
-                      <CardMedia
-                        component="img"
-                        image={boughtTogether[0].image}
-                        alt={boughtTogether[0].name}
-                        sx={{ width: 80, height: 80, objectFit: 'contain', mb: 1 }}
                       />
+<<<<<<< HEAD
                       <Typography
                         variant="subtitle2"
                         fontWeight="bold"
@@ -1724,850 +982,95 @@ useEffect(() => {
                   >
                     Add All To Cart
                   </Button>
+=======
+                    ))}
+                  </Stack>
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
                 </Paper>
-              </Paper>
-            )}
+              </Grid>
 
+<<<<<<< HEAD
             <ProductMiniRail title="Similar Products" products={similarProducts} limit={6} />
             <RecentlyViewedSection excludeId={product.id} />
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (
+=======
+              <Grid item xs={12} md={6}>
+                <Stack spacing={2}>
+                  <Typography variant="h4" fontWeight={900}>{product.name}</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Rating value={Number(product.rating || 0)} precision={0.5} readOnly />
+                    <Typography color="text.secondary">{product.rating || "New"}</Typography>
+                    <Chip size="small" color={inStock ? "success" : "error"} label={inStock ? "In stock" : "Out of stock"} />
+                  </Stack>
+                  <Divider />
+                  <Box>
+                    <Typography variant="h3" fontWeight={900}>{currency.format(effectivePrice)}</Typography>
+                    {product.discount_price ? (
+                      <Typography color="text.secondary" sx={{ textDecoration: "line-through" }}>
+                        {currency.format(product.price)}
+                      </Typography>
+                    ) : null}
+                  </Box>
+                  <Typography color="text.secondary">{product.description}</Typography>
+
+                  <Paper variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <StorefrontIcon color="primary" />
+                      <Box>
+                        <Typography fontWeight={800}>{product.seller?.name || "Verified marketplace seller"}</Typography>
+                        <Typography variant="body2" color="text.secondary">{product.seller?.return_policy || "Easy returns and secure marketplace checkout."}</Typography>
+                      </Box>
+                    </Stack>
+                  </Paper>
+
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <IconButton onClick={() => setQuantity((value) => Math.max(1, value - 1))}><RemoveIcon /></IconButton>
+                    <TextField size="small" value={quantity} type="number" onChange={(e) => setQuantity(Math.max(1, Number(e.target.value || 1)))} sx={{ width: 90 }} />
+                    <IconButton onClick={() => setQuantity((value) => value + 1)}><AddIcon /></IconButton>
+                  </Stack>
+
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                    <Button size="large" variant="contained" startIcon={<AddShoppingCartIcon />} disabled={!inStock || adding} onClick={() => handleAddToCart(false)}>
+                      Add to Cart
+                    </Button>
+                    <Button size="large" variant="outlined" startIcon={<BoltIcon />} disabled={!inStock || adding} onClick={() => handleAddToCart(true)}>
+                      Buy Now
+                    </Button>
+                  </Stack>
+
+                  <Stack direction="row" spacing={1} alignItems="center" color="text.secondary">
+                    <LocalShippingIcon />
+                    <Typography>Fast delivery, secure payments, and order tracking included.</Typography>
+                  </Stack>
+                </Stack>
+              </Grid>
+            </Grid>
+
+            {related.length ? (
+>>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
               <Box sx={{ mt: 6 }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ color: theme.palette.text.primary }}>
-                  Related Products
-                </Typography>
-                <Grid container spacing={3}>
-                  {relatedProducts.slice(0, relatedProducts.length).map((relatedProduct) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={relatedProduct.id}>
-                      <Card
-                        component={Link}
-                        to={`/product/${relatedProduct.id}`}
-                        onClick={scrollToTop}
-                        sx={{
-                          textDecoration: 'none',
-                          height: 380,
-                          width: {
-                            xs: "40vw",  // extra-small screen (mobile)
-                            sm: "27vw",  // small screen (tablet)
-                            md: "25vw",  // medium screen (laptop)
-                            lg: "23vw",  // large screen (desktop)
-                            xl: "20vw",  // extra-large screen
-                          },
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          transition: 'transform 0.2s',
-                          bgcolor: theme.palette.background.paper,
-                          color: theme.palette.text.primary,
-                          '&:hover': { transform: 'translateY(-4px)' },
-                        }}
-                      >
-                        <CardMedia
-                          component="img"
-                          image={relatedProduct.image}
-                          alt={relatedProduct.name}
-                          sx={{
-                            width: '100%',
-                            height: 180,
-                            objectFit: 'contain',
-                            p: 2,
-                            mb: 1,
-                            bgcolor: theme.palette.background.default,
-                          }}
-                        />
-                        <CardContent sx={{ flexGrow: 1, width: '100%', p: 2 }}>
-                          <Typography variant="subtitle1" fontWeight="bold" noWrap sx={{ color: theme.palette.text.primary }}>
-                            {relatedProduct.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            {relatedProduct.brand}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Rating value={relatedProduct.rating} precision={0.5} readOnly size="small" />
-                            <Typography variant="body2">({relatedProduct.rating})</Typography>
-                          </Box>
-                          <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                            ₹{relatedProduct.price.toLocaleString('en-IN')}
-                          </Typography>
-                        </CardContent>
-                      </Card>
+                <Typography variant="h5" fontWeight={900} sx={{ mb: 2 }}>Related Products</Typography>
+                <Grid container spacing={2}>
+                  {related.slice(0, 6).map((item) => (
+                    <Grid item xs={6} sm={4} md={2} key={item.id}>
+                      <Paper component={Link} to={`/product/${item.id}`} sx={{ display: "block", p: 1.5, textDecoration: "none", color: "inherit", borderRadius: 1 }} variant="outlined">
+                        <Box component="img" src={resolveImageUrl(item.image)} alt={item.name} loading="lazy" onError={handleImageFallback} sx={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: 1 }} />
+                        <Typography noWrap fontWeight={800} sx={{ mt: 1 }}>{item.name}</Typography>
+                        <Typography color="primary" fontWeight={900}>{currency.format(Number(item.price || 0))}</Typography>
+                      </Paper>
                     </Grid>
                   ))}
                 </Grid>
-
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  {relatedProducts.length < product.RelatedCount && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={addMoreRelatedProduct}
-                      disabled={showmoreRPLoading}
-                    >
-                      {showmoreRPLoading ? "Loading..." : "Show More"}
-                    </Button>
-                  )}
-
-                </Box>
-
               </Box>
-            )}
+            ) : null}
           </>
         )}
-
-        {/* Cart Dialog */}
-        <Dialog
-          open={cartDialogOpen}
-          onClose={() => setCartDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle sx={{
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <ShoppingCartIcon />
-            Add to Cart
-          </DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{
-              mb: 3,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              pb: 2
-            }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                {product?.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Rating value={product?.rating} precision={0.1} readOnly size="small" />
-                <Typography variant="body2" color="text.secondary">({product?.rating})</Typography>
-              </Box>
-              <Typography variant="h6" color="primary.main">
-                ₹{product?.price.toLocaleString('en-IN')}
-              </Typography>
-            </Box>
-
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Select Cart
-            </Typography>
-            <Box
-              sx={{
-                maxHeight: 200,
-                overflow: 'auto',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                pb: 2,
-                mb: 2
-              }}
-            >
-              {carts.length > 0 ? (
-                carts.map((cart) => (
-                  <FormControlLabel
-                    key={cart.id}
-                    control={
-                      <Checkbox
-                        checked={selectedCart === cart.id}
-                        onChange={() => setSelectedCart(cart.id)}
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                        <Typography color="text.primary">{cart?.name || ""}</Typography>
-                       
-                      </Box>
-                    }
-                    sx={{
-                      width: '100%',
-                      m: 0.5,
-                      p: 1,
-                      borderRadius: 1,
-                      '&:hover': {
-                        bgcolor: 'action.hover'
-                      }
-                    }}
-                  />
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                  No carts available. Create a new one below.
-                </Typography>
-              )}
-            </Box>
-
-
-            <Box sx={{
-              mb: 3,
-              p: 2,
-              bgcolor: 'background.default',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                Create New Cart
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  label="Cart Name"
-                  fullWidth
-                  variant="outlined"
-                  value={newCartName}
-                  onChange={(e) => setNewCartName(e.target.value)}
-                  size="small"
-                  placeholder={"create New Cart"}
-                />
-                <Button
-                  onClick={createNewCart}
-                  variant="contained"
-                  color="primary"
-                  disabled={loadingNewCart || !newCartName.trim()}
-                >
-                  {loadingNewCart ? "Creating..." : "Create"}
-                </Button>
-              </Box>
-            </Box>
-
-            <Box sx={{
-              mb: 2,
-              p: 2,
-              bgcolor: 'background.default',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                Quantity
-              </Typography>
-              <Select
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                fullWidth
-                size="small"
-              >
-                {[...Array(10)].map((_, i) => (
-                  <MenuItem key={i + 1} value={i + 1}>{i + 1}</MenuItem>
-                ))}
-              </Select>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{
-            p: 2,
-            pt: 0,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            gap: 1
-          }}>
-            <Button
-              onClick={() => setCartDialogOpen(false)}
-              color="inherit"
-              variant="outlined"
-              sx={{ mt: 1 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={addToSelectedCart}
-              variant="contained"
-              color="primary"
-              disabled={!selectedCart || cartLoading}
-              sx={{ mt: 1 }}
-            >
-              {cartLoading ? <ShoppingCartIcon /> : "Add to Cart"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* review Dialog */}
-        <Dialog
-          open={reviewDialogOpen}
-          onClose={() => setReviewDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle sx={{
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <RateReviewIcon />
-            Post
-          </DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{
-              mb: 3,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              pb: 2
-            }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                {product?.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Rating value={product?.rating} precision={0.1} readOnly size="small" />
-                <Typography variant="body2" color="text.secondary">({product?.rating})</Typography>
-              </Box>
-              <Typography variant="h6" color="primary.main">
-                ₹{product?.price.toLocaleString('en-IN')}
-              </Typography>
-            </Box>
-
-            {/* ⭐ Add User Rating Here */}
-            <Box sx={{
-              mb: 3,
-              p: 2,
-              bgcolor: 'background.default',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                Your Rating
-              </Typography>
-              <Rating
-                name="user-rating"
-                value={newRating}
-                onChange={(event, newValue) => {
-                  setNewRating(newValue);
-                }}
-                precision={1}
-                size="large"
-              />
-
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary" sx={{ mt: 2 }}>
-                Subject
-              </Typography>
-              <TextField
-                label="Enter"
-                fullWidth
-                variant="outlined"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                size="small"
-                placeholder="Great product, highly recommend!"
-              />
-
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary" sx={{ mt: 2 }}>
-                Comment
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                size="medium"
-                multiline
-                rows={3}
-                placeholder="Write your experience here..."
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{
-            p: 2,
-            pt: 0,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            gap: 1
-          }}>
-            <Button
-              onClick={() => setReviewDialogOpen(false)}
-              color="inherit"
-              variant="outlined"
-              sx={{ mt: 1 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={postReview}
-              variant="contained"
-              color="primary"
-              disabled={(newComment.length > 0 && newTitle.length > 0 && newRating > 0) ? false : true}
-              sx={{ mt: 1 }}
-            >
-              Post
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-
-        {/* Wishlist Dialog */}
-        <Dialog
-          open={wishlistDialogOpen}
-          onClose={() => setWishlistDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle sx={{
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <FavoriteIcon />
-            Add to Wishlist
-          </DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{
-              mb: 3,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              pb: 2
-            }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                {product?.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Rating value={product?.rating} precision={0.1} readOnly size="small" />
-                <Typography variant="body2" color="text.secondary">({product?.rating})</Typography>
-              </Box>
-              <Typography variant="h6" color="primary.main">
-                ₹{product?.price.toLocaleString('en-IN')}
-              </Typography>
-            </Box>
-
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Select Wishlists
-            </Typography>
-            <Box
-              sx={{
-                maxHeight: 200,
-                overflow: "auto",
-                borderBottom: "1px solid",
-                borderColor: "divider",
-                pb: 2,
-                mb: 2
-              }}
-            >
-              {wishlists.length > 0 ? (
-                wishlists.map((wishlist) => (
-                  <FormControlLabel
-                    key={wishlist.id}
-                    control={
-                      <Checkbox
-                        checked={selectedWishlists.includes(wishlist.id)}
-                        onChange={() =>
-                          setSelectedWishlists((prev) =>
-                            prev.includes(wishlist.id)
-                              ? prev.filter((id) => id !== wishlist.id)
-                              : [...prev, wishlist.id]
-                          )
-                        }
-                        color="secondary"
-                      />
-                    }
-                    label={
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          width: "100%"
-                        }}
-                      >
-                        <Typography color="text.primary">{wishlist.name}</Typography>
-                        <Typography color="text.secondary">
-                          {wishlist.product?.some((p) => p.id === id)
-                            ? "Already present"
-                            : ""}
-                        </Typography>
-                      </Box>
-                    }
-                    sx={{
-                      width: "100%",
-                      m: 0.5,
-                      p: 1,
-                      borderRadius: 1,
-                      "&:hover": {
-                        bgcolor: "action.hover"
-                      }
-                    }}
-                  />
-                ))
-              ) : (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ p: 2, textAlign: "center" }}
-                >
-                  No wishlists available. Create a new one below.
-                </Typography>
-              )}
-            </Box>
-
-            <Box sx={{
-              mb: 2,
-              p: 2,
-              bgcolor: 'background.default',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                Create New Wishlist
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  label="Wishlist Name"
-                  fullWidth
-                  variant="outlined"
-                  value={newWishlistName}
-                  onChange={(e) => setNewWishlistName(e.target.value)}
-                  size="small"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'divider' },
-                      '&:hover fieldset': { borderColor: 'secondary.main' },
-                      '&.Mui-focused fieldset': { borderColor: 'secondary.main' }
-                    }
-                  }}
-                />
-                <Button
-                  onClick={createNewWishlist}
-                  variant="contained"
-                  color="secondary"
-                  disabled={!newWishlistName.trim() || createwishlistLoading}
-                  sx={{
-                    bgcolor: 'secondary.main',
-                    '&:hover': {
-                      bgcolor: 'secondary.dark'
-                    },
-                    minWidth: "90px" // keeps size consistent when loader replaces text
-                  }}
-                >
-                  {createwishlistLoading ? (
-                    <CircularProgress size={20} color="secondary" />
-                  ) : (
-                    "Create"
-                  )}
-                </Button>
-              </Box>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{
-            p: 2,
-            pt: 1,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            gap: 1,
-          }}>
-            <Button
-              onClick={() => setWishlistDialogOpen(false)}
-              color="inherit"
-              variant="outlined"
-              sx={{
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'secondary.main',
-                  bgcolor: 'action.hover',
-                }
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={addToSelectedWishlists}
-              variant="contained"
-              color="secondary"
-              disabled={selectedWishlists.length === 0 || addToWishlistLoading}
-              sx={{
-                bgcolor: 'secondary.main',
-                '&:hover': {
-                  bgcolor: 'secondary.dark',
-                },
-                minWidth: '130px', // to keep button size stable
-              }}
-            >
-              {addToWishlistLoading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Add to Wishlist"
-              )}
-            </Button>
-
-          </DialogActions>
-        </Dialog>
-
-        {/* Biding Dialog */}
-        {product?.is_auction && (
-        <Dialog
-          open={bidDialogOpen}
-          onClose={() => setBidDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle sx={{
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <GavelIcon />
-            Bid  
-             <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                Time : {timeLeft}
-              </Typography>
-          </DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{
-              mb: 3,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              pb: 2
-            }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                {product?.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Rating value={product?.rating} precision={0.1} readOnly size="small" />
-                <Typography variant="body2" color="text.secondary">({product?.rating})</Typography>
-              </Box>
-              <Typography variant="h6" color="primary">
-                Current Bid: ₹{product.auction.current_highest_bid.toLocaleString('en-IN')}
-              </Typography>
-              <Chip
-                label={`${ product.auction.total_bids || 0} bids`}
-                color="primary"
-                variant="outlined"
-                size="small"
-              />
-            </Box>
-
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              Last Biding
-            </Typography>
-            {/* <Box
-              sx={{
-                maxHeight: 200,
-                overflow: "auto",
-                borderBottom: "1px solid",
-                borderColor: "divider",
-                pb: 2,
-                mb: 2
-              }}
-            >
-              {bidPlaced ? (
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  {prevBid}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ p: 2, textAlign: "center" }}
-                >
-                  No bids have been submitted at this time.
-                </Typography>
-              )}
-            </Box> */}
-
-            <Box sx={{
-              mb: 2,
-              p: 2,
-              bgcolor: 'background.default',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                Place Bid Amount (₹)
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  label="Bid amount"
-                  fullWidth
-                  variant="outlined"
-                  value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value)}
-                  size="small"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'divider' },
-                      '&:hover fieldset': { borderColor: 'secondary.main' },
-                      '&.Mui-focused fieldset': { borderColor: 'secondary.main' }
-                    }
-                  }}
-                />
-
-              </Box>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{
-            p: 2,
-            pt: 1,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            gap: 1,
-          }}>
-            <Button
-              onClick={() => setBidDialogOpen(false)}
-              color="inherit"
-              variant="outlined"
-              sx={{
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'secondary.main',
-                  bgcolor: 'action.hover',
-                }
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handlePlaceBid}
-              variant="contained"
-              color="primary"
-              disabled={!bidAmount.trim() || bidPlacedLoading}
-              sx={{
-                bgcolor: 'secondary.main',
-                '&:hover': {
-                  bgcolor: 'secondary.dark'
-                },
-                minWidth: "90px" // keeps size consistent when loader replaces text
-              }}
-            >
-              {createwishlistLoading ? (
-                <CircularProgress size={20} color="secondary" />
-              ) : (
-                "Place Bid "
-              )}
-            </Button>
-
-          </DialogActions>
-        </Dialog>)}
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={2000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          TransitionProps={{
-            appear: true,
-            onEnter: (node) => {
-              node.style.opacity = 0;
-              node.style.transform = 'translateY(40px)';
-              setTimeout(() => {
-                node.style.transition = 'opacity 400ms cubic-bezier(0.4,0,0.2,1), transform 400ms cubic-bezier(0.4,0,0.2,1)';
-                node.style.opacity = 1;
-                node.style.transform = 'translateY(0)';
-              }, 10);
-            },
-            onExit: (node) => {
-              node.style.transition = 'opacity 300ms cubic-bezier(0.4,0,0.2,1), transform 300ms cubic-bezier(0.4,0,0.2,1)';
-              node.style.opacity = 0;
-              node.style.transform = 'translateY(40px)';
-            },
-          }}
-        >
-          <Alert
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-            severity={snackbar.severity}
-            sx={{
-              width: '100%',
-              bgcolor: '#fff',
-              color: '#222',
-              border: '1px solid #eee',
-              fontWeight: 600,
-              fontSize: '1.1rem',
-              boxShadow: 6,
-              borderRadius: 3,
-              px: 3,
-              py: 2,
-              transition: 'box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), background 0.3s cubic-bezier(0.4,0,0.2,1)',
-              letterSpacing: 0.2,
-            }}
-            icon={false}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-
-        {/* Fullscreen Dialog */}
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          fullWidth
-          maxWidth="lg"
-          PaperProps={{
-            sx: {
-              width: "80vw",
-              height: "80vh",
-              borderRadius: 2,
-              position: "relative",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            },
-          }}
-        >
-          {/* Close Button */}
-          <IconButton
-            onClick={handleClose}
-            sx={{ position: "absolute", top: 10, right: 10, bgcolor: "red" }}
-          >
-            <CloseIcon />
-          </IconButton>
-
-          {/* Prev Button */}
-          <IconButton
-            onClick={handlePrev}
-            sx={{
-              position: "absolute",
-              left: 20,
-              top: "50%",
-              transform: "translateY(-50%)",
-              bgcolor: "grey",
-            }}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-
-          {/* Next Button */}
-          <IconButton
-            onClick={handleNext}
-            sx={{
-              position: "absolute",
-              right: 20,
-              top: "50%",
-              transform: "translateY(-50%)",
-              bgcolor: "grey",
-            }}
-          >
-            <ArrowForwardIosIcon />
-          </IconButton>
-
-          <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center" }}>
-            <img
-              src={displayedImages[currentIndex]}
-              alt={`Large Product ${currentIndex}`}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "75vh",
-                objectFit: "contain",
-                borderRadius: 10,
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-
-      </Box>
+      </Container>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar((current) => ({ ...current, open: false }))}>
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
       <Footer />
     </>
   );
