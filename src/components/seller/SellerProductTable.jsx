@@ -9,13 +9,16 @@ import {
   TableHead,
   TableRow,
   Typography,
+  IconButton,
 } from "@mui/material";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import SellerDataState from "./SellerDataState";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
-const SellerProductTable = ({ products = [] }) => {
+const SellerProductTable = ({ products = [], onEdit, onDelete }) => {
   if (!products.length) {
     return <SellerDataState title="No products listed" message="Create products through the seller API to populate inventory." />;
   }
@@ -30,6 +33,7 @@ const SellerProductTable = ({ products = [] }) => {
             <TableCell>Stock</TableCell>
             <TableCell>Price</TableCell>
             <TableCell>Status</TableCell>
+            {(onEdit || onDelete) && <TableCell align="right">Actions</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -62,6 +66,20 @@ const SellerProductTable = ({ products = [] }) => {
               <TableCell>
                 <Chip size="small" label={product.status} color={product.status === "active" ? "success" : "default"} />
               </TableCell>
+              {(onEdit || onDelete) && (
+                <TableCell align="right">
+                  {onEdit && (
+                    <IconButton size="small" onClick={() => onEdit(product)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  {onDelete && (
+                    <IconButton size="small" color="error" onClick={() => onDelete(product)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

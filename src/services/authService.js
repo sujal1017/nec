@@ -2,6 +2,25 @@ import api from "./api";
 
 const AUTH_STORAGE_KEY = "auth";
 
+const decodeJwtPayload = (token) => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
+    return JSON.parse(window.atob(padded));
+  } catch {
+    return null;
+  }
+};
+
+export const isValidAccessToken = (token) => {
+  const payload = decodeJwtPayload(token || "");
+  if (!payload || payload.token_type !== "access") return false;
+  if (payload.exp && payload.exp * 1000 <= Date.now()) return false;
+  return true;
+};
+
 const normalizeUserType = (value) => {
   const type = String(value || "").toLowerCase();
   if (["business", "seller"].includes(type)) return "business";
@@ -27,6 +46,10 @@ const buildUser = (data, fallbackEmail = "") => {
 };
 
 export const persistAuth = (authData, remember = true) => {
+  if (!isValidAccessToken(authData?.token)) {
+    throw new Error("Invalid access token received from the authentication server.");
+  }
+
   const storage = remember ? localStorage : sessionStorage;
 
   storage.setItem("token", authData.token);
@@ -52,14 +75,24 @@ export const readStoredAuth = () => {
 
   if (raw) {
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (!isValidAccessToken(parsed?.token)) {
+        clearStoredAuth();
+        return null;
+      }
+      return parsed;
     } catch {
+      clearStoredAuth();
       return null;
     }
   }
 
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
   if (!token) return null;
+  if (!isValidAccessToken(token)) {
+    clearStoredAuth();
+    return null;
+  }
 
   const userType =
     localStorage.getItem("userType") ||

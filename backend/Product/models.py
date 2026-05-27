@@ -7,9 +7,13 @@ from django.core.exceptions import ValidationError
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=120, blank=True, db_index=True)
+    image = models.FileField(upload_to="categories/", blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.name = self.name.lower()
+        if not self.slug:
+            self.slug = slugify(self.name)[:120] or "category"
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -101,6 +105,7 @@ class Product(models.Model):
     )
     sku = models.CharField(max_length=80, blank=True, db_index=True)
     image = models.URLField(blank=True, null=True)
+    thumbnail = models.FileField(upload_to="products/thumbnails/", blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE, db_index=True)
     is_featured = models.BooleanField(default=False)
     options = models.ManyToManyField(OptionValue, default=dict, blank=True)
@@ -133,7 +138,8 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.URLField()
+    image = models.FileField(upload_to="products/", blank=True, null=True)
+    image_url = models.URLField(blank=True, null=True)
     is_main = models.BooleanField(default=False)
     option = models.ForeignKey(OptionValue, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -177,6 +183,11 @@ class FAQ(models.Model):
 
     
 class Banner(models.Model):
-    image = models.URLField()
+    image = models.FileField(upload_to="banners/", blank=True, null=True)
+    image_url = models.URLField(blank=True, null=True)
     alt = models.CharField(max_length=100)
+    title = models.CharField(max_length=160, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    cta_label = models.CharField(max_length=80, blank=True)
+    cta_url = models.CharField(max_length=160, blank=True)
     

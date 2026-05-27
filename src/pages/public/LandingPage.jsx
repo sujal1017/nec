@@ -19,6 +19,7 @@ import SellerCTA from "../../components/landing/SellerCTA";
 import SellerQuickActions from "../../components/landing/SellerQuickActions";
 import TrendingProducts from "../../components/landing/TrendingProducts";
 import TrustSection from "../../components/landing/TrustSection";
+import ProductRail from "../../components/landing/ProductRail";
 import { useAuth } from "../../context/AuthContext";
 import { getLandingContent } from "../../services/landingService";
 
@@ -32,6 +33,7 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
     featuredProducts: [],
     trendingProducts: [],
     recommendedProducts: [],
+    deals: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -140,6 +142,14 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
           <TrendingProducts
             products={content.trendingProducts}
             loading={loading}
+          />
+
+          <ProductRail
+            title="Deals & Offers"
+            subtitle="Limited-time discounts from marketplace sellers."
+            products={content.deals}
+            loading={loading}
+            limit={8}
           />
 
           <SellerCTA mode={mode} onNavigate={navigate} />

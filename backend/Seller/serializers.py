@@ -9,7 +9,39 @@ from Product.models import Brand, Category, Product, ProductImage, Seller as Leg
 from .models import SellerProfile
 
 
+ALLOWED_IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def validate_uploaded_image(file_obj):
+    if not file_obj:
+        return file_obj
+    name = file_obj.name.lower()
+    if not name.endswith(ALLOWED_IMAGE_EXTENSIONS):
+        raise serializers.ValidationError("Upload a JPG, PNG, or WEBP image.")
+    if getattr(file_obj, "size", 0) > 5 * 1024 * 1024:
+        raise serializers.ValidationError("Image size must be 5MB or smaller.")
+    content_type = getattr(file_obj, "content_type", "")
+    if content_type and not content_type.startswith("image/"):
+        raise serializers.ValidationError("Uploaded file must be an image.")
+    return file_obj
+
+
+def media_or_legacy_url(file_field, request=None):
+    if not file_field:
+        return None
+    name = str(getattr(file_field, "name", "") or "")
+    if name.startswith(("http://", "https://")):
+        return name
+    try:
+        url = file_field.url
+    except ValueError:
+        return None
+    return request.build_absolute_uri(url) if request else url
+
+
 class SellerProfileSerializer(serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
+
     class Meta:
         model = SellerProfile
         fields = [
@@ -20,23 +52,44 @@ class SellerProfileSerializer(serializers.ModelSerializer):
             "business_address",
             "gst_number",
             "profile_image",
+            "logo",
+            "logo_url",
             "created_at",
         ]
-        read_only_fields = ("id", "created_at")
+        read_only_fields = ("id", "logo_url", "created_at")
+
+    def validate_logo(self, value):
+        return validate_uploaded_image(value)
+
+    def get_logo_url(self, obj):
+        request = self.context.get("request")
+        return media_or_legacy_url(obj.logo, request) or obj.profile_image
 
 
 class SellerProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ["id", "image", "is_main"]
         read_only_fields = ("id",)
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        return media_or_legacy_url(obj.image, request) or obj.image_url
 
 
 class SellerProductSerializer(serializers.ModelSerializer):
     category = serializers.CharField()
     brand = serializers.CharField(required=False, allow_blank=True)
     stock_quantity = serializers.IntegerField(source="stock", min_value=0)
-    images = SellerProductImageSerializer(many=True, required=False)
+    images = SellerProductImageSerializer(many=True, read_only=True)
+    thumbnail = serializers.FileField(required=False, allow_null=True)
+    uploaded_images = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True,
+    )
 
     class Meta:
         model = Product
@@ -52,9 +105,11 @@ class SellerProductSerializer(serializers.ModelSerializer):
             "stock_quantity",
             "sku",
             "image",
+            "thumbnail",
             "status",
             "is_featured",
             "images",
+            "uploaded_images",
             "created_at",
         ]
         read_only_fields = ("id", "slug", "created_at")
@@ -65,6 +120,12 @@ class SellerProductSerializer(serializers.ModelSerializer):
         if discount_price is not None and price is not None and discount_price >= price:
             raise serializers.ValidationError({"discount_price": "Discount price must be lower than price."})
         return attrs
+
+    def validate_thumbnail(self, value):
+        return validate_uploaded_image(value)
+
+    def validate_uploaded_images(self, value):
+        return [validate_uploaded_image(file_obj) for file_obj in value]
 
     def _category(self, name):
         category, _ = Category.objects.get_or_create(name=str(name).strip().lower())
@@ -92,17 +153,17 @@ class SellerProductSerializer(serializers.ModelSerializer):
         if images is None:
             return
         product.images.all().delete()
-        for index, image_data in enumerate(images):
+        for index, image_file in enumerate(images):
             ProductImage.objects.create(
                 product=product,
-                image=image_data["image"],
-                is_main=image_data.get("is_main", index == 0),
+                image=image_file,
+                is_main=index == 0,
             )
 
     @transaction.atomic
     def create(self, validated_data):
         seller_profile = self.context["seller_profile"]
-        images = validated_data.pop("images", [])
+        images = validated_data.pop("uploaded_images", [])
         category = self._category(validated_data.pop("category"))
         brand = self._brand(validated_data.pop("brand", "generic"))
         product = Product.objects.create(
@@ -118,7 +179,7 @@ class SellerProductSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        images = validated_data.pop("images", None)
+        images = validated_data.pop("uploaded_images", None)
         if "category" in validated_data:
             instance.category = self._category(validated_data.pop("category"))
         if "brand" in validated_data:
@@ -136,7 +197,14 @@ class SellerProductSerializer(serializers.ModelSerializer):
         data["brand"] = instance.brand.name if instance.brand else ""
         if not data.get("image"):
             main_image = instance.images.filter(is_main=True).first() or instance.images.first()
-            data["image"] = main_image.image if main_image else None
+            request = self.context.get("request")
+            thumbnail = media_or_legacy_url(instance.thumbnail, request)
+            if thumbnail:
+                data["image"] = thumbnail
+            elif main_image and main_image.image:
+                data["image"] = media_or_legacy_url(main_image.image, request)
+            elif main_image:
+                data["image"] = main_image.image_url
         return data
 
 

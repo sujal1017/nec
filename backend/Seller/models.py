@@ -14,6 +14,7 @@ class SellerProfile(models.Model):
     business_address = models.TextField(blank=True)
     gst_number = models.CharField(max_length=30, blank=True)
     profile_image = models.URLField(blank=True, null=True)
+    logo = models.FileField(upload_to="sellers/logos/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -1,6 +1,7 @@
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.db.models.functions import Coalesce
 from rest_framework import generics, status
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,7 +12,7 @@ from Product.models import Product
 from .models import SellerProfile
 from .pagination import SellerPageNumberPagination
 from .permissions import IsBusinessSeller
-from .serializers import SellerOrderSerializer, SellerProductSerializer
+from .serializers import SellerOrderSerializer, SellerProductSerializer, SellerProfileSerializer
 
 
 def get_seller_profile(user):
@@ -81,6 +82,7 @@ class SellerProductListCreateView(generics.ListCreateAPIView):
     serializer_class = SellerProductSerializer
     permission_classes = [IsBusinessSeller]
     pagination_class = SellerPageNumberPagination
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         seller_profile = get_seller_profile(self.request.user)
@@ -109,6 +111,7 @@ class SellerProductListCreateView(generics.ListCreateAPIView):
 class SellerProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SellerProductSerializer
     permission_classes = [IsBusinessSeller]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         seller_profile = get_seller_profile(self.request.user)
@@ -137,4 +140,18 @@ class SellerOrderListView(generics.ListAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["seller_profile"] = get_seller_profile(self.request.user)
+        return context
+
+
+class SellerProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = SellerProfileSerializer
+    permission_classes = [IsBusinessSeller]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_object(self):
+        return get_seller_profile(self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
         return context

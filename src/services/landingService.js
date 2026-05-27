@@ -12,55 +12,35 @@ const normalizeProduct = (product) => ({
   ...product,
   image: normalizeImageUrl(product.image),
   price: Number(product.price || 0),
+  discount_price: product.discount_price ? Number(product.discount_price) : null,
   rating: Number(product.rating || 0),
 });
 
 export const getLandingContent = async () => {
   if (landingContentCache) return landingContentCache;
 
-  const [bannersResult, productsResult] = await Promise.allSettled([
-    api.get("/banners/"),
-    api.get("/products/", { params: { in_stock: true } }),
-  ]);
+  const landingResult = await api.get("/api/landing/");
+  const data = landingResult.data || {};
 
-  const banners =
-    bannersResult.status === "fulfilled"
-      ? bannersResult.value.data?.banners || bannersResult.value.data || []
-      : [];
-  const products =
-    productsResult.status === "fulfilled"
-      ? productsResult.value.data?.results || productsResult.value.data || []
-      : [];
-
-  const normalizedProducts = products.map(normalizeProduct);
-
-  const categories = Array.from(
-    normalizedProducts.reduce((map, product) => {
-      if (!product.category) return map;
-      const key = product.category.toLowerCase();
-      if (!map.has(key)) {
-        map.set(key, {
-          name: product.category,
-          image: normalizeImageUrl(product.image),
-        });
-      }
-      return map;
-    }, new Map()).values()
-  );
+  const normalizeList = (items) => (items || []).map(normalizeProduct);
 
   landingContentCache = {
-    banners: banners.map((banner) => ({
+    banners: (data.banners || []).map((banner) => ({
       id: banner.id || banner.image,
       title: banner.title || banner.alt || "Shop new arrivals",
       description: banner.description || "Discover fresh finds from trusted sellers.",
       image: normalizeImageUrl(banner.image),
+      ctaLabel: banner.cta_label,
+      ctaUrl: banner.cta_url,
     })),
-    categories,
-    featuredProducts: normalizedProducts.slice(0, 8),
-    trendingProducts: [...normalizedProducts]
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 8),
-    recommendedProducts: normalizedProducts.slice(4, 12),
+    categories: (data.categories || []).map((category) => ({
+      ...category,
+      image: normalizeImageUrl(category.image),
+    })),
+    featuredProducts: normalizeList(data.featuredProducts),
+    trendingProducts: normalizeList(data.trendingProducts),
+    recommendedProducts: normalizeList(data.recommendedProducts),
+    deals: normalizeList(data.deals),
   };
 
   return landingContentCache;

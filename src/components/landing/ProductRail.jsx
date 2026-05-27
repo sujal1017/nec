@@ -13,6 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 
+const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+
 const ProductRail = ({ title, subtitle, products = [], loading, limit = 8 }) => {
   const navigate = useNavigate();
   const items = loading ? Array.from({ length: limit }) : products.slice(0, limit);
@@ -53,12 +55,14 @@ const ProductRail = ({ title, subtitle, products = [], loading, limit = 8 }) => 
                   },
                 }}
               >
-                <Chip
-                  size="small"
-                  label={product.discount ? `${product.discount}% off` : "Deal"}
-                  color="error"
-                  sx={{ position: "absolute", top: 8, left: 8, zIndex: 1, fontWeight: 800 }}
-                />
+                {product.discount_price ? (
+                  <Chip
+                    size="small"
+                    label="Offer"
+                    color="error"
+                    sx={{ position: "absolute", top: 8, left: 8, zIndex: 1, fontWeight: 800 }}
+                  />
+                ) : null}
                 <CardMedia
                   component="img"
                   image={product.image || "/images/headphones.jpg"}
@@ -80,8 +84,13 @@ const ProductRail = ({ title, subtitle, products = [], loading, limit = 8 }) => 
                     </Typography>
                   </Box>
                   <Typography variant="h6" sx={{ mt: 0.5, fontWeight: 900 }}>
-                    ${product.price}
+                    {currency.format(Number(product.discount_price || product.price || 0))}
                   </Typography>
+                  {product.discount_price ? (
+                    <Typography variant="caption" color="text.secondary" sx={{ textDecoration: "line-through" }}>
+                      {currency.format(Number(product.price || 0))}
+                    </Typography>
+                  ) : null}
                 </CardContent>
               </Card>
             )}
