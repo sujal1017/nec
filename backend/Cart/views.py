@@ -1,11 +1,23 @@
 # views.py
 from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
 from WishList.models import Wishlist, WishlistItem
+from Product.models import Product
+
+
+def get_default_cart(user):
+    cart, _ = Cart.objects.get_or_create(user=user, name="Default")
+    return cart
+
+
+def serialize_user_carts(user):
+    carts = Cart.objects.filter(user=user).prefetch_related("items").order_by("created_at")
+    return {"carts": CartSerializer(carts, many=True).data}
 
 
 class CartViewSet(viewsets.ViewSet):
@@ -159,3 +171,82 @@ class MoveAllToCartViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def api_cart_list(request):
+    return Response(serialize_user_carts(request.user), status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_cart_add(request):
+    product_id = request.data.get("product_id") or request.data.get("id")
+    quantity = int(request.data.get("quantity", 1) or 1)
+    selected_options = request.data.get("selectedOptions") or request.data.get("selected_options") or {}
+    cart_id = request.data.get("cart_id")
+
+    if quantity <= 0:
+        return Response({"detail": "Quantity must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+
+    product = get_object_or_404(Product.objects.select_related("category", "brand"), id=product_id)
+    if product.stock < quantity:
+        return Response({"detail": "Requested quantity is not available."}, status=status.HTTP_400_BAD_REQUEST)
+
+    cart = get_object_or_404(Cart, id=cart_id, user=request.user) if cart_id else get_default_cart(request.user)
+    main_image = product.thumbnail.url if product.thumbnail else product.image
+    if not main_image:
+        image_obj = product.images.filter(is_main=True).first() or product.images.first()
+        if image_obj:
+            main_image = image_obj.image.url if image_obj.image else image_obj.image_url
+
+    item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product_id=product.id,
+        defaults={
+            "name": product.name,
+            "price": product.discount_price or product.price,
+            "quantity": quantity,
+            "image": main_image or "",
+            "selected_options": selected_options,
+        },
+    )
+    if not created:
+        item.quantity = min(product.stock, item.quantity + quantity)
+        item.price = product.discount_price or product.price
+        item.selected_options = selected_options or item.selected_options
+        item.save()
+
+    return Response({"message": "Product added to cart.", **serialize_user_carts(request.user)}, status=status.HTTP_200_OK)
+
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def api_cart_update(request):
+    item_id = request.data.get("item_id")
+    product_id = request.data.get("product_id")
+    quantity = int(request.data.get("quantity", 1) or 1)
+    if quantity <= 0:
+        return Response({"detail": "Quantity must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+
+    items = CartItem.objects.filter(cart__user=request.user)
+    item = get_object_or_404(items, id=item_id) if item_id else get_object_or_404(items, product_id=product_id)
+    product = Product.objects.filter(id=item.product_id).first()
+    item.quantity = min(quantity, product.stock if product else quantity)
+    item.save()
+    return Response({"message": "Cart updated.", **serialize_user_carts(request.user)}, status=status.HTTP_200_OK)
+
+
+@api_view(["DELETE", "POST"])
+@permission_classes([IsAuthenticated])
+def api_cart_remove(request):
+    item_id = request.data.get("item_id")
+    product_id = request.data.get("product_id")
+    cart_id = request.data.get("cart_id")
+    items = CartItem.objects.filter(cart__user=request.user)
+    if cart_id:
+        items = items.filter(cart_id=cart_id)
+    item = get_object_or_404(items, id=item_id) if item_id else get_object_or_404(items, product_id=product_id)
+    item.delete()
+    return Response({"message": "Item removed.", **serialize_user_carts(request.user)}, status=status.HTTP_200_OK)

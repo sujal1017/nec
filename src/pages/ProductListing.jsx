@@ -19,6 +19,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { BaseUrl } from "../config";
+import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
 const DEFAULT_LIMIT = 20;
 const MAX_PRICE = 200000;
@@ -31,6 +32,7 @@ const INITIAL_FILTERS = {
 	maxPrice: MAX_PRICE,
 	rating: 0,
 	availability: null,
+	search: "",
 	color: [],
 	storage: [],
 	size: [],
@@ -150,10 +152,15 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (inStock === 'true') {
 			filters.availability = true;
 		}
+
+		const search = params.get('search');
+		if (search) {
+			filters.search = search;
+		}
 		
 		// Parse dynamic options
 		params.forEach((value, key) => {
-			if (!['category', 'brands', 'minPrice', 'maxPrice', 'rating', 'inStock'].includes(key)) {
+			if (!['category', 'brands', 'minPrice', 'maxPrice', 'rating', 'inStock', 'search'].includes(key)) {
 				filters[key] = value.split(',').filter(Boolean);
 			}
 		});
@@ -245,6 +252,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (body.rating && typeof body.rating === "number")
 			params.rating = body.rating;
 		if (body.availability === true) params.in_stock = "true";
+		if (body.search) params.search = body.search;
 
 		// dynamic option_* params for any array keys not in base filter keys
 		const baseKeys = new Set([
@@ -254,6 +262,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			"maxPrice",
 			"rating",
 			"availability",
+			"search",
 			"offset",
 			"limit",
 		]);
@@ -423,7 +432,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const applyFilters = async () => {
 		// set pagination back to 0
 		setOffset(0);
-		const body = {
+			const body = {
 			offset: 0,
 			limit,
 			categories: filters.categories,
@@ -432,6 +441,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			maxPrice: filters.maxPrice,
 			rating: filters.rating,
 			availability: filters.availability,
+			search: filters.search,
 			color: filters.color,
 			storage: filters.storage,
 			size: filters.size,
@@ -1178,13 +1188,10 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 														: "border-gray-200 bg-white text-gray-900 hover:border-gray-300"
 												}`}
 											>
-											<img
-													src={
-														product.image.startsWith('https') 
-															? product.image 
-															: `${API_BASE_URL}${product.image}`
-													}
+									<img
+													src={resolveImageUrl(product.image)}
 													alt={product.name || 'Product'}
+												onError={handleImageFallback}
 												className={`w-full aspect-[4/3] object-cover object-center block ${
 														isDarkMode ? "bg-gray-900" : "bg-gray-100"
 													}`}
