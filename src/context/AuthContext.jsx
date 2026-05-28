@@ -12,6 +12,7 @@ import {
   login as loginRequest,
   readStoredAuth,
 } from "../services/authService";
+import { addToCart } from "../services/commerceService";
 
 const AuthContext = createContext(null);
 
@@ -35,6 +36,29 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (credentials) => {
     const authData = await loginRequest(credentials);
     setAuth(authData);
+
+    try {
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
+      if (guestCart.length > 0) {
+        localStorage.setItem("token", authData.token);
+        for (const item of guestCart) {
+          await addToCart({
+            productId: item.product_id,
+            quantity: item.quantity,
+            selectedOptions: item.selected_options || {},
+            name: item.name,
+            price: item.price,
+            image: item.image,
+            is_live: item.product_id >= 100000000
+          });
+        }
+        localStorage.removeItem("guest_cart");
+        window.dispatchEvent(new Event("storage"));
+      }
+    } catch (err) {
+      console.error("Failed to merge guest cart during login:", err);
+    }
+
     return authData;
   }, []);
 

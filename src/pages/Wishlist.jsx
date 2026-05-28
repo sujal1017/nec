@@ -14,12 +14,12 @@ import {
   DialogActions,
   Select,
   MenuItem,
-  Grid,
   Paper,
   Snackbar,
   Alert,
   CircularProgress,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useTheme } from "@mui/material/styles";
@@ -595,7 +595,7 @@ const Wishlist = ({ darkMode, setDarkMode }) => {
               <Grid container spacing={2}>
                 {wishlist.items && wishlist.items.length > 0 ? (
                   wishlist.items.map((product) => (
-                    <Grid item xs={12} sm={6} md={4} key={product.id}>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.id}>
                       <Paper sx={{ p: 2, width: "100%", display: "flex", alignItems: "center", gap: 2 }}>
                         <img
                           src={product.image || "/fallback-image.jpg"}

@@ -190,33 +190,56 @@ def api_cart_add(request):
     if quantity <= 0:
         return Response({"detail": "Quantity must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
 
-    product = get_object_or_404(Product.objects.select_related("category", "brand"), id=product_id)
-    if product.stock < quantity:
-        return Response({"detail": "Requested quantity is not available."}, status=status.HTTP_400_BAD_REQUEST)
-
+    product = Product.objects.filter(id=product_id).select_related("category", "brand").first()
     cart = get_object_or_404(Cart, id=cart_id, user=request.user) if cart_id else get_default_cart(request.user)
-    main_image = product.thumbnail.url if product.thumbnail else product.image
-    if not main_image:
-        image_obj = product.images.filter(is_main=True).first() or product.images.first()
-        if image_obj:
-            main_image = image_obj.image.url if image_obj.image else image_obj.image_url
 
-    item, created = CartItem.objects.get_or_create(
-        cart=cart,
-        product_id=product.id,
-        defaults={
-            "name": product.name,
-            "price": product.discount_price or product.price,
-            "quantity": quantity,
-            "image": main_image or "",
-            "selected_options": selected_options,
-        },
-    )
-    if not created:
-        item.quantity = min(product.stock, item.quantity + quantity)
-        item.price = product.discount_price or product.price
-        item.selected_options = selected_options or item.selected_options
-        item.save()
+    if not product or product_id >= 100000000:
+        name = request.data.get("name") or "Live Product"
+        price = request.data.get("price") or 0.0
+        image = request.data.get("image") or ""
+        
+        item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product_id=product_id,
+            defaults={
+                "name": name,
+                "price": price,
+                "quantity": quantity,
+                "image": image,
+                "selected_options": selected_options,
+            },
+        )
+        if not created:
+            item.quantity += quantity
+            item.price = price
+            item.selected_options = selected_options or item.selected_options
+            item.save()
+    else:
+        if product.stock < quantity:
+            return Response({"detail": "Requested quantity is not available."}, status=status.HTTP_400_BAD_REQUEST)
+
+        main_image = product.thumbnail.url if product.thumbnail else product.image
+        if not main_image:
+            image_obj = product.images.filter(is_main=True).first() or product.images.first()
+            if image_obj:
+                main_image = image_obj.image.url if image_obj.image else image_obj.image_url
+
+        item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product_id=product.id,
+            defaults={
+                "name": product.name,
+                "price": product.discount_price or product.price,
+                "quantity": quantity,
+                "image": main_image or "",
+                "selected_options": selected_options,
+            },
+        )
+        if not created:
+            item.quantity = min(product.stock, item.quantity + quantity)
+            item.price = product.discount_price or product.price
+            item.selected_options = selected_options or item.selected_options
+            item.save()
 
     return Response({"message": "Product added to cart.", **serialize_user_carts(request.user)}, status=status.HTTP_200_OK)
 

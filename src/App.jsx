@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { lightTheme, darkTheme } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
+import { CompareProvider } from "./context/CompareContext";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import LoadingFallback from "./components/shared/LoadingFallback";
 
@@ -25,11 +26,19 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
 
 const getInitialDarkMode = () => {
   const stored = localStorage.getItem("darkMode");
-  if (stored !== null) return stored === "true";
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  if (stored !== null) {
+    return stored === "true";
+  }
+
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
 };
 
 const App = () => {
@@ -45,50 +54,170 @@ const App = () => {
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
+
       <AuthProvider>
-        <Router>
-          <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-            <Box sx={{ flexGrow: 1 }}>
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  <Route path="/" element={<LandingPage {...pageProps} />} />
-                  <Route path="/signin" element={<Login />} />
-                  <Route path="/login" element={<Navigate to="/signin" replace />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/verifyEmail" element={<VerifyEmail />} />
-                  <Route path="/email-verification" element={<EmailVerification />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/help" element={<Help />} />
+        <CompareProvider>
+          <Router>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100vh",
+              }}
+            >
+              <Box sx={{ flexGrow: 1 }}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route
+                      path="/"
+                      element={<LandingPage {...pageProps} />}
+                    />
 
-                  <Route path="/products" element={<ProductListing {...pageProps} />} />
-                  <Route path="/product/:id" element={<ProductDetail {...pageProps} />} />
-                  <Route path="/products/:id" element={<ProductDetail {...pageProps} />} />
+                    <Route
+                      path="/cart"
+                      element={<Cart {...pageProps} />}
+                    />
 
-                  <Route element={<ProtectedRoute allowedRoles={["personal", "business"]} />}>
-                    <Route path="/cart" element={<Cart {...pageProps} />} />
-                    <Route path="/profile" element={<Profile {...pageProps} />} />
-                    <Route path="/profile/carts" element={<Profile {...pageProps} />} />
-                    <Route path="/profile/wishlists" element={<Profile {...pageProps} />} />
-                    <Route path="/profile/bids" element={<Bids />} />
-                    <Route path="/profile/settings" element={<Profile {...pageProps} />} />
-                    <Route path="/wishlist" element={<Wishlist {...pageProps} />} />
-                    <Route path="/orders" element={<OrdersPage {...pageProps} />} />
-                    <Route path="/order-success" element={<OrderSuccess {...pageProps} />} />
-                    <Route path="/checkout" element={<Checkout {...pageProps} />} />
-                    <Route path="/payment" element={<PaymentGateway {...pageProps} />} />
-                  </Route>
+                    <Route path="/signin" element={<Login />} />
 
-                  <Route element={<ProtectedRoute allowedRoles={["business"]} />}>
-                    <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                    <Route path="/main" element={<Navigate to="/seller/dashboard" replace />} />
-                  </Route>
+                    <Route
+                      path="/login"
+                      element={<Navigate to="/signin" replace />}
+                    />
 
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </Suspense>
+                    <Route path="/register" element={<Register />} />
+
+                    <Route
+                      path="/verifyEmail"
+                      element={<VerifyEmail />}
+                    />
+
+                    <Route
+                      path="/email-verification"
+                      element={<EmailVerification />}
+                    />
+
+                    <Route
+                      path="/reset-password"
+                      element={<ResetPassword />}
+                    />
+
+                    <Route path="/help" element={<Help />} />
+
+                    {/* Product Routes */}
+                    <Route
+                      path="/products"
+                      element={<ProductListing {...pageProps} />}
+                    />
+
+                    <Route
+                      path="/product/:id"
+                      element={<ProductDetail {...pageProps} />}
+                    />
+
+                    <Route
+                      path="/products/:id"
+                      element={<ProductDetail {...pageProps} />}
+                    />
+
+                    <Route
+                      path="/compare"
+                      element={<ComparePage {...pageProps} />}
+                    />
+
+                    {/* Protected User Routes */}
+                    <Route
+                      element={
+                        <ProtectedRoute
+                          allowedRoles={["personal", "business"]}
+                        />
+                      }
+                    >
+                      <Route
+                        path="/profile"
+                        element={<Profile {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/profile/carts"
+                        element={<Profile {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/profile/wishlists"
+                        element={<Profile {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/profile/bids"
+                        element={<Bids />}
+                      />
+
+                      <Route
+                        path="/profile/settings"
+                        element={<Profile {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/wishlist"
+                        element={<Wishlist {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/orders"
+                        element={<OrdersPage {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/order-success"
+                        element={<OrderSuccess {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/checkout"
+                        element={<Checkout {...pageProps} />}
+                      />
+
+                      <Route
+                        path="/payment"
+                        element={<PaymentGateway {...pageProps} />}
+                      />
+                    </Route>
+
+                    {/* Seller Routes */}
+                    <Route
+                      element={
+                        <ProtectedRoute allowedRoles={["business"]} />
+                      }
+                    >
+                      <Route
+                        path="/seller/dashboard"
+                        element={<SellerDashboard />}
+                      />
+
+                      <Route
+                        path="/main"
+                        element={
+                          <Navigate
+                            to="/seller/dashboard"
+                            replace
+                          />
+                        }
+                      />
+                    </Route>
+
+                    {/* 404 Route */}
+                    <Route
+                      path="*"
+                      element={<NotFoundPage />}
+                    />
+                  </Routes>
+                </Suspense>
+              </Box>
             </Box>
-          </Box>
-        </Router>
+          </Router>
+        </CompareProvider>
       </AuthProvider>
     </ThemeProvider>
   );

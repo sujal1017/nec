@@ -19,6 +19,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { BaseUrl } from "../config";
+import CompareButton from "../components/product/CompareButton";
+import ProductMiniRail from "../components/product/ProductMiniRail";
+import { fetchTrendingSearches } from "../services/searchService";
 import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
 const DEFAULT_LIMIT = 20;
@@ -32,6 +35,8 @@ const INITIAL_FILTERS = {
 	maxPrice: MAX_PRICE,
 	rating: 0,
 	availability: null,
+	condition: [],
+	location: [],
 	search: "",
 	color: [],
 	storage: [],
@@ -86,10 +91,13 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (filters.availability === true) {
 			queryParts.push(`inStock=true`);
 		}
+		if (filters.search) {
+			queryParts.push(`search=${encodeURIComponent(filters.search)}`);
+		}
 		
 		// Add dynamic options
 		Object.entries(filters).forEach(([key, value]) => {
-			if (['categories', 'brands', 'minPrice', 'maxPrice', 'rating', 'availability'].includes(key)) {
+			if (['categories', 'brands', 'minPrice', 'maxPrice', 'rating', 'availability', 'search'].includes(key)) {
 				return; // Skip already handled
 			}
 			if (Array.isArray(value) && value.length > 0) {
@@ -152,11 +160,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (inStock === 'true') {
 			filters.availability = true;
 		}
-
-		const search = params.get('search');
-		if (search) {
-			filters.search = search;
-		}
+		filters.search = params.get('search') || "";
 		
 		// Parse dynamic options
 		params.forEach((value, key) => {
@@ -173,6 +177,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const [loading, setLoading] = useState(true); // Start with loading true
 	const [error, setError] = useState(null);
 	const [hasInitialLoad, setHasInitialLoad] = useState(false);
+	const [trendingTerms, setTrendingTerms] = useState([]);
 
 	// pagination
 	const [offset, setOffset] = useState(0);
@@ -185,6 +190,8 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const [options, setOptions] = useState({
 		categories: [],
 		brands: [],
+		locations: [],
+		conditions: [],
 		dynamic: {}, // { optionName: [values] }
 	});
 
@@ -198,11 +205,15 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const deriveOptions = useCallback((items = []) => {
 		const categoriesSet = new Set();
 		const brandsSet = new Set();
+		const locationsSet = new Set();
+		const conditionsSet = new Set();
 		const dynamicSets = {}; // { key: Set(values) }
 
 		items.forEach((p) => {
 			if (p && p.category) categoriesSet.add(p.category);
 			if (p && p.brand) brandsSet.add(p.brand);
+			if (p && p.location) locationsSet.add(p.location);
+			if (p && p.condition) conditionsSet.add(p.condition);
 			if (p && p.options && typeof p.options === "object") {
 				Object.entries(p.options).forEach(([key, vals]) => {
 					if (!Array.isArray(vals)) return;
@@ -219,6 +230,10 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 
 			const mergedBrands = new Set(prev.brands ?? []);
 			Array.from(brandsSet).forEach((b) => mergedBrands.add(b));
+			const mergedLocations = new Set(prev.locations ?? []);
+			Array.from(locationsSet).forEach((value) => mergedLocations.add(value));
+			const mergedConditions = new Set(prev.conditions ?? []);
+			Array.from(conditionsSet).forEach((value) => mergedConditions.add(value));
 
 			const mergedDynamic = { ...(prev.dynamic || {}) };
 			Object.entries(dynamicSets).forEach(([k, setVals]) => {
@@ -230,6 +245,8 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			return {
 				categories: Array.from(mergedCategories).sort(),
 				brands: Array.from(mergedBrands).sort(),
+				locations: Array.from(mergedLocations).sort(),
+				conditions: Array.from(mergedConditions).sort(),
 				dynamic: mergedDynamic,
 			};
 		});
@@ -252,7 +269,14 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (body.rating && typeof body.rating === "number")
 			params.rating = body.rating;
 		if (body.availability === true) params.in_stock = "true";
-		if (body.search) params.search = body.search;
+		if (Array.isArray(body.condition) && body.condition.length)
+			params.condition = body.condition.join(",");
+		if (Array.isArray(body.location) && body.location.length)
+			params.location = body.location.join(",");
+		if (body.search) {
+			params.search = body.search;
+			params.smart = "true";
+		}
 
 		// dynamic option_* params for any array keys not in base filter keys
 		const baseKeys = new Set([
@@ -262,6 +286,8 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			"maxPrice",
 			"rating",
 			"availability",
+			"condition",
+			"location",
 			"search",
 			"offset",
 			"limit",
@@ -342,6 +368,22 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	};
 
 	// ---------- Initial: load filter options & initial fetch ----------
+	useEffect(() => {
+		fetchTrendingSearches().then(setTrendingTerms).catch(() => setTrendingTerms([]));
+	}, []);
+
+	useEffect(() => {
+		if (!hasInitialLoad) return;
+		const timer = window.setTimeout(() => {
+			setOffset(0);
+			setAppliedFilters(filters);
+			updateURL(filters);
+			performFilterRequest({ ...filters, offset: 0, limit }, false);
+		}, 300);
+		return () => window.clearTimeout(timer);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filters]);
+
 	useEffect(() => {
 		const initializeData = async () => {
 			let normalizedCategory = null;
@@ -441,6 +483,8 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			maxPrice: filters.maxPrice,
 			rating: filters.rating,
 			availability: filters.availability,
+			condition: filters.condition,
+			location: filters.location,
 			search: filters.search,
 			color: filters.color,
 			storage: filters.storage,
@@ -812,6 +856,40 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 						</Stack>
 					</Box>
 
+					{options.conditions.length > 0 && (
+						<Box sx={{ mb: 2.5 }}>
+							<Typography sx={{ fontWeight: 600, fontSize: "16px", mb: 1, color: isDarkMode ? "grey.100" : "text.primary" }}>
+								Product Condition
+							</Typography>
+							<Stack spacing={0.5} sx={{ mt: 1 }}>
+								{options.conditions.map((value) => (
+									<FormControlLabel
+										key={value}
+										control={<Checkbox checked={filters.condition.includes(value)} onChange={() => toggleArrayFilter("condition", value)} />}
+										label={toTitleCase(value)}
+									/>
+								))}
+							</Stack>
+						</Box>
+					)}
+
+					{options.locations.length > 0 && (
+						<Box sx={{ mb: 2.5 }}>
+							<Typography sx={{ fontWeight: 600, fontSize: "16px", mb: 1, color: isDarkMode ? "grey.100" : "text.primary" }}>
+								Location
+							</Typography>
+							<Stack spacing={0.5} sx={{ mt: 1 }}>
+								{options.locations.map((value) => (
+									<FormControlLabel
+										key={value}
+										control={<Checkbox checked={filters.location.includes(value)} onChange={() => toggleArrayFilter("location", value)} />}
+										label={toTitleCase(value)}
+									/>
+								))}
+							</Stack>
+						</Box>
+					)}
+
 					{/* Availability */}
 					<Box
 						sx={{
@@ -1152,7 +1230,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 											color: isDarkMode ? "grey.100" : "text.primary",
 										}}
 									>
-										No products found
+										No matching products yet
 									</Typography>
 									<Typography
 										sx={{
@@ -1160,8 +1238,13 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 											color: isDarkMode ? "grey.400" : "grey.600",
 										}}
 									>
-										Try changing filters or clear them.
+										Try a related search, trending term, or clear filters.
 									</Typography>
+									<ProductMiniRail
+										title="Trending Searches"
+										products={[]}
+										emptyText={trendingTerms.length ? trendingTerms.join(" • ") : "Popular products are loading."}
+									/>
 								</Box>
 							) : (
 								<Box>
@@ -1267,6 +1350,9 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 														>
 															{product.in_stock ? "In Stock" : "Out of Stock"}
 														</span>
+													</div>
+													<div className="mt-3">
+														<CompareButton productId={product.id} />
 													</div>
 												</div>
 											</Link>

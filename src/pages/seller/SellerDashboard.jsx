@@ -8,7 +8,6 @@ import {
   CardContent,
   Container,
   Divider,
-  Grid,
   LinearProgress,
   MenuItem,
   Stack,
@@ -17,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -97,42 +97,42 @@ const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel })
   return (
     <Stack spacing={2} component="form" onSubmit={onSubmit}>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField required fullWidth label="Product name" value={value.name} onChange={(e) => onChange("name", e.target.value)} />
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <TextField required fullWidth label="Category" value={value.category} onChange={(e) => onChange("category", e.target.value)} />
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <TextField fullWidth label="Brand" value={value.brand} onChange={(e) => onChange("brand", e.target.value)} />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField required fullWidth multiline minRows={3} label="Description" value={value.description} onChange={(e) => onChange("description", e.target.value)} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField required fullWidth type="number" label="Price" value={value.price} onChange={(e) => onChange("price", e.target.value)} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField fullWidth type="number" label="Discount price" value={value.discount_price || ""} onChange={(e) => onChange("discount_price", e.target.value)} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField required fullWidth type="number" label="Stock" value={value.stock_quantity} onChange={(e) => onChange("stock_quantity", e.target.value)} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField fullWidth label="SKU" value={value.sku} onChange={(e) => onChange("sku", e.target.value)} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField select fullWidth label="Status" value={value.status} onChange={(e) => onChange("status", e.target.value)}>
             {["active", "draft", "inactive", "archived"].map((status) => <MenuItem key={status} value={status}>{status}</MenuItem>)}
           </TextField>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Button variant="outlined" component="label" fullWidth>
             Upload thumbnail
             <input hidden type="file" accept="image/*" onChange={(e) => onChange("thumbnail", e.target.files?.[0] || null)} />
           </Button>
         </Grid>
-        <Grid item xs={12} sm={6} md={5}>
+        <Grid size={{ xs: 12, sm: 6, md: 5 }}>
           <Button variant="outlined" component="label" fullWidth>
             Upload gallery images
             <input hidden multiple type="file" accept="image/*" onChange={(e) => onChange("uploaded_images", e.target.files || [])} />
@@ -303,17 +303,17 @@ const SellerDashboard = () => {
         {tab === 0 && (
           <Grid container spacing={3}>
             {stats.map((stat) => (
-              <Grid item xs={12} sm={6} lg={2.4} key={stat.label}><SellerStatCard {...stat} /></Grid>
+              <Grid size={{ xs: 12, sm: 6, lg: 2.4 }} key={stat.label}><SellerStatCard {...stat} /></Grid>
             ))}
-            <Grid item xs={12} lg={8}><SectionCard title="Recent Orders"><SellerOrdersTable orders={dashboard?.recent_orders?.length ? dashboard.recent_orders : orders} /></SectionCard></Grid>
-            <Grid item xs={12} lg={4}><SectionCard title="Top Selling Products"><SellerAnalyticsPlaceholder /></SectionCard></Grid>
+            <Grid size={{ xs: 12, lg: 8 }}><SectionCard title="Recent Orders"><SellerOrdersTable orders={dashboard?.recent_orders?.length ? dashboard.recent_orders : orders} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, lg: 4 }}><SectionCard title="Top Selling Products"><SellerAnalyticsPlaceholder /></SectionCard></Grid>
           </Grid>
         )}
 
         {tab === 1 && (
           <Grid container spacing={3}>
-            <Grid item xs={12} lg={5}><SectionCard title={editingId ? "Update Product" : "Add Product"}><ProductForm value={productForm} onChange={updateProductForm} onSubmit={handleSubmitProduct} saving={saving} editingId={editingId} onCancel={resetProductForm} /></SectionCard></Grid>
-            <Grid item xs={12} lg={7}><SectionCard title="Product Management"><SellerProductTable products={products} onEdit={handleEditProduct} onDelete={handleDeleteProduct} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, lg: 5 }}><SectionCard title={editingId ? "Update Product" : "Add Product"}><ProductForm value={productForm} onChange={updateProductForm} onSubmit={handleSubmitProduct} saving={saving} editingId={editingId} onCancel={resetProductForm} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, lg: 7 }}><SectionCard title="Product Management"><SellerProductTable products={products} onEdit={handleEditProduct} onDelete={handleDeleteProduct} /></SectionCard></Grid>
           </Grid>
         )}
 
@@ -321,8 +321,8 @@ const SellerDashboard = () => {
 
         {tab === 3 && (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={5}><SectionCard title="Low Stock Alerts"><SellerInventoryAlerts items={dashboard?.low_stock_items || []} /></SectionCard></Grid>
-            <Grid item xs={12} md={7}><SectionCard title="Inventory Management"><SellerProductTable products={products.filter((product) => Number(product.stock_quantity) <= 5)} onEdit={handleEditProduct} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, md: 5 }}><SectionCard title="Low Stock Alerts"><SellerInventoryAlerts items={dashboard?.low_stock_items || []} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, md: 7 }}><SectionCard title="Inventory Management"><SellerProductTable products={products.filter((product) => Number(product.stock_quantity) <= 5)} onEdit={handleEditProduct} /></SectionCard></Grid>
           </Grid>
         )}
 
@@ -330,12 +330,12 @@ const SellerDashboard = () => {
           <SectionCard title="Seller Profile">
             <Stack spacing={2} component="form" onSubmit={handleProfileSave}>
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}><TextField required fullWidth name="business_name" label="Business name" defaultValue={profile?.business_name || ""} /></Grid>
-                <Grid item xs={12} md={6}><TextField required fullWidth name="business_email" label="Business email" defaultValue={profile?.business_email || ""} /></Grid>
-                <Grid item xs={12} md={6}><TextField fullWidth name="business_phone" label="Business phone" defaultValue={profile?.business_phone || ""} /></Grid>
-                <Grid item xs={12} md={6}><TextField fullWidth name="gst_number" label="GST / tax number" defaultValue={profile?.gst_number || ""} /></Grid>
-                <Grid item xs={12}><TextField fullWidth multiline minRows={3} name="business_address" label="Business address" defaultValue={profile?.business_address || ""} /></Grid>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 6 }}><TextField required fullWidth name="business_name" label="Business name" defaultValue={profile?.business_name || ""} /></Grid>
+                <Grid size={{ xs: 12, md: 6 }}><TextField required fullWidth name="business_email" label="Business email" defaultValue={profile?.business_email || ""} /></Grid>
+                <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth name="business_phone" label="Business phone" defaultValue={profile?.business_phone || ""} /></Grid>
+                <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth name="gst_number" label="GST / tax number" defaultValue={profile?.gst_number || ""} /></Grid>
+                <Grid size={12}><TextField fullWidth multiline minRows={3} name="business_address" label="Business address" defaultValue={profile?.business_address || ""} /></Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Button variant="outlined" component="label" fullWidth>
                     Upload business logo
                     <input hidden type="file" name="logo" accept="image/*" />

@@ -8,7 +8,6 @@ import {
   Container,
   Divider,
   FormControlLabel,
-  Grid,
   Paper,
   Radio,
   RadioGroup,
@@ -17,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { createOrder, fetchCheckoutProfile } from "../services/commerceService";
@@ -172,7 +172,7 @@ const Checkout = ({ darkMode, setDarkMode }) => {
           <Alert severity="warning" action={<Button onClick={() => navigate("/cart")}>Go to cart</Button>}>No cart items selected for checkout.</Alert>
         ) : (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 8 }}>
               <Stack spacing={3}>
                 <Paper variant="outlined" sx={{ p: 3, borderRadius: 1 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -185,7 +185,7 @@ const Checkout = ({ darkMode, setDarkMode }) => {
                       <RadioGroup value={selectedAddressId} onChange={selectSavedAddress}>
                         <Grid container spacing={1.5}>
                           {savedAddresses.map((item) => (
-                            <Grid item xs={12} sm={6} key={item.id}>
+                            <Grid size={{ xs: 12, sm: 6 }} key={item.id}>
                               <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1, height: "100%" }}>
                                 <FormControlLabel
                                   value={String(item.id)}
@@ -208,15 +208,15 @@ const Checkout = ({ darkMode, setDarkMode }) => {
                     </Box>
                   ) : null}
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}><TextField required fullWidth label="First name" value={address.firstName} onChange={updateAddress("firstName")} /></Grid>
-                    <Grid item xs={12} sm={6}><TextField required fullWidth label="Last name" value={address.lastName} onChange={updateAddress("lastName")} /></Grid>
-                    <Grid item xs={12}><TextField required fullWidth label="Email" type="email" value={address.email} onChange={updateAddress("email")} /></Grid>
-                    <Grid item xs={12}><TextField required fullWidth label="Address line 1" value={address.addressLine1} onChange={updateAddress("addressLine1")} /></Grid>
-                    <Grid item xs={12}><TextField fullWidth label="Address line 2" value={address.addressLine2} onChange={updateAddress("addressLine2")} /></Grid>
-                    <Grid item xs={12} sm={4}><TextField required fullWidth label="City" value={address.city} onChange={updateAddress("city")} /></Grid>
-                    <Grid item xs={12} sm={4}><TextField required fullWidth label="State" value={address.state} onChange={updateAddress("state")} /></Grid>
-                    <Grid item xs={12} sm={4}><TextField required fullWidth label="PIN code" value={address.pinCode} onChange={updateAddress("pinCode")} /></Grid>
-                    <Grid item xs={12} sm={4}><TextField required fullWidth label="Country" value={address.country} onChange={updateAddress("country")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}><TextField required fullWidth label="First name" value={address.firstName} onChange={updateAddress("firstName")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}><TextField required fullWidth label="Last name" value={address.lastName} onChange={updateAddress("lastName")} /></Grid>
+                    <Grid size={12}><TextField required fullWidth label="Email" type="email" value={address.email} onChange={updateAddress("email")} /></Grid>
+                    <Grid size={12}><TextField required fullWidth label="Address line 1" value={address.addressLine1} onChange={updateAddress("addressLine1")} /></Grid>
+                    <Grid size={12}><TextField fullWidth label="Address line 2" value={address.addressLine2} onChange={updateAddress("addressLine2")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}><TextField required fullWidth label="City" value={address.city} onChange={updateAddress("city")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}><TextField required fullWidth label="State" value={address.state} onChange={updateAddress("state")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}><TextField required fullWidth label="PIN code" value={address.pinCode} onChange={updateAddress("pinCode")} /></Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}><TextField required fullWidth label="Country" value={address.country} onChange={updateAddress("country")} /></Grid>
                   </Grid>
                   <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
                     This address is saved to your account after placing the order.
@@ -233,7 +233,7 @@ const Checkout = ({ darkMode, setDarkMode }) => {
                 </Paper>
               </Stack>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: 1, position: { md: "sticky" }, top: 96 }}>
                 <Typography variant="h6" fontWeight={900}>Order Summary</Typography>
                 <Divider sx={{ my: 2 }} />

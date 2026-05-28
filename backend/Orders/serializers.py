@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory
+from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory, OrderTrackingEvent
 
 
 # Shipping Address
@@ -31,6 +31,14 @@ class OrderSerializer(serializers.ModelSerializer):
             "id", "created_at", "status", "payment_method",
             "total_amount", "shipping_address", "items"
         ]
+
+
+class OrderTrackingEventSerializer(serializers.ModelSerializer):
+    label = serializers.CharField(source="get_status_display", read_only=True)
+
+    class Meta:
+        model = OrderTrackingEvent
+        fields = ["status", "label", "timestamp", "note"]
 
 
 # Payment

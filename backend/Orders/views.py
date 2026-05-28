@@ -10,13 +10,14 @@ from django.db import transaction
 from Cart.models import Cart, CartItem
 from Customer.models import CustomerAddress
 from Product.models import Product
-from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory
+from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory, OrderTrackingEvent
 from .serializers import (
     ShippingAddressSerializer,
     OrderSerializer,
     PaymentSerializer,
     AuctionProductSerializer,
     BidHistorySerializer,
+    OrderTrackingEventSerializer,
 )
 
 
@@ -130,24 +131,31 @@ def create_order_from_cart(request):
             total_amount=Decimal(total),
         )
 
-        for ci in cart_items:
-            prod = get_object_or_404(Product, id=ci.product_id)
-            if prod.stock < ci.quantity:
-                return Response({"error": f"{prod.name} does not have enough stock."}, status=400)
-            image_url = product_image_url(prod)
+            is_live_item = ci.product_id and ci.product_id >= 100000000
+            prod = None
+            seller_profile = None
+            image_url = ci.image or ""
+
+            if not is_live_item:
+                prod = Product.objects.filter(id=ci.product_id).first()
+                if prod:
+                    if prod.stock < ci.quantity:
+                        return Response({"error": f"{prod.name} does not have enough stock."}, status=400)
+                    image_url = product_image_url(prod)
+                    seller_profile = prod.seller_profile
+                    prod.stock = max(0, prod.stock - ci.quantity)
+                    prod.save(update_fields=["stock"])
 
             OrderItem.objects.create(
                 order=order,
                 product=prod,
-                seller=prod.seller_profile,
-                name=prod.name,
+                seller=seller_profile,
+                name=ci.name,
                 price=ci.price,
                 quantity=ci.quantity,
                 image=image_url,
                 selected_options=ci.selected_options,
             )
-            prod.stock = max(0, prod.stock - ci.quantity)
-            prod.save(update_fields=["stock"])
 
         payment_status = "COMPLETED" if payment_method in ["UPI", "Credit/Debit Card", "PayPal"] else "PENDING"
         Payment.objects.create(
@@ -160,6 +168,13 @@ def create_order_from_cart(request):
 
         order.status = "PAID" if payment_status == "COMPLETED" else "PENDING"
         order.save()
+        
+        OrderTrackingEvent.objects.get_or_create(
+            order=order,
+            status=OrderTrackingEvent.STATUS_ORDERED,
+            defaults={"note": "Your order has been placed."},
+        )
+        
         carts.delete()
 
     return Response({"message": "Order created successfully", "order": OrderSerializer(order).data}, status=201)
@@ -197,6 +212,47 @@ def user_orders(request):
     user = request.user
     orders = Order.objects.filter(user=user).order_by("-created_at")
     return Response(OrderSerializer(orders, many=True).data, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def order_tracking(request, order_id):
+    order = get_object_or_404(Order.objects.prefetch_related("tracking_events"), id=order_id, user=request.user)
+    status_to_step = {
+        "PENDING": OrderTrackingEvent.STATUS_ORDERED,
+        "PAID": OrderTrackingEvent.STATUS_ORDERED,
+        "PROCESSING": OrderTrackingEvent.STATUS_PACKED,
+        "SHIPPED": OrderTrackingEvent.STATUS_SHIPPED,
+        "DELIVERED": OrderTrackingEvent.STATUS_DELIVERED,
+    }
+    current_step = status_to_step.get(order.status, OrderTrackingEvent.STATUS_ORDERED)
+    order_rank = [
+        OrderTrackingEvent.STATUS_ORDERED,
+        OrderTrackingEvent.STATUS_PACKED,
+        OrderTrackingEvent.STATUS_SHIPPED,
+        OrderTrackingEvent.STATUS_OUT_FOR_DELIVERY,
+        OrderTrackingEvent.STATUS_DELIVERED,
+    ]
+    existing = {event.status: event for event in order.tracking_events.all()}
+    if OrderTrackingEvent.STATUS_ORDERED not in existing:
+        existing[OrderTrackingEvent.STATUS_ORDERED], _ = OrderTrackingEvent.objects.get_or_create(
+            order=order,
+            status=OrderTrackingEvent.STATUS_ORDERED,
+            defaults={"timestamp": order.created_at, "note": "Your order has been placed."},
+        )
+    current_index = order_rank.index(current_step)
+    timeline = []
+    for index, step in enumerate(order_rank):
+        event = existing.get(step)
+        timeline.append({
+            "status": step,
+            "label": dict(OrderTrackingEvent.STATUS_CHOICES)[step],
+            "timestamp": event.timestamp if event and index <= current_index else None,
+            "note": event.note if event else "",
+            "completed": index <= current_index,
+            "current": index == current_index,
+        })
+    return Response({"orderId": order.id, "orderStatus": order.status, "timeline": timeline}, status=200)
 
 
 # AUCTION DETAILS (for viewing before bidding)

@@ -4,12 +4,9 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  TextField,
-  Autocomplete,
   IconButton,
   Badge,
   Box,
-  InputAdornment,
   useTheme,
   useMediaQuery,
   Collapse,
@@ -36,22 +33,18 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import MenuIcon from "@mui/icons-material/Menu";
 import CategoryIcon from "@mui/icons-material/Category";
 import { useNavigate } from "react-router-dom";
-import debounce from "lodash.debounce";
-import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import LiveSearchBox from "./search/LiveSearchBox";
 
 const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [allSuggestions, setAllSuggestions] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [notifications, setNotifications] = useState(2);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [profileAnchor, setProfileAnchor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
@@ -60,9 +53,15 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const isPersonal = isAuthenticated && userType === "personal";
 
   const updateCartCount = useCallback(() => {
-    const carts = JSON.parse(localStorage.getItem("carts")) || {};
-    setCartCount(Object.keys(carts).length);
-  }, []);
+    if (isAuthenticated) {
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      setCartCount(Object.keys(carts).length);
+    } else {
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
+      const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
+      setCartCount(count);
+    }
+  }, [isAuthenticated]);
 
   const updateWishlistCount = useCallback(() => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
@@ -80,22 +79,6 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
     };
   }, [updateCartCount, updateWishlistCount]);
 
-  useEffect(() => {
-    const fetchSuggestions = debounce(() => {
-      api
-        .get("/products/")
-        .then((res) => {
-          const products = res.data?.results || res.data || [];
-          const names = products.map((product) => product.name).filter(Boolean);
-          setAllSuggestions(Array.from(new Set(names)));
-        })
-        .catch((err) => console.error("Error loading search suggestions:", err));
-    }, 300);
-
-    fetchSuggestions();
-    return () => fetchSuggestions.cancel();
-  }, []);
-
   const logoutFunc = () => {
     logout();
     setProfileAnchor(null);
@@ -108,27 +91,10 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
     user?.email ||
     "";
 
-  const getFilteredSuggestions = (query) => {
-    if (!query) return allSuggestions;
-    const lowerQuery = query.toLowerCase();
-    const startsWith = allSuggestions.filter(s => s.toLowerCase().startsWith(lowerQuery));
-    const includes = allSuggestions.filter(
-      s => !s.toLowerCase().startsWith(lowerQuery) && s.toLowerCase().includes(lowerQuery)
-    );
-    return [...startsWith, ...includes];
-  };
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${searchQuery}`);
-      setSearchOpen(false);
-    }
-  };
-
   const drawerItems = [
     { label: "Categories", path: "/products", show: true },
     { label: "Featured products", path: "/products", show: true },
-    { label: "Cart", path: "/cart", show: isPersonal },
+    { label: "Cart", path: "/cart", show: true },
     { label: "Wishlist", path: "/wishlist", show: isPersonal },
     { label: "Orders", path: "/orders", show: isPersonal },
     { label: "Seller dashboard", path: "/seller/dashboard", show: isBusiness },
@@ -253,38 +219,7 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
           {/* Desktop Search Bar */}
           {!isTablet && (
             <Box sx={{ flexGrow: 1, maxWidth: 700, mx: 3 }}>
-              <Autocomplete
-                freeSolo
-                options={getFilteredSuggestions(searchQuery)}
-                inputValue={searchQuery}
-                onInputChange={(event, newInputValue) => setSearchQuery(newInputValue)}
-                onChange={(event, newValue) => {
-                  if (newValue) navigate(`/products?search=${newValue}`);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Search for products..."
-                    variant="outlined"
-                    size="small"
-                    fullWidth
-                    sx={{
-                      borderRadius: "20px",
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "20px",
-                      },
-                    }}
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
-              />
+              <LiveSearchBox />
             </Box>
           )}
 
@@ -324,8 +259,8 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
                 <DashboardIcon />
               </IconButton>
             ) : (
-              <IconButton onClick={() => navigate(isAuthenticated ? "/cart" : "/signin")}>
-                <Badge badgeContent={isAuthenticated ? cartCount : 0} color="error" showZero>
+              <IconButton onClick={() => navigate("/cart")}>
+                <Badge badgeContent={cartCount} color="error" showZero>
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
@@ -395,49 +330,9 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
 
 <Collapse in={searchOpen} timeout="auto">
   <Box sx={{ display: "flex", alignItems: "center", px: 2, pb: 1 }}>
-    <Box sx={{ flexGrow: 1, maxWidth: 400 }}>
-      <Autocomplete
-        freeSolo
-        options={getFilteredSuggestions(searchQuery)}
-        inputValue={searchQuery}
-        onInputChange={(event, newInputValue) => setSearchQuery(newInputValue)}
-        onChange={(event, newValue) => {
-          if (newValue) {
-            navigate(`/products?search=${newValue}`);
-            setSearchOpen(false);
-          }
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            autoFocus
-            placeholder="Search..."
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            onBlur={() => setSearchOpen(false)}
-          />
-        )}
-      />
+    <Box sx={{ flexGrow: 1, maxWidth: 600 }}>
+      <LiveSearchBox autoFocus onNavigate={() => setSearchOpen(false)} />
     </Box>
-
-    <Button
-      variant="contained"
-      color="primary"
-      sx={{ ml: 1, height: "40px", minWidth: "64px" }}
-      onClick={handleSearch}
-    >
-      Go
-    </Button>
   </Box>
 </Collapse>
 

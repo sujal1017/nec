@@ -18,6 +18,9 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import axios from "axios";
+import { BaseUrl } from "../config";
+import OrderTrackingTimeline from "../components/orders/OrderTrackingTimeline";
 import { fetchOrders } from "../services/commerceService";
 import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
@@ -86,6 +89,8 @@ const OrdersPage = ({ darkMode, setDarkMode }) => {
                     <Typography variant="body2" color="text.secondary">
                       Delivery Address: {[order.shipping_address?.addressLine1, order.shipping_address?.addressLine2, order.shipping_address?.city, order.shipping_address?.state, order.shipping_address?.country, order.shipping_address?.pin_code].filter(Boolean).join(", ")}
                     </Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <OrderTrackingTimeline orderId={order.id} />
                   </Stack>
                 </AccordionDetails>
               </Accordion>
