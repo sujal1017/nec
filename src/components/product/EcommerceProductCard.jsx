@@ -1,5 +1,6 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   Box,
   Button,
@@ -19,7 +20,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import { addToCart } from "../../services/commerceService";
+import { addToCart, fetchCart } from "../../services/commerceService";
 import { FALLBACK_PRODUCT_IMAGE, handleImageFallback } from "../../utils/images";
 
 const currency = new Intl.NumberFormat("en-IN", {
@@ -39,7 +40,9 @@ const getProductUrl = (product) => `/product/${product.id}`;
 
 const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [adding, setAdding] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(() => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
     return wishlist.some((item) => String(item.id || item.product_id) === String(product?.id));
@@ -54,6 +57,22 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
 
     return { price, finalPrice, hasOffer, discountPercent };
   }, [product]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    let alive = true;
+    fetchCart()
+      .then((carts) => {
+        const found = carts.some((cart) =>
+          (cart.items || []).some((item) => String(item.product_id || item.product || item.id) === String(product.id))
+        );
+        if (alive) setIsInCart(found);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [product?.id]);
 
   const handleWishlist = (event) => {
     event.stopPropagation();
@@ -70,6 +89,25 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
 
   const handleAddToCart = async (event) => {
     event.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/signin", {
+        state: {
+          from: {
+            pathname: `/product/${product.id}`,
+            state: {
+              intendedAction: "addToCart",
+              productId: product.id,
+              quantity: 1,
+            },
+          },
+        },
+      });
+      return;
+    }
+    if (isInCart) {
+      navigate("/cart");
+      return;
+    }
     setAdding(true);
     try {
       await addToCart({
@@ -81,10 +119,44 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
         image: product.image,
         is_live: product.isLive,
       });
+      setIsInCart(true);
       onCartAdded?.(product);
     } finally {
       setAdding(false);
     }
+  };
+
+  const handleBuyNow = async (event) => {
+    event.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/signin", {
+        state: {
+          from: {
+            pathname: "/checkout",
+            state: {
+              buyNow: true,
+              productId: product.id,
+              productName: product.name || product.title,
+              price: pricing.finalPrice,
+              image: product.image,
+              quantity: 1,
+            },
+          },
+        },
+      });
+      return;
+    }
+    if (!isInCart) await handleAddToCart(event);
+    navigate("/checkout", {
+      state: {
+        buyNow: true,
+        productId: product.id,
+        productName: product.name || product.title,
+        price: pricing.finalPrice,
+        image: product.image,
+        quantity: 1,
+      },
+    });
   };
 
   return (
@@ -208,16 +280,26 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
       </CardActionArea>
 
       <Box sx={{ px: dense ? 1.5 : 1.75, pb: dense ? 1.5 : 1.75, mt: "auto" }}>
-        <Button
-          fullWidth
-          variant="contained"
-          startIcon={adding ? <CircularProgress color="inherit" size={16} /> : <AddShoppingCartIcon />}
-          disabled={adding || product.in_stock === false || product.stock === 0}
-          onClick={handleAddToCart}
-          sx={{ minHeight: 38, borderRadius: 1, textTransform: "none", fontWeight: 900, boxShadow: "none" }}
-        >
-          {adding ? "Adding..." : "Add to cart"}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={adding ? <CircularProgress color="inherit" size={16} /> : <AddShoppingCartIcon />}
+            disabled={adding || product.in_stock === false || product.stock === 0}
+            onClick={handleAddToCart}
+            sx={{ minHeight: 38, borderRadius: 1, textTransform: "none", fontWeight: 900, boxShadow: "none" }}
+          >
+            {adding ? "Adding..." : isInCart ? "Go cart" : "Add"}
+          </Button>
+          <Button
+            variant="outlined"
+            disabled={adding || product.in_stock === false || product.stock === 0}
+            onClick={handleBuyNow}
+            sx={{ minHeight: 38, borderRadius: 1, textTransform: "none", fontWeight: 900, whiteSpace: "nowrap" }}
+          >
+            Buy
+          </Button>
+        </Stack>
       </Box>
     </Card>
   );

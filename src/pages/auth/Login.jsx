@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -35,8 +35,11 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, setAuth } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "", rememberMe: true });
+
+  const redirectTarget = location.state?.from || "/";
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,7 +64,7 @@ const Login = () => {
       try {
         const authData = await googleLogin({ accessToken: response.access_token });
         setAuth(authData);
-        navigate("/", { replace: true });
+        navigate(redirectTarget, { replace: true });
       } catch {
         setApiError("Google login is not available from the backend yet.");
       } finally {
@@ -98,7 +101,7 @@ const Login = () => {
     setApiError("");
     try {
       await login(formData);
-      navigate("/", { replace: true });
+      navigate(redirectTarget, { replace: true });
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {
         username: "email",

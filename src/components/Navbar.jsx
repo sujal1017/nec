@@ -35,6 +35,13 @@ import CategoryIcon from "@mui/icons-material/Category";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LiveSearchBox from "./search/LiveSearchBox";
+import { fetchCategories } from "../services/categoryService";
+import {
+  fetchCartCount,
+  fetchOrderNotificationCount,
+  fetchSellerAlertCount,
+  fetchWishlistCount,
+} from "../services/notificationService";
 
 const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const theme = useTheme();
@@ -43,7 +50,8 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
 
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [notifications] = useState(2);
+  const [notifications, setNotifications] = useState(0);
+  const [categories, setCategories] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileAnchor, setProfileAnchor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -52,32 +60,29 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const isBusiness = isAuthenticated && userType === "business";
   const isPersonal = isAuthenticated && userType === "personal";
 
-  const updateCartCount = useCallback(() => {
-    if (isAuthenticated) {
-      const carts = JSON.parse(localStorage.getItem("carts")) || {};
-      setCartCount(Object.keys(carts).length);
-    } else {
-      const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
-      const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
-      setCartCount(count);
-    }
-  }, [isAuthenticated]);
-
-  const updateWishlistCount = useCallback(() => {
-    const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-    setWishlistCount(wishlist.length);
-  }, []);
+  const updateCounts = useCallback(async () => {
+    const [nextCartCount, nextWishlistCount, orderCount, sellerCount] = await Promise.all([
+      fetchCartCount(),
+      fetchWishlistCount(),
+      isPersonal ? fetchOrderNotificationCount() : Promise.resolve(0),
+      isBusiness ? fetchSellerAlertCount() : Promise.resolve(0),
+    ]);
+    setCartCount(nextCartCount);
+    setWishlistCount(nextWishlistCount);
+    setNotifications(isBusiness ? sellerCount : orderCount);
+  }, [isBusiness, isPersonal]);
 
   useEffect(() => {
-    updateCartCount();
-    updateWishlistCount();
-    window.addEventListener("storage", updateCartCount);
-    window.addEventListener("storage", updateWishlistCount);
+    updateCounts();
+    window.addEventListener("storage", updateCounts);
     return () => {
-      window.removeEventListener("storage", updateCartCount);
-      window.removeEventListener("storage", updateWishlistCount);
+      window.removeEventListener("storage", updateCounts);
     };
-  }, [updateCartCount, updateWishlistCount]);
+  }, [updateCounts]);
+
+  useEffect(() => {
+    fetchCategories().then((items) => setCategories(items.slice(0, 8))).catch(() => setCategories([]));
+  }, []);
 
   const logoutFunc = () => {
     logout();
@@ -92,8 +97,8 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
     "";
 
   const drawerItems = [
-    { label: "Categories", path: "/products", show: true },
-    { label: "Featured products", path: "/products", show: true },
+    ...categories.map((category) => ({ label: category.name, path: `/products?category=${encodeURIComponent(category.name)}`, show: true })),
+    { label: "All products", path: "/products", show: true },
     { label: "Cart", path: "/cart", show: true },
     { label: "Wishlist", path: "/wishlist", show: isPersonal },
     { label: "Orders", path: "/orders", show: isPersonal },

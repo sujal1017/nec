@@ -173,7 +173,7 @@ const Register = () => {
         password: formData.password,
       });
       setSuccess(true);
-      navigate("/", { replace: true });
+      navigate("/signin", { replace: true, state: { registered: true } });
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {
         full_name: "firstName",
@@ -239,7 +239,7 @@ const Register = () => {
               {success ? (
                 <Box sx={{ py: 4 }}>
                   <Alert severity="success" sx={{ mb: 3 }}>Account created successfully.</Alert>
-                  <Button fullWidth variant="contained" onClick={() => navigate("/")}>Go to homepage</Button>
+                  <Button fullWidth variant="contained" onClick={() => navigate("/signin")}>Go to login</Button>
                 </Box>
               ) : (
                 <Box component="form" onSubmit={handleSubmit} noValidate>

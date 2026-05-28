@@ -19,7 +19,7 @@ import {
 import Grid from "@mui/material/Grid";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { createOrder, fetchCheckoutProfile } from "../services/commerceService";
+import { addToCart, createOrder, fetchCart, fetchCheckoutProfile } from "../services/commerceService";
 import { handleImageFallback } from "../utils/images";
 import { useAuth } from "../context/AuthContext";
 
@@ -47,8 +47,10 @@ const formatApiError = (error) => {
 const Checkout = ({ darkMode, setDarkMode }) => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const selectedCarts = state?.selectedCarts || [];
+  const { user, token } = useAuth();
+  const [selectedCarts, setSelectedCarts] = useState(state?.selectedCarts || []);
+  const [checkoutIntentLoading, setCheckoutIntentLoading] = useState(Boolean(state?.buyNow));
+  const [intentProcessed, setIntentProcessed] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("COD");
@@ -118,6 +120,38 @@ const Checkout = ({ darkMode, setDarkMode }) => {
     };
   }, [navigate, user]);
 
+  useEffect(() => {
+    const buyNow = state?.buyNow;
+    if (!buyNow || intentProcessed || !token) return;
+
+    const processBuyNow = async () => {
+      setIntentProcessed(true);
+      setCheckoutIntentLoading(true);
+      try {
+        await addToCart({
+          productId: buyNow.productId,
+          quantity: buyNow.quantity || 1,
+          selectedOptions: buyNow.selectedOptions || {},
+          name: buyNow.productName || "Selected product",
+          price: buyNow.price || 0,
+          image: buyNow.image || "",
+          is_live: buyNow.isLive,
+        });
+        const carts = await fetchCart();
+        const matching = carts.filter((cart) =>
+          (cart.items || []).some((item) => String(item.product_id) === String(buyNow.productId))
+        );
+        setSelectedCarts(matching.length ? matching : carts);
+      } catch (error) {
+        setSnackbar({ open: true, message: "Could not prepare checkout item.", severity: "error" });
+      } finally {
+        setCheckoutIntentLoading(false);
+      }
+    };
+
+    processBuyNow();
+  }, [state, intentProcessed, token]);
+
   const items = useMemo(() => selectedCarts.flatMap((cart) => cart.items || []), [selectedCarts]);
   const subtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
   const delivery = subtotal > 0 && subtotal < 999 ? DELIVERY_CHARGE : 0;
@@ -169,7 +203,11 @@ const Checkout = ({ darkMode, setDarkMode }) => {
       <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
         <Typography variant="h4" fontWeight={900} sx={{ mb: 3 }}>Checkout</Typography>
         {!items.length ? (
-          <Alert severity="warning" action={<Button onClick={() => navigate("/cart")}>Go to cart</Button>}>No cart items selected for checkout.</Alert>
+          checkoutIntentLoading ? (
+            <Alert severity="info">Preparing your checkout session…</Alert>
+          ) : (
+            <Alert severity="warning" action={<Button onClick={() => navigate("/cart")}>Go to cart</Button>}>No cart items selected for checkout.</Alert>
+          )
         ) : (
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 8 }}>

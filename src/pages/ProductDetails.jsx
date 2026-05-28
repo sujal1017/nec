@@ -39,7 +39,7 @@ import CompareButton from "../components/product/CompareButton";
 import ProductMiniRail from "../components/product/ProductMiniRail";
 import RecentlyViewedSection from "../components/product/RecentlyViewedSection";
 import { fetchRecommendations, recordProductView } from "../services/searchService";
-import { addToCart } from "../services/commerceService";
+import { addToCart, fetchCart } from "../services/commerceService";
 import { useAuth } from "../context/AuthContext";
 import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
@@ -92,6 +92,7 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
 
   // Quantity and options
   const [quantity, setQuantity] = useState(1);
+  const [isInCart, setIsInCart] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [reviews, setReviews] = useState([]);
   const [sellerDetails, setSellerDetails] = useState(null);
@@ -250,8 +251,46 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
     return Object.keys(product.options).every((key) => selectedOptions[key]);
   }, [product, selectedOptions]);
 
+  const stockCount = Number(product?.stock ?? product?.stock_quantity ?? (product?.in_stock ? 99 : 0));
+
+  useEffect(() => {
+    if (!product?.id) return;
+    let alive = true;
+    fetchCart()
+      .then((carts) => {
+        const found = carts.some((cart) =>
+          (cart.items || []).some((item) => String(item.product_id || item.product || item.id) === String(product.id))
+        );
+        if (alive) setIsInCart(found);
+      })
+      .catch(() => setIsInCart(false));
+    return () => {
+      alive = false;
+    };
+  }, [product?.id]);
+
   // Cart Add Logic
   const handleAddToCart = async (goToCart = false) => {
+    if (!isAuthenticated) {
+      navigate("/signin", {
+        state: {
+          from: {
+            pathname: `/product/${id}`,
+            state: {
+              intendedAction: "addToCart",
+              productId: product?.id,
+              quantity,
+            },
+          },
+        },
+      });
+      return;
+    }
+
+    if (stockCount <= 0 || quantity > stockCount) {
+      setSnackbar({ open: true, message: "Requested quantity is not available.", severity: "warning" });
+      return;
+    }
     setAdding(true);
     try {
       await addToCart({
@@ -261,9 +300,10 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
         name: product.name,
         price: product.discount_price || product.price,
         image: selectedImage || product.image,
-        is_live: isLive
+        is_live: isLive,
       });
       window.dispatchEvent(new Event("storage"));
+      setIsInCart(true);
       if (goToCart) {
         navigate("/cart");
       } else {
@@ -274,6 +314,52 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
     } finally {
       setAdding(false);
     }
+  };
+
+  const handleBuyNow = async () => {
+    if (!allOptionsSelected) {
+      setSnackbar({ open: true, message: "Please choose product options first.", severity: "warning" });
+      return;
+    }
+    if (stockCount <= 0 || quantity > stockCount) {
+      setSnackbar({ open: true, message: "Requested quantity is not available.", severity: "warning" });
+      return;
+    }
+
+    if (!isAuthenticated) {
+      navigate("/signin", {
+        state: {
+          from: {
+            pathname: "/checkout",
+            state: {
+              buyNow: true,
+              productId: product.id,
+              productName: product.name,
+              price: product.discount_price || product.price,
+              image: selectedImage || product.image,
+              quantity,
+              selectedOptions,
+              isLive,
+            },
+          },
+        },
+      });
+      return;
+    }
+
+    await handleAddToCart(false);
+    navigate("/checkout", {
+      state: {
+        buyNow: true,
+        productId: product.id,
+        productName: product.name,
+        price: product.discount_price || product.price,
+        image: selectedImage || product.image,
+        quantity,
+        selectedOptions,
+        isLive,
+      },
+    });
   };
 
   // Open Bidding Dialog
@@ -651,8 +737,8 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                 {/* Stock and Shipping status */}
                 <Stack direction="row" spacing={2}>
                   <Chip
-                    label={product.stock > 0 ? `In Stock (${product.stock})` : "Out of Stock"}
-                    color={product.stock > 0 ? "success" : "error"}
+                    label={stockCount > 0 ? `In Stock (${stockCount})` : "Out of Stock"}
+                    color={stockCount > 0 ? "success" : "error"}
                     variant="outlined"
                   />
                   {sellerDetails?.shippingTime && (
@@ -697,7 +783,7 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                           <RemoveIcon />
                         </IconButton>
                         <Typography sx={{ minWidth: 30, textAlign: "center", fontWeight: "bold" }}>{quantity}</Typography>
-                        <IconButton size="small" onClick={() => setQuantity((q) => q + 1)}>
+                        <IconButton size="small" onClick={() => setQuantity((q) => Math.min(stockCount || 1, q + 1))} disabled={quantity >= stockCount}>
                           <AddIcon />
                         </IconButton>
                       </Stack>
@@ -707,13 +793,25 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                         color="primary"
                         size="large"
                         startIcon={<AddShoppingCartIcon />}
-                        onClick={handleOpenCartDialog}
-                        disabled={adding || product.stock === 0 || !allOptionsSelected}
+                        onClick={() => (isInCart ? navigate("/cart") : handleOpenCartDialog())}
+                        disabled={adding || stockCount === 0 || !allOptionsSelected}
                         sx={{ flex: 2, py: 1.5, textTransform: "none", fontSize: "1.1rem" }}
                       >
-                        Add to Cart
+                        {isInCart ? "Go to Cart" : "Add to Cart"}
                       </Button>
                       
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        size="large"
+                        startIcon={<BoltIcon />}
+                        onClick={handleBuyNow}
+                        disabled={adding || stockCount === 0 || !allOptionsSelected}
+                        sx={{ flex: 1, py: 1.5, textTransform: "none", fontSize: "1.1rem" }}
+                      >
+                        Buy Now
+                      </Button>
+
                       <Button
                         variant="outlined"
                         color="secondary"

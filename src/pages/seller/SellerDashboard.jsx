@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -34,6 +35,7 @@ import {
   updateSellerProduct,
   updateSellerProfile,
 } from "../../services/sellerService";
+import { fetchCategories } from "../../services/categoryService";
 import SellerDataState from "../../components/seller/SellerDataState";
 import SellerDashboardSkeleton from "../../components/seller/SellerDashboardSkeleton";
 import SellerStatCard from "../../components/seller/SellerStatCard";
@@ -91,7 +93,7 @@ const buildProductFormData = (product) => {
   return formData;
 };
 
-const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel }) => {
+const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel, categories = [] }) => {
   const preview = value.thumbnail instanceof File ? URL.createObjectURL(value.thumbnail) : value.image;
 
   return (
@@ -101,7 +103,15 @@ const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel })
           <TextField required fullWidth label="Product name" value={value.name} onChange={(e) => onChange("name", e.target.value)} />
         </Grid>
         <Grid size={{ xs: 12, md: 3 }}>
-          <TextField required fullWidth label="Category" value={value.category} onChange={(e) => onChange("category", e.target.value)} />
+          <Autocomplete
+            freeSolo={false}
+            options={categories.map((category) => category.name)}
+            value={value.category || null}
+            onChange={(_, nextValue) => onChange("category", nextValue || "")}
+            renderInput={(params) => (
+              <TextField {...params} required fullWidth label="Category" helperText="Choose an existing marketplace category" />
+            )}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 3 }}>
           <TextField fullWidth label="Brand" value={value.brand} onChange={(e) => onChange("brand", e.target.value)} />
@@ -154,7 +164,7 @@ const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel })
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, userType, isAuthenticated, logout } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -167,22 +177,46 @@ const SellerDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const loadDashboard = useCallback(async (silent = false) => {
     if (silent) setRefreshing(true);
     else setLoading(true);
     setError("");
     try {
-      const [dashboardData, productData, orderData, profileData] = await Promise.all([
+      if (!isAuthenticated || userType !== "business") {
+        navigate("/signin", { replace: true, state: { from: "/seller/dashboard" } });
+        return;
+      }
+
+      const [dashboardResult, productResult, orderResult, profileResult] = await Promise.allSettled([
         fetchSellerDashboard(),
         fetchSellerProducts({ page_size: 25 }),
         fetchSellerOrders({ page_size: 25 }),
         fetchSellerProfile(),
       ]);
+      const failedAuth = [dashboardResult, productResult, orderResult, profileResult].find(
+        (result) => result.status === "rejected" && result.reason?.response?.status === 401
+      );
+      if (failedAuth) {
+        logout();
+        navigate("/signin", { replace: true, state: { from: "/seller/dashboard" } });
+        return;
+      }
+
+      const dashboardData = dashboardResult.status === "fulfilled" ? dashboardResult.value : { metrics: {}, recent_orders: [], low_stock_items: [] };
+      const productData = productResult.status === "fulfilled" ? productResult.value : [];
+      const orderData = orderResult.status === "fulfilled" ? orderResult.value : [];
+      const profileData = profileResult.status === "fulfilled" ? profileResult.value : null;
+
       setDashboard(dashboardData);
       setProducts(getResults(productData));
       setOrders(getResults(orderData));
       setProfile(profileData);
+      const rejected = [dashboardResult, productResult, orderResult, profileResult].filter((result) => result.status === "rejected");
+      if (rejected.length) {
+        setError("Some seller data could not be loaded. Empty sections are shown safely.");
+      }
     } catch (err) {
       const detail = err?.response?.data?.detail || "";
       const code = err?.response?.data?.code || "";
@@ -196,11 +230,15 @@ const SellerDashboard = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [logout, navigate]);
+  }, [isAuthenticated, logout, navigate, userType]);
 
   useEffect(() => {
     loadDashboard();
   }, [loadDashboard]);
+
+  useEffect(() => {
+    fetchCategories().then(setCategories).catch(() => setCategories([]));
+  }, []);
 
   const metrics = dashboard?.metrics || {};
   const displayName = dashboard?.seller?.business_name || user?.business_name || user?.businessName || user?.name || "Seller";
@@ -312,7 +350,7 @@ const SellerDashboard = () => {
 
         {tab === 1 && (
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, lg: 5 }}><SectionCard title={editingId ? "Update Product" : "Add Product"}><ProductForm value={productForm} onChange={updateProductForm} onSubmit={handleSubmitProduct} saving={saving} editingId={editingId} onCancel={resetProductForm} /></SectionCard></Grid>
+            <Grid size={{ xs: 12, lg: 5 }}><SectionCard title={editingId ? "Update Product" : "Add Product"}><ProductForm value={productForm} onChange={updateProductForm} onSubmit={handleSubmitProduct} saving={saving} editingId={editingId} onCancel={resetProductForm} categories={categories} /></SectionCard></Grid>
             <Grid size={{ xs: 12, lg: 7 }}><SectionCard title="Product Management"><SellerProductTable products={products} onEdit={handleEditProduct} onDelete={handleDeleteProduct} /></SectionCard></Grid>
           </Grid>
         )}

@@ -22,17 +22,18 @@ import { BaseUrl } from "../config";
 import CompareButton from "../components/product/CompareButton";
 import ProductMiniRail from "../components/product/ProductMiniRail";
 import { fetchTrendingSearches } from "../services/searchService";
+import EcommerceProductCard from "../components/product/EcommerceProductCard";
+import { fetchCategories } from "../services/categoryService";
 import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
 const DEFAULT_LIMIT = 20;
-const MAX_PRICE = 200000;
 const API_BASE_URL = BaseUrl; // Use from config.js
 
 const INITIAL_FILTERS = {
 	categories: [],
 	brands: [],
 	minPrice: 0,
-	maxPrice: MAX_PRICE,
+	maxPrice: 0,
 	rating: 0,
 	availability: null,
 	condition: [],
@@ -78,7 +79,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (filters.minPrice > 0) {
 			queryParts.push(`minPrice=${filters.minPrice}`);
 		}
-		if (filters.maxPrice < MAX_PRICE) {
+		if (filters.maxPrice > 0 && filters.maxPrice < priceBounds.max) {
 			queryParts.push(`maxPrice=${filters.maxPrice}`);
 		}
 		
@@ -112,7 +113,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		if (newPath !== `${location.pathname}${location.search}`) {
 			navigate(newPath, { replace: true });
 		}
-	}, [location.pathname, location.search, navigate]);
+	}, [location.pathname, location.search, navigate, priceBounds.max]);
 
 	// Helper function to sync filters with URL when filters change
 	const syncFiltersWithURL = useCallback((newFilters) => {
@@ -146,7 +147,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		
 		const maxPrice = params.get('maxPrice');
 		if (maxPrice) {
-			filters.maxPrice = parseInt(maxPrice, 10) || MAX_PRICE;
+			filters.maxPrice = parseInt(maxPrice, 10) || 0;
 		}
 		
 		// Parse rating
@@ -178,6 +179,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const [error, setError] = useState(null);
 	const [hasInitialLoad, setHasInitialLoad] = useState(false);
 	const [trendingTerms, setTrendingTerms] = useState([]);
+	const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
 
 	// pagination
 	const [offset, setOffset] = useState(0);
@@ -252,6 +254,19 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 		});
 	}, []);
 
+	const updatePriceBounds = useCallback((items = []) => {
+		const prices = items
+			.map((product) => Number(product.discount_price || product.price || 0))
+			.filter((price) => Number.isFinite(price) && price >= 0);
+		if (!prices.length) {
+			setPriceBounds({ min: 0, max: 0 });
+			return;
+		}
+		const min = Math.floor(Math.min(...prices));
+		const max = Math.ceil(Math.max(...prices));
+		setPriceBounds({ min, max });
+	}, []);
+
 
 
 	// ---------- Convert filter body -> json-server friendly query params ----------
@@ -264,7 +279,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			params.brand = body.brands.join(",");
 		if (typeof body.minPrice === "number" && body.minPrice > 0)
 			params.min_price = body.minPrice;
-		if (typeof body.maxPrice === "number" && body.maxPrice < MAX_PRICE)
+		if (typeof body.maxPrice === "number" && body.maxPrice > 0 && body.maxPrice < priceBounds.max)
 			params.max_price = body.maxPrice;
 		if (body.rating && typeof body.rating === "number")
 			params.rating = body.rating;
@@ -313,7 +328,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			// Merge defaults for pagination since backend doesn't paginate
 			const usedBody = {
 				minPrice: 0,
-				maxPrice: MAX_PRICE,
+				maxPrice: 0,
 				offset: 0,
 				limit,
 				...body,
@@ -331,6 +346,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			const itemsAll = Array.isArray(resp.data)
 				? resp.data
 				: resp.data.results ?? resp.data.products ?? [];
+			updatePriceBounds(itemsAll);
 
 			// client-side slice for pagination
 			const start = usedBody.offset ?? 0;
@@ -370,6 +386,14 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	// ---------- Initial: load filter options & initial fetch ----------
 	useEffect(() => {
 		fetchTrendingSearches().then(setTrendingTerms).catch(() => setTrendingTerms([]));
+		fetchCategories()
+			.then((categories) => {
+				setOptions((prev) => ({
+					...prev,
+					categories: categories.map((category) => category.name).sort(),
+				}));
+			})
+			.catch(() => undefined);
 	}, []);
 
 	useEffect(() => {
@@ -396,6 +420,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 					? resp.data
 					: resp.data.products ?? [];
 				deriveOptions(all);
+				updatePriceBounds(all);
 
 				// If URL has category param, normalize to actual category name
 				const params = new URLSearchParams(location.search);
@@ -448,7 +473,11 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 			const next = arr.includes(value)
 				? arr.filter((v) => v !== value)
 				: [...arr, value];
-			return { ...prev, [key]: next };
+			return {
+				...prev,
+				[key]: next,
+				...(key === "categories" ? { minPrice: 0, maxPrice: 0 } : {}),
+			};
 		});
 	};
 
@@ -570,7 +599,7 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 					: appliedFilters.volume)
 				: [],
 			minPrice: appliedFilters?.minPrice ?? 0,
-			maxPrice: appliedFilters?.maxPrice ?? MAX_PRICE,
+			maxPrice: appliedFilters?.maxPrice ?? 0,
 			rating: appliedFilters?.rating ?? 0,
 			availability: appliedFilters?.availability ?? null,
 		};
@@ -729,12 +758,13 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 									width: "100%",
 									bgcolor: isDarkMode ? "background.paper" : "#fff",
 								}}
-								value={[filters.minPrice, filters.maxPrice]}
+								value={[filters.minPrice, filters.maxPrice || priceBounds.max || 0]}
 								onChange={handlePriceChange}
 								valueLabelDisplay="auto"
-								min={0}
-								max={MAX_PRICE}
-								step={1000}
+								min={priceBounds.min || 0}
+								max={priceBounds.max || 0}
+								step={Math.max(1, Math.round((priceBounds.max || 1000) / 100))}
+								disabled={!priceBounds.max}
 							/>
 							<Box
 								sx={{
@@ -1122,19 +1152,19 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 
 							{appliedFilters &&
 								(appliedFilters.minPrice > 0 ||
-									appliedFilters.maxPrice < MAX_PRICE) && (
+									appliedFilters.maxPrice < priceBounds.max) && (
 									<Chip
 										label={`₹${appliedFilters.minPrice} - ₹${appliedFilters.maxPrice}`}
 										onDelete={async () => {
 											const updatedFilters = {
 												...filters,
 												minPrice: 0,
-												maxPrice: MAX_PRICE,
+												maxPrice: 0,
 											};
 											const updatedApplied = {
 												...appliedFilters,
 												minPrice: 0,
-												maxPrice: MAX_PRICE,
+												maxPrice: 0,
 											};
 											setFilters(updatedFilters);
 											setAppliedFilters(updatedApplied);
