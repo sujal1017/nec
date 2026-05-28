@@ -18,17 +18,14 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-<<<<<<< HEAD
 import axios from "axios";
 import { BaseUrl } from "../config";
 import OrderTrackingTimeline from "../components/orders/OrderTrackingTimeline";
-=======
 import { fetchOrders } from "../services/commerceService";
 import { handleImageFallback, resolveImageUrl } from "../utils/images";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
->>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
 const OrdersPage = ({ darkMode, setDarkMode }) => {
   const navigate = useNavigate();
@@ -92,73 +89,8 @@ const OrdersPage = ({ darkMode, setDarkMode }) => {
                     <Typography variant="body2" color="text.secondary">
                       Delivery Address: {[order.shipping_address?.addressLine1, order.shipping_address?.addressLine2, order.shipping_address?.city, order.shipping_address?.state, order.shipping_address?.country, order.shipping_address?.pin_code].filter(Boolean).join(", ")}
                     </Typography>
-<<<<<<< HEAD
-                    <Chip label={order.status} color="success" size="small" />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Date: {order?.created_at?.split("T")[0]} | Total: ₹{order.total_amount}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-
-              <AccordionDetails>
-                {order.items.map((item, index) => (
-                  <Card key={index} sx={{ display: "flex", mb: 1 }}>
-                    <CardMedia
-                      component="img"
-                      sx={{ width: 100, objectFit: "contain" }}
-                      image={item.image}
-                      alt={item.name}
-                    />
-                    <CardContent>
-                      <Typography
-                        onClick={() => navigate(`/product/${item.product_id}`)}
-                        sx={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          "&:hover": { color: "primary.main" },
-                        }}
-                        variant="body1"
-                      >
-                        {item.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Price: ₹{item.price}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
-
-                <Divider sx={{ my: 2 }} />
-                <OrderTrackingTimeline orderId={order.id} />
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="body2">
-                  Delivery Address: {[
-                    order?.shipping_address?.addressLine1,
-                    order?.shipping_address?.addressLine2,
-                    order?.shipping_address?.city,
-                    order?.shipping_address?.state,
-                    order?.shipping_address?.country,
-                    order?.shipping_address?.pin_code
-                  ].filter(Boolean).join(", ")}
-
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          )))}
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={4000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Box>
-=======
+                    <Divider sx={{ my: 2 }} />
+                    <OrderTrackingTimeline orderId={order.id} />
                   </Stack>
                 </AccordionDetails>
               </Accordion>
@@ -166,7 +98,6 @@ const OrdersPage = ({ darkMode, setDarkMode }) => {
           </Stack>
         )}
       </Container>
->>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
       <Footer />
     </>
   );

@@ -6,7 +6,6 @@ import {
   Button,
   Container,
   Divider,
-  Grid,
   IconButton,
   Paper,
   Skeleton,
@@ -14,6 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -22,12 +22,14 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { fetchCart, removeCartItem, updateCartItem } from "../services/commerceService";
 import { handleImageFallback } from "../utils/images";
+import { useAuth } from "../context/AuthContext";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 const DELIVERY_CHARGE = 49;
 
 const Cart = ({ darkMode, setDarkMode }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [carts, setCarts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyItem, setBusyItem] = useState(null);
@@ -80,6 +82,10 @@ const Cart = ({ darkMode, setDarkMode }) => {
   };
 
   const checkout = () => {
+    if (!isAuthenticated) {
+      navigate("/signin", { state: { from: "/cart" } });
+      return;
+    }
     navigate("/checkout", {
       state: {
         selectedCarts: carts.filter((cart) => (cart.items || []).length),
@@ -94,8 +100,8 @@ const Cart = ({ darkMode, setDarkMode }) => {
         <Typography variant="h4" fontWeight={900} sx={{ mb: 3 }}>Shopping Cart</Typography>
         {loading ? (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={8}><Skeleton variant="rounded" height={360} /></Grid>
-            <Grid item xs={12} md={4}><Skeleton variant="rounded" height={260} /></Grid>
+            <Grid size={{ xs: 12, md: 8 }}><Skeleton variant="rounded" height={360} /></Grid>
+            <Grid size={{ xs: 12, md: 4 }}><Skeleton variant="rounded" height={260} /></Grid>
           </Grid>
         ) : !items.length ? (
           <Paper sx={{ minHeight: 360, display: "grid", placeItems: "center", p: 4, borderRadius: 1 }} variant="outlined">
@@ -107,7 +113,7 @@ const Cart = ({ darkMode, setDarkMode }) => {
           </Paper>
         ) : (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 8 }}>
               <Stack spacing={2}>
                 {items.map((item) => (
                   <Paper key={item.id} variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
@@ -129,7 +135,7 @@ const Cart = ({ darkMode, setDarkMode }) => {
                 ))}
               </Stack>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper variant="outlined" sx={{ p: 3, borderRadius: 1, position: { md: "sticky" }, top: 96 }}>
                 <Typography variant="h6" fontWeight={900}>Price Details</Typography>
                 <Divider sx={{ my: 2 }} />

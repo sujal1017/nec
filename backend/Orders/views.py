@@ -131,34 +131,31 @@ def create_order_from_cart(request):
             total_amount=Decimal(total),
         )
 
-        for ci in cart_items:
-            prod = get_object_or_404(Product, id=ci.product_id)
-            if prod.stock < ci.quantity:
-                return Response({"error": f"{prod.name} does not have enough stock."}, status=400)
-            image_url = product_image_url(prod)
+            is_live_item = ci.product_id and ci.product_id >= 100000000
+            prod = None
+            seller_profile = None
+            image_url = ci.image or ""
 
-<<<<<<< HEAD
-    order.status = "PAID" if payment_status == "COMPLETED" else "PENDING"
-    order.save()
-    OrderTrackingEvent.objects.get_or_create(
-        order=order,
-        status=OrderTrackingEvent.STATUS_ORDERED,
-        defaults={"note": "Your order has been placed."},
-    )
-    cart.delete()
-=======
+            if not is_live_item:
+                prod = Product.objects.filter(id=ci.product_id).first()
+                if prod:
+                    if prod.stock < ci.quantity:
+                        return Response({"error": f"{prod.name} does not have enough stock."}, status=400)
+                    image_url = product_image_url(prod)
+                    seller_profile = prod.seller_profile
+                    prod.stock = max(0, prod.stock - ci.quantity)
+                    prod.save(update_fields=["stock"])
+
             OrderItem.objects.create(
                 order=order,
                 product=prod,
-                seller=prod.seller_profile,
-                name=prod.name,
+                seller=seller_profile,
+                name=ci.name,
                 price=ci.price,
                 quantity=ci.quantity,
                 image=image_url,
                 selected_options=ci.selected_options,
             )
-            prod.stock = max(0, prod.stock - ci.quantity)
-            prod.save(update_fields=["stock"])
 
         payment_status = "COMPLETED" if payment_method in ["UPI", "Credit/Debit Card", "PayPal"] else "PENDING"
         Payment.objects.create(
@@ -171,8 +168,14 @@ def create_order_from_cart(request):
 
         order.status = "PAID" if payment_status == "COMPLETED" else "PENDING"
         order.save()
+        
+        OrderTrackingEvent.objects.get_or_create(
+            order=order,
+            status=OrderTrackingEvent.STATUS_ORDERED,
+            defaults={"note": "Your order has been placed."},
+        )
+        
         carts.delete()
->>>>>>> 0e91b93c18a15c809815810e835e7568b67aa556
 
     return Response({"message": "Order created successfully", "order": OrderSerializer(order).data}, status=201)
 

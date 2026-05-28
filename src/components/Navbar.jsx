@@ -53,9 +53,15 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const isPersonal = isAuthenticated && userType === "personal";
 
   const updateCartCount = useCallback(() => {
-    const carts = JSON.parse(localStorage.getItem("carts")) || {};
-    setCartCount(Object.keys(carts).length);
-  }, []);
+    if (isAuthenticated) {
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      setCartCount(Object.keys(carts).length);
+    } else {
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
+      const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
+      setCartCount(count);
+    }
+  }, [isAuthenticated]);
 
   const updateWishlistCount = useCallback(() => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
@@ -88,7 +94,7 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const drawerItems = [
     { label: "Categories", path: "/products", show: true },
     { label: "Featured products", path: "/products", show: true },
-    { label: "Cart", path: "/cart", show: isPersonal },
+    { label: "Cart", path: "/cart", show: true },
     { label: "Wishlist", path: "/wishlist", show: isPersonal },
     { label: "Orders", path: "/orders", show: isPersonal },
     { label: "Seller dashboard", path: "/seller/dashboard", show: isBusiness },
@@ -253,8 +259,8 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
                 <DashboardIcon />
               </IconButton>
             ) : (
-              <IconButton onClick={() => navigate(isAuthenticated ? "/cart" : "/signin")}>
-                <Badge badgeContent={isAuthenticated ? cartCount : 0} color="error" showZero>
+              <IconButton onClick={() => navigate("/cart")}>
+                <Badge badgeContent={cartCount} color="error" showZero>
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
