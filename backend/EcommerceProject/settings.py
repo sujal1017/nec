@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     #Third party apps
     'rest_framework',
     'corsheaders',
+    'cloudinary',
+    'cloudinary_storage',
 
     #custom apps
     'Customer',
@@ -86,15 +88,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'EcommerceProject.wsgi.application'
 
-db_config = dj_database_url.config(
-    default=config('DATABASE_URL'),
-    conn_max_age=600
-)
-
-db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
-
 DATABASES = {
-    'default': db_config
+    "default": dj_database_url.parse(
+        config("DATABASE_URL")
+    )
 }
 
 
@@ -153,6 +150,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

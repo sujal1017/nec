@@ -12,3 +12,6 @@ python-decouple==3.8
 sqlparse==0.5.3
 tzdata==2025.2
 requests==2.33.1
+cloudinary==1.33.0
+django-cloudinary-storage==0.4.0
+tses==0.3.0
