@@ -43,7 +43,7 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
 
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [notifications, setNotifications] = useState(2);
+  const [notifications] = useState(2);
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileAnchor, setProfileAnchor] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -110,11 +110,11 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
 
   return (
     <>
-      <AppBar position="fixed">
+      <AppBar position="sticky" sx={{ top: 0, zIndex: (theme) => theme.zIndex.drawer + 2 }}>
       <Box
           sx={{
             backgroundColor: (theme) => theme.palette.background.default,
-            display: "flex",
+            display: { xs: "none", sm: "flex" },
             justifyContent: "flex-end",
             alignItems: "center",
             px: 2,
@@ -194,9 +194,9 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
           </Typography>
         </Box>
 
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: isMobile ? 1 : 3 }}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: { xs: 1, md: 3 }, gap: 1, minHeight: { xs: 60, md: 68 } }}>
           {isTablet && (
-            <IconButton onClick={() => setDrawerOpen(true)} sx={{ mr: 1 }}>
+            <IconButton aria-label="Open menu" onClick={() => setDrawerOpen(true)}>
               <MenuIcon />
             </IconButton>
           )}
@@ -205,11 +205,14 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
           <Typography
             variant="h5"
             sx={{
-              fontWeight: "bold",
+              fontWeight: 950,
               cursor: "pointer",
               color: theme.palette.text.primary,
               transition: "color 0.3s",
               "&:hover": { color: theme.palette.primary.main },
+              letterSpacing: 0,
+              whiteSpace: "nowrap",
+              fontSize: { xs: "1.25rem", md: "1.5rem" },
             }}
             onClick={() => navigate("/")}
           >
@@ -221,6 +224,16 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
             <Box sx={{ flexGrow: 1, maxWidth: 700, mx: 3 }}>
               <LiveSearchBox />
             </Box>
+          )}
+
+          {!isTablet && (
+            <Button
+              startIcon={<CategoryIcon />}
+              onClick={() => navigate("/products")}
+              sx={{ textTransform: "none", whiteSpace: "nowrap", fontWeight: 800 }}
+            >
+              Categories
+            </Button>
           )}
 
           {/* Icons */}
@@ -250,6 +263,14 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
             {isPersonal && !isMobile && (
               <IconButton onClick={() => navigate("/orders")}>
                 <ReceiptLongIcon />
+              </IconButton>
+            )}
+
+            {!isMobile && (
+              <IconButton aria-label="Notifications">
+                <Badge badgeContent={notifications} color="error">
+                  <NotificationsNoneIcon />
+                </Badge>
               </IconButton>
             )}
 
@@ -293,15 +314,6 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
             </MenuItem>
           )}
 
-          {!isTablet && (
-            <Button
-              startIcon={<CategoryIcon />}
-              onClick={() => navigate("/products")}
-              sx={{ textTransform: "none", whiteSpace: "nowrap" }}
-            >
-              Categories
-            </Button>
-          )}
           {isBusiness && (
             <MenuItem onClick={() => { setProfileAnchor(null); navigate("/products"); }}>
               <StorefrontIcon fontSize="small" style={{ marginRight: 8 }} />
@@ -337,8 +349,6 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
 </Collapse>
 
       </AppBar>
-
-      <Box sx={{ marginTop: "64px" }} />
     </>
   );
 };

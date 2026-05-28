@@ -5,14 +5,23 @@ body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  min-height: 100vh;
 }
 
 .slick-slide {
   display: flex !important;
   justify-content: center;
   align-items: center;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
 }

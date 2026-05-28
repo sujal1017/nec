@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Container,
+  Stack,
   Typography,
   useTheme,
   Skeleton,
@@ -76,8 +77,14 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
   return (
     <>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Box sx={{ bgcolor: theme.palette.background.default, pt: { xs: 2, md: 4 } }}>
-        <Container maxWidth="xl">
+      <Box
+        sx={{
+          bgcolor: theme.palette.mode === "dark" ? "background.default" : "#eef2f7",
+          pt: { xs: 2, md: 3 },
+          pb: { xs: 4, md: 6 },
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
           {error && <Alert severity="warning" sx={{ mb: 3 }}>{error}</Alert>}
 
           <HeroCarousel
@@ -89,16 +96,17 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
           />
 
           {isAuthenticated && (
-            <Box sx={{ py: { xs: 3, md: 4 } }}>
-              <Box
+            <Box sx={{ pt: { xs: 2, md: 3 } }}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
                 sx={{
-                  display: "flex",
                   gap: 2,
                   alignItems: "center",
                   p: 2,
                   border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 1,
                   bgcolor: theme.palette.background.paper,
+                  boxShadow: "0 10px 28px rgba(15, 23, 42, 0.08)",
                 }}
               >
                 <Avatar src={user?.avatar}>{displayName?.charAt(0)}</Avatar>
@@ -115,12 +123,19 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
                 <Button
                   variant="contained"
                   onClick={() => navigate(mode === "seller" ? "/seller/dashboard" : "/profile")}
+                  sx={{ borderRadius: 1, fontWeight: 900, alignSelf: { xs: "stretch", sm: "center" } }}
                 >
                   {mode === "seller" ? "Seller dashboard" : "View profile"}
                 </Button>
-              </Box>
+              </Stack>
             </Box>
           )}
+
+          <CategoryStrip
+            categories={content.categories}
+            loading={loading}
+            onSelect={handleCategorySelect}
+          />
 
           {mode === "seller" ? (
             <SellerQuickActions businessName={user?.businessName} onNavigate={navigate} />
@@ -133,12 +148,6 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
             />
           ) : null}
 
-          <CategoryStrip
-            categories={content.categories}
-            loading={loading}
-            onSelect={handleCategorySelect}
-          />
-
           <FeaturedProducts
             products={content.featuredProducts}
             loading={loading}
@@ -149,9 +158,17 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
             loading={loading}
           />
 
+          <ProductRail
+            title="Best Deals"
+            subtitle="Limited-time discounts from marketplace sellers."
+            products={content.deals}
+            loading={loading}
+            limit={8}
+          />
+
           <Suspense
             fallback={
-              <Box sx={{ my: 6 }}>
+              <Box sx={{ my: 3, p: { xs: 2, md: 3 }, bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
                 {/* Skeleton for Title and Category/Filters */}
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
                   <Box>
@@ -193,14 +210,6 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
           </Suspense>
 
           <RecentlyViewedSection />
-
-          <ProductRail
-            title="Deals & Offers"
-            subtitle="Limited-time discounts from marketplace sellers."
-            products={content.deals}
-            loading={loading}
-            limit={8}
-          />
 
           <SellerCTA mode={mode} onNavigate={navigate} />
 

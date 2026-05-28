@@ -131,6 +131,7 @@ def create_order_from_cart(request):
             total_amount=Decimal(total),
         )
 
+        for ci in cart_items:
             is_live_item = ci.product_id and ci.product_id >= 100000000
             prod = None
             seller_profile = None

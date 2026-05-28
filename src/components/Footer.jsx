@@ -1,122 +1,133 @@
 import React, { useState } from "react";
-import { 
-  Box, Typography, Container, Grid, Link, 
-  IconButton, TextField, Button, Divider 
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid,
+  IconButton,
+  Link,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Facebook, Twitter, Instagram, LinkedIn } from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
-import { BaseUrl ,name } from "../config";
+import { Facebook, Instagram, LinkedIn, Twitter } from "@mui/icons-material";
+import { name } from "../config";
+
+const columns = [
+  {
+    title: "Shop",
+    links: [
+      ["All products", "/products"],
+      ["Best deals", "/products"],
+      ["Wishlist", "/wishlist"],
+      ["Cart", "/cart"],
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      ["About", "/help"],
+      ["Contact", "/help"],
+      ["Seller program", "/register"],
+      ["Support", "/help"],
+    ],
+  },
+  {
+    title: "Account",
+    links: [
+      ["Profile", "/profile"],
+      ["Orders", "/orders"],
+      ["Sign in", "/signin"],
+      ["Register", "/register"],
+    ],
+  },
+];
+
 const Footer = () => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
   const [email, setEmail] = useState("");
 
   const handleSubscribe = () => {
-    if (email) {
-      alert(`Subscribed with: ${email}`);
-      setEmail("");
-    }
+    if (!email.trim()) return;
+    alert(`Subscribed with: ${email}`);
+    setEmail("");
   };
 
   return (
-    <Box
-  component="footer"
-  sx={{
-    position: "relative",
-    width: "100vw",
-    bgcolor: isDarkMode ? "grey.900" : "#f9f9f9",
-    color: isDarkMode ? "grey.300" : "grey.800",
-    py: 4, 
-    px: 3,
-    boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
-  }}
->
-      <Container maxWidth="lg">
-        <Grid container spacing={4} justifyContent="space-between">
-          <Grid item xs={12} sm={6} md={4}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Stay Updated
+    <Box component="footer" sx={{ width: "100%", bgcolor: "#080d18", color: "rgba(255,255,255,0.86)", mt: 0 }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 5 }, px: { xs: 2, md: 3 } }}>
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h5" fontWeight={950} sx={{ color: "white", mb: 1 }}>
+              {name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Subscribe to our newsletter for the latest updates.
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.66)", maxWidth: 390, mb: 2.5 }}>
+              A modern marketplace for daily shopping, trusted sellers, fast delivery, secure checkout, and fresh deals.
             </Typography>
-            <Box display="flex" gap={1} mt={2}>
+            <Stack direction="row" spacing={1}>
+              {[Facebook, Twitter, Instagram, LinkedIn].map((Icon, index) => (
+                <IconButton
+                  key={index}
+                  size="small"
+                  sx={{ color: "white", bgcolor: "rgba(255,255,255,0.08)", "&:hover": { bgcolor: "primary.main" } }}
+                >
+                  <Icon fontSize="small" />
+                </IconButton>
+              ))}
+            </Stack>
+          </Grid>
+
+          {columns.map((column) => (
+            <Grid size={{ xs: 6, sm: 4, md: 2 }} key={column.title}>
+              <Typography variant="subtitle2" fontWeight={950} sx={{ color: "white", mb: 1.5 }}>
+                {column.title}
+              </Typography>
+              <Stack spacing={1}>
+                {column.links.map(([label, href]) => (
+                  <Link key={label} href={href} underline="none" sx={{ color: "rgba(255,255,255,0.64)", fontSize: 14, "&:hover": { color: "white" } }}>
+                    {label}
+                  </Link>
+                ))}
+              </Stack>
+            </Grid>
+          ))}
+
+          <Grid size={{ xs: 12, md: 2 }}>
+            <Typography variant="subtitle2" fontWeight={950} sx={{ color: "white", mb: 1.5 }}>
+              Newsletter
+            </Typography>
+            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.64)", display: "block", mb: 1.5 }}>
+              Get deal alerts and marketplace updates.
+            </Typography>
+            <Stack direction="row" spacing={1}>
               <TextField
                 size="small"
-                fullWidth
-                variant="outlined"
-                placeholder="Your email"
+                placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                sx={{ bgcolor: "white", borderRadius: 1 }}
+                onChange={(event) => setEmail(event.target.value)}
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: 1,
+                  flex: 1,
+                  "& .MuiOutlinedInput-root": { borderRadius: 1 },
+                }}
               />
-              <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={handleSubscribe}
-                sx={{ minWidth: "80px", fontSize: "0.85rem" }}
-              >
-                Subscribe
+              <Button variant="contained" onClick={handleSubscribe} sx={{ borderRadius: 1, fontWeight: 900 }}>
+                Join
               </Button>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6} sm={3} md={2}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Quick Links
-            </Typography>
-            <Link href="/" color="inherit" underline="none" display="block" sx={{ mb: 1 }}>
-              Home
-            </Link>
-            <Link href="/about" color="inherit" underline="none" display="block" sx={{ mb: 1 }}>
-              About
-            </Link>
-            <Link href="/contact" color="inherit" underline="none" display="block">
-              Contact
-            </Link>
-          </Grid>
-
-          <Grid item xs={6} sm={3} md={2}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Contact
-            </Typography>
-            <Typography> 
-                  <Link
-                    href="https://mail.google.com/mail/?view=cm&fs=1&to=support@ecom.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    underline="hover"
-                    sx={{ mb: 1, display: "block", cursor: "pointer" }}
-                  >
-                    support@ecom.com
-                  </Link>
-
-            </Typography>
-            <Typography variant="body2">+91 8595585912</Typography>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3} textAlign={{ xs: "center", sm: "left" }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Follow Us
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-              <IconButton size="small" color="inherit"><Facebook /></IconButton>
-              <IconButton size="small" color="inherit"><Twitter /></IconButton>
-              <IconButton size="small" color="inherit"><Instagram /></IconButton>
-              <IconButton size="small" color="inherit"><LinkedIn /></IconButton>
-            </Box>
+            </Stack>
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 3 }} />
-
-        <Typography 
-          variant="body2" 
-          textAlign="center" 
-          sx={{ pt: 1, color: "text.secondary" }}
-        >
-          &copy; {new Date().getFullYear()} {name}. All rights reserved.
-        </Typography>
+        <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.1)" }} />
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={1}>
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.52)" }}>
+            © {new Date().getFullYear()} {name}. All rights reserved.
+          </Typography>
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.52)" }}>
+            Secure payments · Verified sellers · Fast delivery
+          </Typography>
+        </Stack>
       </Container>
     </Box>
   );

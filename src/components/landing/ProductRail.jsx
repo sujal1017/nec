@@ -1,102 +1,68 @@
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Grid,
-  Rating,
-  Skeleton,
-  Typography,
-} from "@mui/material";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import EcommerceProductCard from "../product/EcommerceProductCard";
 
 const ProductRail = ({ title, subtitle, products = [], loading, limit = 8 }) => {
   const navigate = useNavigate();
   const items = loading ? Array.from({ length: limit }) : products.slice(0, limit);
 
+  if (!loading && !items.length) return null;
+
   return (
-    <Box component="section" sx={{ py: { xs: 3, md: 5 } }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 2, alignItems: "end" }}>
+    <Box
+      component="section"
+      sx={{
+        py: { xs: 2, md: 2.5 },
+        px: { xs: 1.25, md: 2 },
+        my: { xs: 1.5, md: 2 },
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        boxShadow: (theme) => (theme.palette.mode === "dark" ? "none" : "0 10px 28px rgba(15, 23, 42, 0.06)"),
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} sx={{ mb: 1.75 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: 24, md: 32 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 950, fontSize: { xs: 18, md: 22 }, lineHeight: 1.15 }}>
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: { xs: "none", sm: "block" } }}>
               {subtitle}
             </Typography>
           )}
         </Box>
-        <Button onClick={() => navigate("/products")}>View all</Button>
-      </Box>
+        <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => navigate("/products")} sx={{ fontWeight: 900, whiteSpace: "nowrap" }}>
+          View all
+        </Button>
+      </Stack>
 
-      <Grid container spacing={2}>
+      <Box
+        sx={{
+          display: "grid",
+          gridAutoFlow: "column",
+          gridAutoColumns: { xs: "72%", sm: "38%", md: "24%", lg: "19%" },
+          gap: 1.5,
+          overflowX: "auto",
+          overscrollBehaviorX: "contain",
+          scrollSnapType: "x mandatory",
+          pb: 0.75,
+          scrollbarWidth: "thin",
+        }}
+      >
         {items.map((product, index) => (
-          <Grid item xs={6} sm={4} md={3} lg={1.5} key={product?.id || index}>
+          <Box key={product?.id || index} sx={{ scrollSnapAlign: "start" }}>
             {loading ? (
-              <Skeleton variant="rounded" height={276} />
+              <Skeleton variant="rounded" height={318} sx={{ width: "100%", borderRadius: 1 }} />
             ) : (
-              <Card
-                onClick={() => navigate(`/product/${product.id}`)}
-                sx={{
-                  cursor: "pointer",
-                  height: "100%",
-                  borderRadius: 1,
-                  position: "relative",
-                  transition: "transform 180ms ease, box-shadow 180ms ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                {product.discount_price ? (
-                  <Chip
-                    size="small"
-                    label="Offer"
-                    color="error"
-                    sx={{ position: "absolute", top: 8, left: 8, zIndex: 1, fontWeight: 800 }}
-                  />
-                ) : null}
-                <CardMedia
-                  component="img"
-                  image={product.image || "/images/headphones.jpg"}
-                  alt={product.name}
-                  loading="lazy"
-                  sx={{ height: { xs: 150, md: 170 }, objectFit: "cover" }}
-                />
-                <CardContent sx={{ p: 1.5 }}>
-                  <Typography variant="subtitle2" fontWeight={800} noWrap>
-                    {product.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }} noWrap>
-                    {product.category}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
-                    <Rating value={product.rating || 0} precision={0.5} size="small" readOnly />
-                    <Typography variant="caption" color="text.secondary">
-                      {product.rating || "New"}
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6" sx={{ mt: 0.5, fontWeight: 900 }}>
-                    {currency.format(Number(product.discount_price || product.price || 0))}
-                  </Typography>
-                  {product.discount_price ? (
-                    <Typography variant="caption" color="text.secondary" sx={{ textDecoration: "line-through" }}>
-                      {currency.format(Number(product.price || 0))}
-                    </Typography>
-                  ) : null}
-                </CardContent>
-              </Card>
+              <EcommerceProductCard product={product} dense />
             )}
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };

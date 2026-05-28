@@ -1,21 +1,40 @@
 import { memo } from "react";
-import { Chip, Grid } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 
 const TrustSection = () => (
-  <Grid container spacing={2} component="section" sx={{ py: { xs: 3, md: 5 } }}>
+  <Box
+    component="section"
+    sx={{
+      display: "grid",
+      gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+      gap: 1.25,
+      py: { xs: 1.5, md: 2 },
+    }}
+  >
     {[
       { icon: <VerifiedUserIcon />, label: "Secure payments" },
       { icon: <LocalShippingIcon />, label: "Fast delivery" },
       { icon: <StorefrontIcon />, label: "Verified sellers" },
     ].map((item) => (
-      <Grid item xs={12} md={4} key={item.label}>
-        <Chip icon={item.icon} label={item.label} sx={{ width: "100%", py: 3, borderRadius: 1, fontWeight: 800 }} />
-      </Grid>
+      <Chip
+        key={item.label}
+        icon={item.icon}
+        label={item.label}
+        sx={{
+          width: "100%",
+          height: 44,
+          borderRadius: 1,
+          fontWeight: 900,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      />
     ))}
-  </Grid>
+  </Box>
 );
 
 export default memo(TrustSection);
