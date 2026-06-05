@@ -104,12 +104,19 @@ const ProductForm = ({ value, onChange, onSubmit, saving, editingId, onCancel, c
         </Grid>
         <Grid size={{ xs: 12, md: 3 }}>
           <Autocomplete
-            freeSolo={false}
+            freeSolo
             options={categories.map((category) => category.name)}
-            value={value.category || null}
+            value={value.category || ""}
             onChange={(_, nextValue) => onChange("category", nextValue || "")}
+            onInputChange={(_, inputValue) => onChange("category", inputValue)}
             renderInput={(params) => (
-              <TextField {...params} required fullWidth label="Category" helperText="Choose an existing marketplace category" />
+              <TextField
+                {...params}
+                required
+                fullWidth
+                label="Category"
+                helperText="Choose or type a marketplace category"
+              />
             )}
           />
         </Grid>

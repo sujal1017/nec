@@ -9,11 +9,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.exceptions import AuthenticationFailed
 
 #models import
 from .models import Customer
 from .models import CustomerAddress
 from .models import Subscriber
+from .models import OTPVerification
+from .models import AuthAuditLog
+from Seller.models import SellerProfile
 # from .models import CustomerPhoneNo
 
 #form imports
@@ -47,6 +51,9 @@ from django.conf import settings
 from .utils import generate_email_token, verify_email_token
 import asyncio #for sending email asynchronously
 import requests
+import re
+import random
+from datetime import timedelta
 
 from django.http import HttpResponse
 from .html_pages import email_verified_successfully_page
@@ -57,6 +64,7 @@ from django.core.validators import validate_email
 # Create your vi
 import requests
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -76,9 +84,49 @@ def serialize_auth_user(user):
     }
 
 
+def generate_otp_code():
+    return f"{random.SystemRandom().randint(0, 999999):06d}"
+
+
+def create_otp_for_user(user, attempts=0):
+    return OTPVerification.objects.create(
+        user=user,
+        otp=generate_otp_code(),
+        attempts=attempts,
+        expires_at=OTPVerification.default_expiry(),
+    )
+
+
+def send_otp_email(user, otp_record):
+    send_mail(
+        "Your verification OTP",
+        f"Your verification OTP is {otp_record.otp}. It expires in 10 minutes.",
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+    )
+
+
+def get_client_ip(request):
+    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
+def create_auth_audit_log(request, action, user=None):
+    AuthAuditLog.objects.create(
+        user=user,
+        action=action,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+    )
+
+
 class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
+        if not self.user.is_verified or getattr(self.user, "user_status", "") != Customer.STATUS_ACTIVE:
+            raise AuthenticationFailed("Please verify your email before logging in.")
         data["token"] = data["access"]
         data["userType"] = getattr(self.user, "account_type", "personal")
         data["user"] = serialize_auth_user(self.user)
@@ -87,6 +135,19 @@ class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomerTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomerTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username")
+        attempted_user = Customer.objects.filter(username=username).first()
+        try:
+            response = super().post(request, *args, **kwargs)
+        except Exception:
+            create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, attempted_user)
+            raise
+
+        if response.status_code == status.HTTP_200_OK:
+            create_auth_audit_log(request, AuthAuditLog.ACTION_LOGIN, attempted_user)
+        return response
 
 class LegacyRegisterCustomer(APIView):
 
@@ -229,6 +290,24 @@ class RegisterCustomer(APIView):
     def post(self, request):
         print("REQUEST DATA:", request.data)
 
+        email = str(request.data.get("email") or request.data.get("username") or "").strip().lower()
+        if email and Customer.objects.filter(email__iexact=email).exists():
+            return Response({"email": ["Email already exists"]}, status=status.HTTP_409_CONFLICT)
+
+        mobile = str(
+            request.data.get("mobile")
+            or request.data.get("phone")
+            or request.data.get("phoneno")
+            or ""
+        )
+        normalized_mobile = re.sub(r"[\s()-]", "", mobile)
+        if normalized_mobile:
+            mobile_candidates = {normalized_mobile}
+            if not normalized_mobile.startswith("+"):
+                mobile_candidates.add(f"+{normalized_mobile}")
+            if Customer.objects.filter(phoneno__in=mobile_candidates).exists():
+                return Response({"mobile": ["Mobile already exists"]}, status=status.HTTP_409_CONFLICT)
+
         serializer = RegisterCustomerSerializer(data=request.data)
         if not serializer.is_valid():
             print("SERIALIZER ERRORS:", serializer.errors)
@@ -238,7 +317,19 @@ class RegisterCustomer(APIView):
             with transaction.atomic():
                 customer = serializer.save()
                 customer.is_verified = False
+                customer.user_status = Customer.STATUS_PENDING_VERIFICATION
                 customer.save()
+
+                if customer.account_type == "business":
+                    SellerProfile.objects.create(
+                        user=customer,
+                        business_name=serializer.validated_data["business_name"],
+                        business_registration_number=serializer.validated_data["business_registration_number"],
+                        business_email=customer.email,
+                        business_phone=str(customer.phoneno or ""),
+                        business_address=serializer.validated_data["business_address"],
+                        tax_id=serializer.validated_data["tax_id"],
+                    )
 
                 # Existing Keycloak integration remains part of the registration flow.
                 token_url = "https://iam.astropean.com/realms/master/protocol/openid-connect/token"
@@ -286,11 +377,14 @@ class RegisterCustomer(APIView):
                 if kc_response.status_code != 201:
                     raise Exception(f"Keycloak Error: {kc_response.text}")
 
+                VerifyEmail.send_verification_email(request, customer.email)
+                create_auth_audit_log(request, AuthAuditLog.ACTION_REGISTER, customer)
+
                 return Response(
                     {
-                        "msg": "User registered successfully",
-                        "userType": customer.account_type,
-                        "user": serialize_auth_user(customer),
+                        "userId": customer.id,
+                        "status": customer.user_status,
+                        "message": "Verification email sent",
                     },
                     status=status.HTTP_201_CREATED
                 )
@@ -305,18 +399,26 @@ class RegisterCustomer(APIView):
 #for email verification
 class VerifyEmail(APIView):
     @staticmethod
-    async def generateLink(request, username):
+    def build_verification_link(request, username):
         token = generate_email_token(username)
-        verification_link = request.build_absolute_uri(
+        return request.build_absolute_uri(
             reverse('verify_email') + f'?token={token}'
         )
 
-        return send_mail(
+    @staticmethod
+    def send_verification_email(request, username):
+        verification_link = VerifyEmail.build_verification_link(request, username)
+
+        send_mail(
             'Verify your email',
             f'Click here to verify: {verification_link}',
             settings.DEFAULT_FROM_EMAIL,
             [username]  # assuming username is email
         )
+
+    @staticmethod
+    async def generateLink(request, username):
+        return VerifyEmail.send_verification_email(request, username)
 
     def get(self, request):
         token = request.GET.get('token')
@@ -329,9 +431,13 @@ class VerifyEmail(APIView):
         try:
             user = Customer.objects.get(username=email)
             user.is_verified = True
+            user.user_status = Customer.STATUS_PENDING_OTP
             user.save()
+            otp_record = create_otp_for_user(user)
+            send_otp_email(user, otp_record)
+            create_auth_audit_log(request, AuthAuditLog.ACTION_EMAIL_VERIFICATION, user)
             # return Response({"msg": "Email verified successfully"}, status=status.HTTP_200_OK)
-            return HttpResponse(email_verified_successfully_page(msg = "Email verified Successfully", success=True))
+            return HttpResponse(email_verified_successfully_page(msg = "Email verified Successfully. OTP sent.", success=True))
         except:
             # return Response({"msg" : "User doesn't exist"}, status=status.HTTP_401_UNAUTHORIZED)
             return HttpResponse(email_verified_successfully_page(msg = "Email Verification failed", success=False))
@@ -346,8 +452,7 @@ class SendEmailVerificationLink(APIView):
             if(not self.isValidEmail(email)):
                 return Response({"msg" : "Invalid email format"}, status=status.HTTP_400_BAD_REQUEST)
 
-            asyncio.run(VerifyEmail.generateLink(request, email))
-            VerifyEmail.generateLink(request, email)
+            VerifyEmail.send_verification_email(request, email)
             return Response({"msg" : "email sent"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"msg" : "email not sent"}, status=status.HTTP_400_BAD_REQUEST)
@@ -359,6 +464,89 @@ class SendEmailVerificationLink(APIView):
             return True
         except:
             return False
+
+
+class GenerateOTP(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = str(request.data.get("email") or "").strip().lower()
+        if not email:
+            return Response({"email": ["Email is required"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Customer.objects.get(email__iexact=email)
+        except Customer.DoesNotExist:
+            return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user.is_verified:
+            return Response({"detail": "Verify email before generating OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_record = create_otp_for_user(user)
+        send_otp_email(user, otp_record)
+        return Response({"message": "OTP sent", "expiresAt": otp_record.expires_at}, status=status.HTTP_201_CREATED)
+
+
+class ResendOTP(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = str(request.data.get("email") or "").strip().lower()
+        if not email:
+            return Response({"email": ["Email is required"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Customer.objects.get(email__iexact=email)
+        except Customer.DoesNotExist:
+            return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user.is_verified:
+            return Response({"detail": "Verify email before resending OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        window_start = timezone.now() - timedelta(minutes=10)
+        latest = user.otp_verifications.filter(created_at__gte=window_start).first()
+        attempts = latest.attempts if latest else 0
+        if attempts >= 3:
+            return Response({"detail": "Maximum OTP resend attempts reached. Try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        otp_record = create_otp_for_user(user, attempts=attempts + 1)
+        send_otp_email(user, otp_record)
+        return Response({"message": "OTP resent", "expiresAt": otp_record.expires_at}, status=status.HTTP_200_OK)
+
+
+class VerifyOTP(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = str(request.data.get("email") or "").strip().lower()
+        otp = str(request.data.get("otp") or "").strip()
+        if not email:
+            return Response({"email": ["Email is required"]}, status=status.HTTP_400_BAD_REQUEST)
+        if not re.fullmatch(r"\d{6}", otp):
+            return Response({"otp": ["Enter a valid 6 digit OTP"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Customer.objects.get(email__iexact=email)
+        except Customer.DoesNotExist:
+            return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user.is_verified:
+            return Response({"detail": "Verify email before verifying OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_record = user.otp_verifications.filter(verified=False).first()
+        if not otp_record:
+            return Response({"detail": "No active OTP found."}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_record.is_expired():
+            return Response({"detail": "OTP expired."}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_record.otp != otp:
+            return Response({"otp": ["Invalid OTP"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_record.verified = True
+        otp_record.save(update_fields=["verified"])
+        user.user_status = Customer.STATUS_ACTIVE
+        user.save(update_fields=["user_status"])
+        create_auth_audit_log(request, AuthAuditLog.ACTION_OTP_VERIFICATION, user)
+        return Response({"message": "OTP verified", "status": user.user_status}, status=status.HTTP_200_OK)
 
 
     
@@ -375,10 +563,13 @@ class CustomerLogin(APIView):
             
             user = authenticate(username=username, password=password)
             if(not user):
+                attempted_user = Customer.objects.filter(username=username).first()
+                create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, attempted_user)
                 return Response({"msg" : "Incorrect username or password "}, status=status.HTTP_401_UNAUTHORIZED)
             
             #checking whether email is verified or not
-            if(user.is_verified == False):
+            if(user.is_verified == False or getattr(user, "user_status", "") != Customer.STATUS_ACTIVE):
+                create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, user)
                 return Response({"msg" : "Please Verify the Email"}, status=status.HTTP_401_UNAUTHORIZED)
 
             refresh = RefreshToken.for_user(user=user)
@@ -392,6 +583,7 @@ class CustomerLogin(APIView):
                 "user": serialize_auth_user(user),
             }, status=status.HTTP_200_OK)
             response['Authorization'] = f'Bearer {access_token}'
+            create_auth_audit_log(request, AuthAuditLog.ACTION_LOGIN, user)
 
             return response
         
@@ -657,6 +849,7 @@ class GoogleLogin(APIView):
                 "name": f"{first_name} {last_name}".strip() or email,
                 "account_type": account_type,
                 "is_verified": True,
+                "user_status": Customer.STATUS_ACTIVE,
             },
         )
 

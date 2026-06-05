@@ -47,9 +47,11 @@ class SellerProfileSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "business_name",
+            "business_registration_number",
             "business_email",
             "business_phone",
             "business_address",
+            "tax_id",
             "gst_number",
             "profile_image",
             "logo",

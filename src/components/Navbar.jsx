@@ -81,7 +81,7 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   }, [updateCounts]);
 
   useEffect(() => {
-    fetchCategories().then((items) => setCategories(items.slice(0, 8))).catch(() => setCategories([]));
+    fetchCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
   const logoutFunc = () => {

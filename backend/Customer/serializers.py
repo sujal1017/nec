@@ -31,6 +31,21 @@ class RegisterCustomerSerializer(serializers.Serializer):
         allow_blank=True,
         trim_whitespace=True,
     )
+    business_registration_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        trim_whitespace=True,
+    )
+    tax_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        trim_whitespace=True,
+    )
+    business_address = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        trim_whitespace=True,
+    )
 
     def to_internal_value(self, data):
         mutable = dict(data)
@@ -49,6 +64,12 @@ class RegisterCustomerSerializer(serializers.Serializer):
 
         if not mutable.get("business_name"):
             mutable["business_name"] = mutable.get("businessName") or ""
+        if not mutable.get("business_registration_number"):
+            mutable["business_registration_number"] = mutable.get("businessRegistrationNumber") or ""
+        if not mutable.get("tax_id"):
+            mutable["tax_id"] = mutable.get("taxId") or mutable.get("taxIdVat") or ""
+        if not mutable.get("business_address"):
+            mutable["business_address"] = mutable.get("businessAddress") or ""
 
         return super().to_internal_value(mutable)
 
@@ -82,8 +103,18 @@ class RegisterCustomerSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        if attrs["account_type"] == "business" and not attrs.get("business_name"):
-            raise serializers.ValidationError({"business_name": ["Business name is required for business users."]})
+        if attrs["account_type"] == "business":
+            errors = {}
+            if not attrs.get("business_name"):
+                errors["business_name"] = ["Business name is required for business users."]
+            if not attrs.get("business_registration_number"):
+                errors["business_registration_number"] = ["Business registration number is required for business users."]
+            if not attrs.get("tax_id"):
+                errors["tax_id"] = ["Tax ID / VAT number is required for business users."]
+            if not attrs.get("business_address"):
+                errors["business_address"] = ["Business address is required for business users."]
+            if errors:
+                raise serializers.ValidationError(errors)
         return attrs
 
     def create(self, validated_data):

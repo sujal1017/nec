@@ -43,6 +43,9 @@ const initialForm = {
   email: "",
   phone: "",
   businessName: "",
+  businessRegistrationNumber: "",
+  taxId: "",
+  businessAddress: "",
   password: "",
   confirmPassword: "",
   agreeTerms: false,
@@ -67,6 +70,12 @@ const Register = () => {
         return value.trim() ? "" : "Last name is required";
       case "businessName":
         return nextAccountType === "business" && !value.trim() ? "Business name is required" : "";
+      case "businessRegistrationNumber":
+        return nextAccountType === "business" && !value.trim() ? "Business registration number is required" : "";
+      case "taxId":
+        return nextAccountType === "business" && !value.trim() ? "Tax ID / VAT number is required" : "";
+      case "businessAddress":
+        return nextAccountType === "business" && !value.trim() ? "Business address is required" : "";
       case "email":
         return emailRegex.test(value) ? "" : "Enter a valid email address";
       case "phone":
@@ -113,6 +122,9 @@ const Register = () => {
               firstName: 50,
               lastName: 50,
               businessName: 80,
+              businessRegistrationNumber: 80,
+              taxId: 80,
+              businessAddress: 300,
               email: 254,
               password: 64,
               confirmPassword: 64,
@@ -142,6 +154,11 @@ const Register = () => {
     }
     if (formData.password !== formData.confirmPassword) nextErrors.confirmPassword = "Passwords do not match";
     if (accountType === "business" && !formData.businessName.trim()) nextErrors.businessName = "Business name is required";
+    if (accountType === "business" && !formData.businessRegistrationNumber.trim()) {
+      nextErrors.businessRegistrationNumber = "Business registration number is required";
+    }
+    if (accountType === "business" && !formData.taxId.trim()) nextErrors.taxId = "Tax ID / VAT number is required";
+    if (accountType === "business" && !formData.businessAddress.trim()) nextErrors.businessAddress = "Business address is required";
     if (!formData.agreeTerms) nextErrors.agreeTerms = "You must accept the terms";
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -160,6 +177,12 @@ const Register = () => {
         userType: accountType,
         businessName: accountType === "business" ? formData.businessName : "",
         business_name: accountType === "business" ? formData.businessName : "",
+        businessRegistrationNumber: accountType === "business" ? formData.businessRegistrationNumber : "",
+        business_registration_number: accountType === "business" ? formData.businessRegistrationNumber : "",
+        taxId: accountType === "business" ? formData.taxId : "",
+        tax_id: accountType === "business" ? formData.taxId : "",
+        businessAddress: accountType === "business" ? formData.businessAddress : "",
+        business_address: accountType === "business" ? formData.businessAddress : "",
         full_name: `${formData.firstName} ${formData.lastName}`,
         mobile: formData.phone,
         name: `${formData.firstName} ${formData.lastName}`,
@@ -176,11 +199,14 @@ const Register = () => {
       navigate("/signin", { replace: true, state: { registered: true } });
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {
-        full_name: "firstName",
-        mobile: "phone",
-        account_type: "accountType",
-        business_name: "businessName",
-        non_field_errors: "form",
+                    full_name: "firstName",
+                    mobile: "phone",
+                    account_type: "accountType",
+                    business_name: "businessName",
+                    business_registration_number: "businessRegistrationNumber",
+                    tax_id: "taxId",
+                    business_address: "businessAddress",
+                    non_field_errors: "form",
       });
 
       setErrors((current) => ({ ...current, ...fieldErrors }));
@@ -228,6 +254,9 @@ const Register = () => {
                   setErrors((current) => ({
                     ...current,
                     businessName: validateField("businessName", formData.businessName, formData, value),
+                    businessRegistrationNumber: validateField("businessRegistrationNumber", formData.businessRegistrationNumber, formData, value),
+                    taxId: validateField("taxId", formData.taxId, formData, value),
+                    businessAddress: validateField("businessAddress", formData.businessAddress, formData, value),
                   }));
                 }}
                 sx={{ mb: 3 }}
@@ -244,7 +273,12 @@ const Register = () => {
               ) : (
                 <Box component="form" onSubmit={handleSubmit} noValidate>
                   {accountType === "business" && (
-                    <TextField fullWidth label="Business name" value={formData.businessName} onChange={handleChange("businessName")} error={Boolean(errors.businessName)} helperText={errors.businessName} inputProps={{ maxLength: 80 }} sx={{ mb: 2 }} />
+                    <Stack spacing={2} sx={{ mb: 2 }}>
+                      <TextField fullWidth label="Business name" value={formData.businessName} onChange={handleChange("businessName")} error={Boolean(errors.businessName)} helperText={errors.businessName} inputProps={{ maxLength: 80 }} />
+                      <TextField fullWidth label="Business registration number" value={formData.businessRegistrationNumber} onChange={handleChange("businessRegistrationNumber")} error={Boolean(errors.businessRegistrationNumber)} helperText={errors.businessRegistrationNumber} inputProps={{ maxLength: 80 }} />
+                      <TextField fullWidth label="Tax ID / VAT number" value={formData.taxId} onChange={handleChange("taxId")} error={Boolean(errors.taxId)} helperText={errors.taxId} inputProps={{ maxLength: 80 }} />
+                      <TextField fullWidth multiline minRows={3} label="Business address" value={formData.businessAddress} onChange={handleChange("businessAddress")} error={Boolean(errors.businessAddress)} helperText={errors.businessAddress} inputProps={{ maxLength: 300 }} />
+                    </Stack>
                   )}
 
                   <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>

@@ -9,9 +9,11 @@ class SellerProfile(models.Model):
         related_name="seller_profile",
     )
     business_name = models.CharField(max_length=180)
+    business_registration_number = models.CharField(max_length=80, blank=True)
     business_email = models.EmailField()
     business_phone = models.CharField(max_length=20, blank=True)
     business_address = models.TextField(blank=True)
+    tax_id = models.CharField(max_length=80, blank=True)
     gst_number = models.CharField(max_length=30, blank=True)
     profile_image = models.URLField(blank=True, null=True)
     logo = models.FileField(upload_to="sellers/logos/", blank=True, null=True)

@@ -1,10 +1,11 @@
  /* dev- viraj
  */ 
-import React, {useState, useRef} from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import ContentEditable from "react-contenteditable";
 import { CheckCircle } from "lucide-react";
 import { Link, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import { fetchCategories } from "../../../../services/categoryService";
 import 'react-toastify/dist/ReactToastify.css'
 
 const Adddetails = () => {
@@ -13,7 +14,7 @@ const Adddetails = () => {
   console.log(Data.item)
   console.log(Data.condition)
 
-  const categories = [
+  const defaultCategories = [
     "Garden & Patio",
     "Health & Beauty",
     "Holidays & Travel",
@@ -36,9 +37,38 @@ const Adddetails = () => {
     "Everything Else",
     "Shoes",
   ];
+  const [categories, setCategories] = useState(defaultCategories);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [showToast, setShowToast] = useState(false);
-  
+
+  useEffect(() => {
+    let alive = true;
+
+    fetchCategories()
+      .then((items) => {
+        if (!alive) return;
+        const names = Array.from(
+          new Set([
+            ...items.map((item) => item.name).filter(Boolean),
+            ...defaultCategories,
+          ])
+        ).sort((a, b) => a.localeCompare(b));
+        setCategories(names);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCategories(defaultCategories);
+      })
+      .finally(() => {
+        if (!alive) return;
+        setCategoriesLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handleClick = () => {
     setShowToast(true);
@@ -60,23 +90,40 @@ const Adddetails = () => {
               className="w-full p-3 rounded-md border bg-gray-50 placeholder-gray-400"
             />
             <div className="mt-6">
-        <label className="font-semibold text-xl">Category</label>
-        <select
-          className="w-full p-3 border mt-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="" disabled>
-            -- Select Category --
-          </option>
-          {categories.map((cat, idx) => (
-            <option key={idx} value={cat}>
-              {cat}
+          <label className="font-semibold text-xl">Category</label>
+          <select
+            className="w-full p-3 border mt-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              if (e.target.value !== "Other") {
+                setCustomCategory("");
+              }
+            }}
+          >
+            <option value="" disabled>
+              -- Select Category --
             </option>
-          ))}
-        </select>
-        <h1 className='text-gray-600 mt-2 underline'>in Clothes, Shoes & Accessories - Men - Men's Shoes</h1>
-            </div>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+            <option value="Other">Other (type your own category)</option>
+          </select>
+
+          {(selectedCategory === "Other" || categories.length === 0) && (
+            <input
+              type="text"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              placeholder="Enter a custom category"
+              className="w-full p-3 border mt-3 rounded-xl bg-white placeholder-gray-400"
+            />
+          )}
+
+          <h1 className='text-gray-600 mt-2 underline'>in Clothes, Shoes & Accessories - Men - Men's Shoes</h1>
+        </div>
           
           </div>
 

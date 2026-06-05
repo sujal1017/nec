@@ -27,6 +27,7 @@ import RecentlyViewedSection from "../../components/product/RecentlyViewedSectio
 import { useAuth } from "../../context/AuthContext";
 
 const LiveMarketplace = lazy(() => import("../../components/landing/LiveMarketplace"));
+import { fetchCategories } from "../../services/categoryService";
 import { getLandingContent } from "../../services/landingService";
 
 const LandingPage = ({ darkMode, setDarkMode }) => {
@@ -41,6 +42,8 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
     recommendedProducts: [],
     deals: [],
   });
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -62,6 +65,39 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+
+    fetchCategories()
+      .then((items) => {
+        if (!alive) return;
+        setCategories(items);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCategories([]);
+      })
+      .finally(() => {
+        if (!alive) return;
+        setCategoriesLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const landingCategories = useMemo(() => {
+    const unique = new Map();
+    [...content.categories, ...categories].forEach((category) => {
+      const name = String(category?.name || "").trim().toLowerCase();
+      if (name && !unique.has(name)) {
+        unique.set(name, category);
+      }
+    });
+    return Array.from(unique.values());
+  }, [content.categories, categories]);
 
   const displayName = useMemo(() => {
     if (!user) return "";
@@ -132,8 +168,8 @@ const LandingPage = ({ darkMode, setDarkMode }) => {
           )}
 
           <CategoryStrip
-            categories={content.categories}
-            loading={loading}
+            categories={landingCategories}
+            loading={loading || categoriesLoading}
             onSelect={handleCategorySelect}
           />
 
