@@ -54,6 +54,9 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const location = useLocation();
 	const navigate = useNavigate();
 
+	// price bounds must be declared before callbacks that reference it
+	const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
+
 	// Helper function to convert text to title case for display
 	const toTitleCase = (str) => {
 		return str.replace(/\w\S*/g, (txt) => 
@@ -179,7 +182,6 @@ const ProductListing = ({ darkMode, setDarkMode }) => {
 	const [error, setError] = useState(null);
 	const [hasInitialLoad, setHasInitialLoad] = useState(false);
 	const [trendingTerms, setTrendingTerms] = useState([]);
-	const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
 
 	// pagination
 	const [offset, setOffset] = useState(0);

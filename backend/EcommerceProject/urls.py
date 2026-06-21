@@ -1,4 +1,4 @@
-"""
+﻿"""
 URL configuration for EcommerceProject project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from Product.views import BannersListView, CategoryListView, LandingContentView
+from Customer.views import RegisterCustomer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,7 @@ urlpatterns = [
     path("cart/", include("Cart.urls")),
     path("wishlist/", include("WishList.urls")),
     path("banners/", BannersListView.as_view()),
+    path("api/signup", RegisterCustomer.as_view(), name="api_signup"),
     path("api/landing/", LandingContentView.as_view()),
     path("api/categories/", CategoryListView.as_view()),
     path("api/products/", include("Product.urls")),
@@ -38,3 +40,5 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+

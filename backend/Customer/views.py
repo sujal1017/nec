@@ -1,4 +1,4 @@
-from django.shortcuts import render
+﻿from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -49,6 +49,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.conf import settings
 from .utils import generate_email_token, verify_email_token
+from .keycloak import create_keycloak_user
 import asyncio #for sending email asynchronously
 import requests
 import re
@@ -68,6 +69,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from .keycloak import delete_keycloak_user
 
 
 def serialize_auth_user(user):
@@ -124,9 +126,18 @@ def create_auth_audit_log(request, action, user=None):
 
 class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        username = attrs.get("username")
+        try:
+            user = Customer.objects.get(username=username)
+        except Customer.DoesNotExist:
+            raise AuthenticationFailed("Incorrect username or password")
+        if not user.is_verified:
+            raise AuthenticationFailed("Verify your email first")
+        if user.user_status == Customer.STATUS_PENDING_OTP:
+            raise AuthenticationFailed("Complete OTP verification")
+        if user.user_status == Customer.STATUS_SUSPENDED:
+            raise AuthenticationFailed("Account suspended")
         data = super().validate(attrs)
-        if not self.user.is_verified or getattr(self.user, "user_status", "") != Customer.STATUS_ACTIVE:
-            raise AuthenticationFailed("Please verify your email before logging in.")
         data["token"] = data["access"]
         data["userType"] = getattr(self.user, "account_type", "personal")
         data["user"] = serialize_auth_user(self.user)
@@ -162,7 +173,7 @@ class LegacyRegisterCustomer(APIView):
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
 
-            # ✅ uniqueness checks
+            # âœ… uniqueness checks
             if Customer.objects.filter(username=username).exists():
    
                 return Response({"msg": "Username is already used"}, status=400)
@@ -185,7 +196,7 @@ class LegacyRegisterCustomer(APIView):
 
                    
 
-                    # ✅ Step 1: Save in DB
+                    # âœ… Step 1: Save in DB
                     customer = Customer.objects.create_user(
                         username=username,
                         email=email,
@@ -199,68 +210,15 @@ class LegacyRegisterCustomer(APIView):
                     )
                     customer.is_verified = False
                     customer.save()
-
-                 
-
-                    # ✅ Step 2: Get Keycloak token
-                    token_url = "https://iam.astropean.com/realms/master/protocol/openid-connect/token"
-
-                    token_data = {
-                        "grant_type": "password",
-                        "client_id": "admin-cli",
-                        "username": "kcadmin",
-                        "password": "NEC2025$12!"
-                    }
-
-
-                    token_response = requests.post(token_url, data=token_data)
-
-
-                    if token_response.status_code != 200:
-                        raise Exception(f"Token Error: {token_response.text}")
-
-                    access_token = token_response.json().get("access_token")
-
-                    if not access_token:
-                        raise Exception("No access token received")
-
-               
-
-                    # ✅ Step 3: Create user in Keycloak
-                    kc_user_url = "https://iam.astropean.com/admin/realms/Buy-Sell/users"
-
-                    headers = {
-                        "Authorization": f"Bearer {access_token}",
-                        "Content-Type": "application/json"
-                    }
-
-                    kc_payload = {
-                        "username": username,
-                        "email": email,
-                        "firstName": first_name,
-                        "lastName": last_name,
-                        "enabled": True,
-                        "emailVerified": True,
-                        "credentials": [{
-                            "type": "password",
-                            "value": password,
-                            "temporary": False
-                        }]
-                    }
-
-                   
-
-                    kc_response = requests.post(
-                        kc_user_url,
-                        json=kc_payload,
-                        headers=headers
+                    # Step 2: Create user in Keycloak and store its ID.
+                    customer.keycloak_user_id = create_keycloak_user(
+                        username=username,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        password=password,
                     )
-
-
-
-                    # ✅ Step 4: Check Keycloak response
-                    if kc_response.status_code != 201:
-                        raise Exception(f"Keycloak Error: {kc_response.text}")
+                    customer.save(update_fields=["keycloak_user_id"])
 
                 
 
@@ -274,7 +232,7 @@ class LegacyRegisterCustomer(APIView):
                     )
 
             except Exception as e:
-                print("🔥 ERROR OCCURRED:", str(e))
+                print("ðŸ”¥ ERROR OCCURRED:", str(e))
 
                 return Response(
                     {"msg": str(e)},
@@ -313,6 +271,7 @@ class RegisterCustomer(APIView):
             print("SERIALIZER ERRORS:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        keycloak_user_id = None
         try:
             with transaction.atomic():
                 customer = serializer.save()
@@ -328,82 +287,56 @@ class RegisterCustomer(APIView):
                         business_email=customer.email,
                         business_phone=str(customer.phoneno or ""),
                         business_address=serializer.validated_data["business_address"],
-                        tax_id=serializer.validated_data["tax_id"],
+                        tax_id=serializer.validated_data.get("tax_id", ""),
                     )
-
-                # Existing Keycloak integration remains part of the registration flow.
-                token_url = "https://iam.astropean.com/realms/master/protocol/openid-connect/token"
-                token_data = {
-                    "grant_type": "password",
-                    "client_id": "admin-cli",
-                    "username": "kcadmin",
-                    "password": "NEC2025$12!"
-                }
-
-                token_response = requests.post(token_url, data=token_data)
-                if token_response.status_code != 200:
-                    raise Exception(f"Token Error: {token_response.text}")
-
-                access_token = token_response.json().get("access_token")
-                if not access_token:
-                    raise Exception("No access token received")
-
-                kc_user_url = "https://iam.astropean.com/admin/realms/Buy-Sell/users"
-                headers = {
-                    "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json"
-                }
-
-                kc_payload = {
-                    "username": customer.username,
-                    "email": customer.email,
-                    "firstName": customer.first_name,
-                    "lastName": customer.last_name,
-                    "enabled": True,
-                    "emailVerified": True,
-                    "credentials": [{
-                        "type": "password",
-                        "value": serializer.validated_data["password"],
-                        "temporary": False
-                    }]
-                }
-
-                kc_response = requests.post(
-                    kc_user_url,
-                    json=kc_payload,
-                    headers=headers
+                keycloak_user_id = create_keycloak_user(
+                    username=customer.username,
+                    email=customer.email,
+                    first_name=customer.first_name,
+                    last_name=customer.last_name,
+                    password=serializer.validated_data["password"],
                 )
-
-                if kc_response.status_code != 201:
-                    raise Exception(f"Keycloak Error: {kc_response.text}")
-
-                VerifyEmail.send_verification_email(request, customer.email)
+                customer.keycloak_user_id = keycloak_user_id
+                customer.save(update_fields=["keycloak_user_id"])
                 create_auth_audit_log(request, AuthAuditLog.ACTION_REGISTER, customer)
-
-                return Response(
-                    {
-                        "userId": customer.id,
-                        "status": customer.user_status,
-                        "message": "Verification email sent",
-                    },
-                    status=status.HTTP_201_CREATED
-                )
 
         except Exception as e:
             print("REGISTRATION ERROR:", str(e))
+            if keycloak_user_id:
+                try:
+                    delete_keycloak_user(keycloak_user_id)
+                except Exception as kc_err:
+                    print("KEYCLOAK CLEANUP FAILED:", str(kc_err))
             return Response(
                 {"non_field_errors": [str(e)]},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Send verification email outside atomic block — non-fatal
+        try:
+            VerifyEmail.send_verification_email(request, customer.email)
+            email_msg = "Verification email sent"
+        except Exception as e:
+            print("EMAIL SEND FAILED (non-fatal):", str(e))
+            email_msg = "Verification email could not be sent — use resend option"
+
+        return Response(
+            {
+                "userId": customer.id,
+                "status": customer.user_status,
+                "message": email_msg,
+            },
+            status=status.HTTP_201_CREATED
+        )
     
 #for email verification
 class VerifyEmail(APIView):
     @staticmethod
     def build_verification_link(request, username):
         token = generate_email_token(username)
-        return request.build_absolute_uri(
-            reverse('verify_email') + f'?token={token}'
-        )
+        from django.conf import settings
+        frontend_url = getattr(settings, 'SITE_URL', 'http://localhost:5173')
+        return f"{frontend_url}/verifyEmail?token={token}"
 
     @staticmethod
     def send_verification_email(request, username):
@@ -423,26 +356,39 @@ class VerifyEmail(APIView):
     def get(self, request):
         token = request.GET.get('token')
         email = verify_email_token(token)
-    
-        if(not email):
-            # return Response({"msg" : "Link expired or invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
-            return HttpResponse(email_verified_successfully_page(msg = "Email Verification failed", success=False))
-        
+
+        if not email:
+            return Response(
+                {"detail": "Link expired or invalid token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         try:
             user = Customer.objects.get(username=email)
             user.is_verified = True
             user.user_status = Customer.STATUS_PENDING_OTP
-            user.save()
+            user.save(update_fields=["is_verified", "user_status"])
             otp_record = create_otp_for_user(user)
-            send_otp_email(user, otp_record)
+            try:
+                send_otp_email(user, otp_record)
+            except Exception as e:
+                print("OTP EMAIL SEND FAILED (non-fatal):", str(e))
             create_auth_audit_log(request, AuthAuditLog.ACTION_EMAIL_VERIFICATION, user)
-            # return Response({"msg": "Email verified successfully"}, status=status.HTTP_200_OK)
-            return HttpResponse(email_verified_successfully_page(msg = "Email verified Successfully. OTP sent.", success=True))
-        except:
-            # return Response({"msg" : "User doesn't exist"}, status=status.HTTP_401_UNAUTHORIZED)
-            return HttpResponse(email_verified_successfully_page(msg = "Email Verification failed", success=False))
+            return Response(
+                {"status": user.user_status, "message": "Email verified successfully", "email": user.email},
+                status=status.HTTP_200_OK
+            )
+        except Customer.DoesNotExist:
+            return Response(
+                {"detail": "User does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        
 
 class SendEmailVerificationLink(APIView):
     def get(self, request):
@@ -483,7 +429,10 @@ class GenerateOTP(APIView):
             return Response({"detail": "Verify email before generating OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
         otp_record = create_otp_for_user(user)
-        send_otp_email(user, otp_record)
+        try:
+            send_otp_email(user, otp_record)
+        except Exception as e:
+            print("OTP EMAIL SEND FAILED (non-fatal):", str(e))
         return Response({"message": "OTP sent", "expiresAt": otp_record.expires_at}, status=status.HTTP_201_CREATED)
 
 
@@ -510,7 +459,10 @@ class ResendOTP(APIView):
             return Response({"detail": "Maximum OTP resend attempts reached. Try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         otp_record = create_otp_for_user(user, attempts=attempts + 1)
-        send_otp_email(user, otp_record)
+        try:
+            send_otp_email(user, otp_record)
+        except Exception as e:
+            print("OTP EMAIL SEND FAILED (non-fatal):", str(e))
         return Response({"message": "OTP resent", "expiresAt": otp_record.expires_at}, status=status.HTTP_200_OK)
 
 
@@ -568,9 +520,15 @@ class CustomerLogin(APIView):
                 return Response({"msg" : "Incorrect username or password "}, status=status.HTTP_401_UNAUTHORIZED)
             
             #checking whether email is verified or not
-            if(user.is_verified == False or getattr(user, "user_status", "") != Customer.STATUS_ACTIVE):
+            if not user.is_verified:
                 create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, user)
-                return Response({"msg" : "Please Verify the Email"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"msg": "Verify your email first"}, status=status.HTTP_401_UNAUTHORIZED)
+            if user.user_status == Customer.STATUS_PENDING_OTP:
+                create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, user)
+                return Response({"msg": "Complete OTP verification"}, status=status.HTTP_401_UNAUTHORIZED)
+            if user.user_status == Customer.STATUS_SUSPENDED:
+                create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, user)
+                return Response({"msg": "Account suspended"}, status=status.HTTP_401_UNAUTHORIZED)
 
             refresh = RefreshToken.for_user(user=user)
             access_token = str(refresh.access_token)
@@ -848,14 +806,74 @@ class GoogleLogin(APIView):
                 "last_name": last_name,
                 "name": f"{first_name} {last_name}".strip() or email,
                 "account_type": account_type,
-                "is_verified": True,
-                "user_status": Customer.STATUS_ACTIVE,
+                "is_verified": False,
+                "user_status": Customer.STATUS_PENDING_VERIFICATION,
             },
         )
 
         if created:
+            import secrets
+            temp_password = secrets.token_urlsafe(32)
             user.set_unusable_password()
             user.save()
+            keycloak_user_id = None
+            try:
+                with transaction.atomic():
+                    keycloak_user_id = create_keycloak_user(
+                        username=email,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        password=temp_password,
+                    )
+                    user.keycloak_user_id = keycloak_user_id
+                    user.save(update_fields=["keycloak_user_id"])
+                    if account_type == "business":
+                        SellerProfile.objects.create(
+                            user=user,
+                            business_name=request.data.get("businessName", ""),
+                            business_registration_number=request.data.get("businessRegistrationNumber", ""),
+                            business_email=email,
+                            business_phone="",
+                            business_address=request.data.get("businessAddress", ""),
+                            tax_id=request.data.get("taxId", ""),
+                        )
+            except Exception as e:
+                if keycloak_user_id:
+                    try:
+                        delete_keycloak_user(keycloak_user_id)
+                    except Exception:
+                        pass
+                if user.pk:
+                    user.delete()
+                return Response(
+                    {"msg": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            VerifyEmail.send_verification_email(request, user.email)
+            create_auth_audit_log(request, AuthAuditLog.ACTION_REGISTER, user)
+            return Response({
+                "msg": "Account created. Please verify your email.",
+                "requires_verification": True,
+                "email": user.email
+            }, status=status.HTTP_201_CREATED)
+
+        if not user.is_verified:
+            return Response({
+                "msg": "Verify your email first",
+                "requires_verification": True,
+                "email": user.email
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        if user.user_status == Customer.STATUS_PENDING_OTP:
+            return Response({
+                "msg": "Complete OTP verification",
+                "requires_verification": True,
+                "email": user.email
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        if user.user_status == Customer.STATUS_SUSPENDED:
+            return Response({
+                "msg": "Account suspended",
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user=user)
         access_token = str(refresh.access_token)
@@ -925,3 +943,6 @@ class GoogleLogin(APIView):
 #             return Response({"msg" : "Success"}, status=status.HTTP_200_OK)
         
 #         return Response({"msg" : "Form not valid"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+

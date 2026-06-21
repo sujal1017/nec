@@ -1,16 +1,19 @@
 export const getApiErrorMessage = (error) => {
   const data = error?.response?.data;
+  if (!data) return "Server error. Please try again.";
 
-  if (data) {
-    return (
-      Object.values(data)[0]?.[0] ||
-      data.detail ||
-      data.msg ||
-      "Something went wrong"
-    );
+  const values = Object.values(data);
+  if (values.length > 0) {
+    const first = values[0];
+    if (Array.isArray(first) && first.length > 0) {
+      return first[0];
+    }
+    if (typeof first === "string") {
+      return first;
+    }
   }
 
-  return "Server error. Please try again.";
+  return data.detail || data.msg || "Something went wrong";
 };
 
 export const getApiFieldErrors = (error, fieldMap = {}) => {

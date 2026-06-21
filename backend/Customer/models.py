@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
@@ -30,7 +30,7 @@ class Customer(AbstractUser):
     # already has:
     # username, first_name, last_name
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)  # important ✅
+    email = models.EmailField(unique=True)  # important âœ…
     phoneno = PhoneNumberField(blank=True, null=True)
     avatar = models.URLField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
@@ -41,6 +41,7 @@ class Customer(AbstractUser):
     )
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default="personal")
     business_name = models.CharField(max_length=150, blank=True, default="")
+    keycloak_user_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.username} ({self.first_name} {self.last_name})"
@@ -132,3 +133,6 @@ class AuthAuditLog(models.Model):
 
 #     def __str__(self):
 #         return self.custId.username
+
+
+

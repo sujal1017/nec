@@ -165,6 +165,15 @@ export const googleLogin = async ({ accessToken, accountType = "personal" }) => 
   });
 
   const data = response.data || {};
+
+  if (data.requires_verification) {
+    sessionStorage.setItem("otp_verification_email", data.email);
+    const error = new Error(data.msg || "Please verify your email before logging in.");
+    error.requiresVerification = true;
+    error.email = data.email;
+    throw error;
+  }
+
   const authData = {
     token: data.token || data.access,
     refreshToken: data.refreshToken || data.refresh || "",

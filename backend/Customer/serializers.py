@@ -52,8 +52,10 @@ class RegisterCustomerSerializer(serializers.Serializer):
 
         first_name = mutable.get("firstName") or mutable.get("first_name") or ""
         last_name = mutable.get("lastName") or mutable.get("last_name") or ""
-        if not mutable.get("full_name"):
+        if not mutable.get("full_name") and not mutable.get("fullName"):
             mutable["full_name"] = f"{first_name} {last_name}".strip() or mutable.get("name", "")
+        elif mutable.get("fullName") and not mutable.get("full_name"):
+            mutable["full_name"] = mutable["fullName"]
 
         if not mutable.get("mobile"):
             mutable["mobile"] = mutable.get("phone") or mutable.get("phoneno") or mutable.get("mobile", "")
@@ -109,8 +111,6 @@ class RegisterCustomerSerializer(serializers.Serializer):
                 errors["business_name"] = ["Business name is required for business users."]
             if not attrs.get("business_registration_number"):
                 errors["business_registration_number"] = ["Business registration number is required for business users."]
-            if not attrs.get("tax_id"):
-                errors["tax_id"] = ["Tax ID / VAT number is required for business users."]
             if not attrs.get("business_address"):
                 errors["business_address"] = ["Business address is required for business users."]
             if errors:

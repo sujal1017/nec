@@ -40,8 +40,10 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "", rememberMe: true });
 
   const redirectTarget = location.state?.from || "/";
+  const justRegistered = location.state?.registered === true;
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  const [apiSuccess, setApiSuccess] = useState(justRegistered ? "Account created successfully. Please verify your email before logging in." : "");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -65,8 +67,13 @@ const Login = () => {
         const authData = await googleLogin({ accessToken: response.access_token });
         setAuth(authData);
         navigate(redirectTarget, { replace: true });
-      } catch {
-        setApiError("Google login is not available from the backend yet.");
+      } catch (error) {
+        if (error.requiresVerification) {
+          setApiError(error.message || "Please verify your email to continue.");
+          navigate("/verify-otp", { replace: true });
+        } else {
+          setApiError("Google login failed. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
@@ -99,9 +106,11 @@ const Login = () => {
 
     setLoading(true);
     setApiError("");
+    setApiSuccess("");
     try {
       await login(formData);
-      navigate(redirectTarget, { replace: true });
+      setApiSuccess("Signed in successfully. Redirecting...");
+      setTimeout(() => navigate(redirectTarget, { replace: true }), 800);
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {
         username: "email",
@@ -175,6 +184,7 @@ const Login = () => {
                 </Box>
 
                 {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
+                {apiSuccess && <Alert severity="success" sx={{ mb: 2 }}>{apiSuccess}</Alert>}
 
                 <Button type="submit" fullWidth variant="contained" size="large" disabled={loading} sx={{ mb: 3 }}>
                   {loading ? "Signing in..." : "Sign in"}

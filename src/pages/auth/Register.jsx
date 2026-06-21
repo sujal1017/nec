@@ -72,8 +72,6 @@ const Register = () => {
         return nextAccountType === "business" && !value.trim() ? "Business name is required" : "";
       case "businessRegistrationNumber":
         return nextAccountType === "business" && !value.trim() ? "Business registration number is required" : "";
-      case "taxId":
-        return nextAccountType === "business" && !value.trim() ? "Tax ID / VAT number is required" : "";
       case "businessAddress":
         return nextAccountType === "business" && !value.trim() ? "Business address is required" : "";
       case "email":
@@ -157,7 +155,6 @@ const Register = () => {
     if (accountType === "business" && !formData.businessRegistrationNumber.trim()) {
       nextErrors.businessRegistrationNumber = "Business registration number is required";
     }
-    if (accountType === "business" && !formData.taxId.trim()) nextErrors.taxId = "Tax ID / VAT number is required";
     if (accountType === "business" && !formData.businessAddress.trim()) nextErrors.businessAddress = "Business address is required";
     if (!formData.agreeTerms) nextErrors.agreeTerms = "You must accept the terms";
     setErrors(nextErrors);
