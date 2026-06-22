@@ -46,33 +46,33 @@ from .serializers import RegisterCustomerSerializer
 
 #for email verification
 from django.core.mail import send_mail
-from django.urls import reverse
 from django.conf import settings
-from .utils import generate_email_token, verify_email_token
-from .keycloak import create_keycloak_user
-import asyncio #for sending email asynchronously
+# email verification imports removed — Keycloak handles email verification
+from .keycloak import (
+    create_keycloak_user,
+    delete_keycloak_user,
+    send_keycloak_verification_email,
+    check_keycloak_email_verified,
+    update_keycloak_email_verified,
+    get_keycloak_user_status,
+)
+import asyncio
 import requests
 import re
 import random
 from datetime import timedelta
-
-from django.http import HttpResponse
-from .html_pages import email_verified_successfully_page
-
 from django.core.validators import validate_email
 
-
-# Create your vi
-import requests
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .keycloak import delete_keycloak_user
 
 
 def serialize_auth_user(user):
+    if user.keycloak_user_id:
+        _sync_keycloak_verification(user)
     return {
         "username": user.username,
         "email": user.email,
@@ -83,6 +83,8 @@ def serialize_auth_user(user):
         "avatar": user.avatar,
         "accountType": getattr(user, "account_type", "personal"),
         "businessName": getattr(user, "business_name", ""),
+        "isVerified": user.is_verified,
+        "userStatus": user.user_status,
     }
 
 
@@ -131,6 +133,7 @@ class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
             user = Customer.objects.get(username=username)
         except Customer.DoesNotExist:
             raise AuthenticationFailed("Incorrect username or password")
+        _sync_keycloak_verification(user)
         if not user.is_verified:
             raise AuthenticationFailed("Verify your email first")
         if user.user_status == Customer.STATUS_PENDING_OTP:
@@ -312,12 +315,15 @@ class RegisterCustomer(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Send verification email outside atomic block — non-fatal
+        # Trigger Keycloak verification email — non-fatal
         try:
-            VerifyEmail.send_verification_email(request, customer.email)
+            from django.conf import settings
+            frontend_url = getattr(settings, 'SITE_URL', 'http://localhost:5173')
+            redirect_uri = f"{frontend_url}/verify-account?email={customer.email}"
+            send_keycloak_verification_email(customer.keycloak_user_id, redirect_uri=redirect_uri)
             email_msg = "Verification email sent"
         except Exception as e:
-            print("EMAIL SEND FAILED (non-fatal):", str(e))
+            print("KEYCLOAK VERIFICATION EMAIL FAILED (non-fatal):", str(e))
             email_msg = "Verification email could not be sent — use resend option"
 
         return Response(
@@ -329,87 +335,78 @@ class RegisterCustomer(APIView):
             status=status.HTTP_201_CREATED
         )
     
-#for email verification
-class VerifyEmail(APIView):
-    @staticmethod
-    def build_verification_link(request, username):
-        token = generate_email_token(username)
-        from django.conf import settings
-        frontend_url = getattr(settings, 'SITE_URL', 'http://localhost:5173')
-        return f"{frontend_url}/verifyEmail?token={token}"
+def _sync_keycloak_verification(user):
+    if not user.keycloak_user_id:
+        return
+    try:
+        status = get_keycloak_user_status(user.keycloak_user_id)
+        if status and status.get('emailVerified') and not user.is_verified:
+            user.is_verified = True
+            if user.user_status == Customer.STATUS_PENDING_VERIFICATION:
+                user.user_status = Customer.STATUS_PENDING_OTP
+            user.save(update_fields=["is_verified", "user_status"])
+    except Exception as e:
+        print("Keycloak sync failed (non-fatal):", str(e))
 
-    @staticmethod
-    def send_verification_email(request, username):
-        verification_link = VerifyEmail.build_verification_link(request, username)
 
-        send_mail(
-            'Verify your email',
-            f'Click here to verify: {verification_link}',
-            settings.DEFAULT_FROM_EMAIL,
-            [username]  # assuming username is email
-        )
-
-    @staticmethod
-    async def generateLink(request, username):
-        return VerifyEmail.send_verification_email(request, username)
+class VerificationStatus(APIView):
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        token = request.GET.get('token')
-        email = verify_email_token(token)
-
+        email = request.query_params.get("email", "").strip().lower()
         if not email:
-            return Response(
-                {"detail": "Link expired or invalid token"},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+            return Response({"email": ["Email is required"]}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = Customer.objects.get(username=email)
-            user.is_verified = True
-            user.user_status = Customer.STATUS_PENDING_OTP
-            user.save(update_fields=["is_verified", "user_status"])
-            otp_record = create_otp_for_user(user)
-            try:
-                send_otp_email(user, otp_record)
-            except Exception as e:
-                print("OTP EMAIL SEND FAILED (non-fatal):", str(e))
-            create_auth_audit_log(request, AuthAuditLog.ACTION_EMAIL_VERIFICATION, user)
-            return Response(
-                {"status": user.user_status, "message": "Email verified successfully", "email": user.email},
-                status=status.HTTP_200_OK
-            )
+            user = Customer.objects.get(email__iexact=email)
         except Customer.DoesNotExist:
-            return Response(
-                {"detail": "User does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.keycloak_user_id:
+            try:
+                kc_status = get_keycloak_user_status(user.keycloak_user_id)
+                if kc_status:
+                    if kc_status.get('emailVerified') and not user.is_verified:
+                        _sync_keycloak_verification(user)
+                    return Response({
+                        "emailVerified": kc_status['emailVerified'],
+                        "enabled": kc_status['enabled'],
+                        "requiredActions": kc_status['requiredActions'],
+                        "status": "verified" if kc_status['emailVerified'] else "pending_verification",
+                        "local_is_verified": user.is_verified,
+                        "local_user_status": user.user_status,
+                    })
+            except Exception as e:
+                print("Keycloak status check failed:", str(e))
+
+        return Response({
+            "emailVerified": False,
+            "enabled": False,
+            "requiredActions": [],
+            "status": "pending_verification",
+            "local_is_verified": user.is_verified,
+            "local_user_status": user.user_status,
+        })
 
 
 class SendEmailVerificationLink(APIView):
     def get(self, request):
         try:
             email = request.query_params.get('email')
+            if not email:
+                return Response({"msg": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if(not self.isValidEmail(email)):
-                return Response({"msg" : "Invalid email format"}, status=status.HTTP_400_BAD_REQUEST)
+            user = Customer.objects.filter(email__iexact=email).first()
+            if not user or not user.keycloak_user_id:
+                return Response({"msg": "User not found or no Keycloak account"}, status=status.HTTP_404_NOT_FOUND)
 
-            VerifyEmail.send_verification_email(request, email)
-            return Response({"msg" : "email sent"}, status=status.HTTP_200_OK)
+            from django.conf import settings
+            frontend_url = getattr(settings, 'SITE_URL', 'http://localhost:5173')
+            redirect_uri = f"{frontend_url}/verify-account?email={email}"
+            send_keycloak_verification_email(user.keycloak_user_id, redirect_uri=redirect_uri)
+            return Response({"msg": "Verification email sent"}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"msg" : "email not sent"}, status=status.HTTP_400_BAD_REQUEST)
-    
-
-    def isValidEmail(self, email):
-        try:
-            validate_email(email)
-            return True
-        except:
-            return False
+            return Response({"msg": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GenerateOTP(APIView):
@@ -424,6 +421,8 @@ class GenerateOTP(APIView):
             user = Customer.objects.get(email__iexact=email)
         except Customer.DoesNotExist:
             return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        _sync_keycloak_verification(user)
 
         if not user.is_verified:
             return Response({"detail": "Verify email before generating OTP."}, status=status.HTTP_400_BAD_REQUEST)
@@ -448,6 +447,8 @@ class ResendOTP(APIView):
             user = Customer.objects.get(email__iexact=email)
         except Customer.DoesNotExist:
             return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
+
+        _sync_keycloak_verification(user)
 
         if not user.is_verified:
             return Response({"detail": "Verify email before resending OTP."}, status=status.HTTP_400_BAD_REQUEST)
@@ -482,6 +483,8 @@ class VerifyOTP(APIView):
         except Customer.DoesNotExist:
             return Response({"email": ["User not found"]}, status=status.HTTP_404_NOT_FOUND)
 
+        _sync_keycloak_verification(user)
+
         if not user.is_verified:
             return Response({"detail": "Verify email before verifying OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -497,6 +500,11 @@ class VerifyOTP(APIView):
         otp_record.save(update_fields=["verified"])
         user.user_status = Customer.STATUS_ACTIVE
         user.save(update_fields=["user_status"])
+        if user.keycloak_user_id:
+            try:
+                update_keycloak_email_verified(user.keycloak_user_id, verified=True)
+            except Exception as e:
+                print("Keycloak status sync failed (non-fatal):", str(e))
         create_auth_audit_log(request, AuthAuditLog.ACTION_OTP_VERIFICATION, user)
         return Response({"message": "OTP verified", "status": user.user_status}, status=status.HTTP_200_OK)
 
@@ -518,8 +526,9 @@ class CustomerLogin(APIView):
                 attempted_user = Customer.objects.filter(username=username).first()
                 create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, attempted_user)
                 return Response({"msg" : "Incorrect username or password "}, status=status.HTTP_401_UNAUTHORIZED)
-            
-            #checking whether email is verified or not
+
+            _sync_keycloak_verification(user)
+
             if not user.is_verified:
                 create_auth_audit_log(request, AuthAuditLog.ACTION_FAILED_LOGIN, user)
                 return Response({"msg": "Verify your email first"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -850,7 +859,13 @@ class GoogleLogin(APIView):
                     {"msg": str(e)},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            VerifyEmail.send_verification_email(request, user.email)
+            try:
+                from django.conf import settings
+                frontend_url = getattr(settings, 'SITE_URL', 'http://localhost:5173')
+                redirect_uri = f"{frontend_url}/verify-account?email={user.email}"
+                send_keycloak_verification_email(user.keycloak_user_id, redirect_uri=redirect_uri)
+            except Exception as e:
+                print("KEYCLOAK VERIFICATION EMAIL FAILED (non-fatal):", str(e))
             create_auth_audit_log(request, AuthAuditLog.ACTION_REGISTER, user)
             return Response({
                 "msg": "Account created. Please verify your email.",

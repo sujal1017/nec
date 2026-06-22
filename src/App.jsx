@@ -24,6 +24,7 @@ const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
 const Help = lazy(() => import("./pages/Contact"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
+const VerifyAccount = lazy(() => import("./pages/auth/VerifyAccount"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
@@ -88,6 +89,8 @@ const App = () => {
                     />
 
                     <Route path="/register" element={<Register />} />
+
+                    <Route path="/verify-account" element={<VerifyAccount />} />
 
                     <Route
                       path="/verifyEmail"

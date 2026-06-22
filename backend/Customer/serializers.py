@@ -159,7 +159,7 @@ class CustomerNamePhoneSerializer(serializers.ModelSerializer):
     # phoneno = serializers.CharField(source='phoneno') 
     class Meta:
         model = Customer
-        fields = ['name', 'phoneno', 'email', 'avatar', 'account_type', 'business_name']
+        fields = ['name', 'phoneno', 'email', 'avatar', 'account_type', 'business_name', 'is_verified', 'user_status']
 
 # class CustomerPhoneSerializer(serializers.ModelSerializer):
 #     class Meta:

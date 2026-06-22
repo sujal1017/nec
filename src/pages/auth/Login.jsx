@@ -41,9 +41,13 @@ const Login = () => {
 
   const redirectTarget = location.state?.from || "/";
   const justRegistered = location.state?.registered === true;
+  const justVerified = location.state?.verified === true;
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
-  const [apiSuccess, setApiSuccess] = useState(justRegistered ? "Account created successfully. Please verify your email before logging in." : "");
+  const [apiSuccess, setApiSuccess] = useState(
+    justVerified ? "Account verified! You can now log in." :
+    justRegistered ? "Account created. Please verify your email before logging in." : ""
+  );
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -70,7 +74,7 @@ const Login = () => {
       } catch (error) {
         if (error.requiresVerification) {
           setApiError(error.message || "Please verify your email to continue.");
-          navigate("/verify-otp", { replace: true });
+          navigate("/verify-account", { state: { email: formData.email }, replace: true });
         } else {
           setApiError("Google login failed. Please try again.");
         }
@@ -118,7 +122,13 @@ const Login = () => {
       });
 
       setErrors((current) => ({ ...current, ...fieldErrors }));
-      setApiError(getApiErrorMessage(error));
+      const apiMsg = getApiErrorMessage(error);
+      setApiError(apiMsg);
+      if (apiMsg.includes("Complete OTP verification")) {
+        navigate("/verify-account", { state: { email: formData.email } });
+      } else if (apiMsg.includes("Verify your email")) {
+        navigate("/verify-account", { state: { email: formData.email } });
+      }
     } finally {
       setLoading(false);
     }

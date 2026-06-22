@@ -55,6 +55,8 @@ const Profile = ({ darkMode, setDarkMode }) => {
   const [updatedName, setUpdatedName] = useState(profileData.profile.name);
   const [updatedPhone, setUpdatedPhone] = useState(profileData.profile.phone);
   const [userEmail, setUserEmail] = useState("");
+  const [userVerified, setUserVerified] = useState(false);
+  const [userStatus, setUserStatus] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [openAddressDialog, setOpenAddressDialog] = useState(false);
   const [newAddress, setNewAddress] = useState("");
@@ -98,6 +100,8 @@ useEffect(() => {
         setUpdatedName(profile?.name || "");
         setUpdatedPhone(profile?.phoneno || "");
         setUserEmail(profile?.email || "");
+        setUserVerified(profile?.is_verified || false);
+        setUserStatus(profile?.user_status || "");
         setSavedAddresses(newSavedAdress || []);
       }
     } catch (error) {
@@ -534,6 +538,16 @@ const handleDeleteAddress = async (id) => {
                     <Typography variant="body1" color="text.secondary">
                       {userEmail}
                     </Typography>
+                    {userStatus !== "active" && (
+                      <Box sx={{ mt: 1 }}>
+                        <Chip
+                          label={userStatus === "pending_verification" ? "Email not verified" : userStatus === "pending_otp" ? "Phone not verified" : "Account not verified"}
+                          color="warning"
+                          size="small"
+                          onClick={() => navigate("/verify-account")}
+                        />
+                      </Box>
+                    )}
                   </Stack>
                 )}
                 <Button

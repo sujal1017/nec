@@ -1598,12 +1598,12 @@
   "smtpServer": {
     "password": "",
     "replyToDisplayName": "",
-    "starttls": "true",
-    "auth": "true",
-    "port": "587",
-    "host": "",
+    "starttls": "false",
+    "auth": "false",
+    "port": "1025",
+    "host": "mailhog",
     "replyTo": "",
-    "from": "",
+    "from": "noreply@ecommerce.local",
     "fromDisplayName": "E-Commerce Platform",
     "ssl": "false",
     "user": ""
@@ -2276,162 +2276,5 @@
   },
   "clientPolicies": {
     "policies": []
-  },
-  "userProfile": {
-    "attributes": [
-      {
-        "name": "username",
-        "displayName": "${username}",
-        "validations": {
-          "length": {
-            "min": 3,
-            "max": 255
-          },
-          "username-prohibited-characters": {},
-          "up-username-not-idn-homograph": {}
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      },
-      {
-        "name": "email",
-        "displayName": "${email}",
-        "validations": {
-          "email": {},
-          "length": {
-            "max": 255
-          }
-        },
-        "required": {
-          "roles": [
-            "user"
-          ]
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      },
-      {
-        "name": "firstName",
-        "displayName": "${firstName}",
-        "validations": {
-          "length": {
-            "max": 255
-          },
-          "person-name-prohibited-characters": {}
-        },
-        "required": {
-          "roles": [
-            "user"
-          ]
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      },
-      {
-        "name": "lastName",
-        "displayName": "${lastName}",
-        "validations": {
-          "length": {
-            "max": 255
-          },
-          "person-name-prohibited-characters": {}
-        },
-        "required": {
-          "roles": [
-            "user"
-          ]
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      },
-      {
-        "name": "account_type",
-        "displayName": "Account Type",
-        "validations": {
-          "options": {
-            "options": [
-              "customer",
-              "seller",
-              "admin",
-              "support"
-            ]
-          }
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      },
-      {
-        "name": "business_name",
-        "displayName": "Business Name",
-        "validations": {
-          "length": {
-            "max": 255
-          }
-        },
-        "permissions": {
-          "view": [
-            "admin",
-            "user"
-          ],
-          "edit": [
-            "admin",
-            "user"
-          ]
-        },
-        "multivalued": false
-      }
-    ],
-    "groups": [
-      {
-        "name": "user-metadata",
-        "displayHeader": "User metadata",
-        "displayDescription": "Attributes, which refer to user metadata"
-      }
-    ]
   }
 }
