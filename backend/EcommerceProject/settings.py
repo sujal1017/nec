@@ -153,9 +153,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
 }
 
 REST_FRAMEWORK = {
@@ -189,23 +189,53 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@ecomm.local'
-SITE_URL = config('SITE_URL', default='http://0.0.0.0:8000')
+SITE_URL = config('SITE_URL')
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 # """
 
 KEYCLOAK_SERVER_URL = config('KEYCLOAK_SERVER_URL')
 KEYCLOAK_REALM = config('KEYCLOAK_REALM')
 KEYCLOAK_CLIENT_ID = config('KEYCLOAK_CLIENT_ID')
-KEYCLOAK_CLIENT_SECRET = config('KEYCLOAK_CLIENT_SECRET')
+KEYCLOAK_CLIENT_SECRET = config('KEYCLOAK_CLIENT_SECRET', default='')
 KEYCLOAK_ADMIN_USERNAME = config('KEYCLOAK_ADMIN_USERNAME')
 KEYCLOAK_ADMIN_PASSWORD = config('KEYCLOAK_ADMIN_PASSWORD')
+KEYCLOAK_VERIFICATION_CLIENT_ID = config('KEYCLOAK_VERIFICATION_CLIENT_ID', default=KEYCLOAK_CLIENT_ID)
+KEYCLOAK_VERIFICATION_REDIRECT_URI = config('KEYCLOAK_VERIFICATION_REDIRECT_URI', default=f'{FRONTEND_URL.rstrip("/")}/verify-account')
 
-# Feature flag: switch to local Docker Keycloak without modifying keycloak.py
-if config('USE_LOCAL_KEYCLOAK', default=False, cast=bool):
-    KEYCLOAK_SERVER_URL = config('LOCAL_KEYCLOAK_SERVER_URL')
-    KEYCLOAK_REALM = config('LOCAL_KEYCLOAK_REALM')
-    KEYCLOAK_CLIENT_ID = config('LOCAL_KEYCLOAK_CLIENT_ID')
-    KEYCLOAK_CLIENT_SECRET = config('LOCAL_KEYCLOAK_CLIENT_SECRET', default='')
-    KEYCLOAK_ADMIN_USERNAME = config('LOCAL_KEYCLOAK_ADMIN_USERNAME')
-    KEYCLOAK_ADMIN_PASSWORD = config('LOCAL_KEYCLOAK_ADMIN_PASSWORD')
-
-KEYCLOAK_VERIFICATION_CLIENT_ID = config('KEYCLOAK_VERIFICATION_CLIENT_ID', default='ecommerce-frontend')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'Customer.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'Customer.keycloak': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'Customer': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

@@ -34,6 +34,10 @@ class Customer(AbstractUser):
     phoneno = PhoneNumberField(blank=True, null=True)
     avatar = models.URLField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
+    email_verified = models.BooleanField(default=False)
+    phone_verified = models.BooleanField(default=False)
+    verification_timestamp = models.DateTimeField(null=True, blank=True)
+    phone_verification_timestamp = models.DateTimeField(null=True, blank=True)
     user_status = models.CharField(
         max_length=30,
         choices=USER_STATUS_CHOICES,

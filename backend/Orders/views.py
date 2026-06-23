@@ -9,6 +9,7 @@ from django.db import transaction
 
 from Cart.models import Cart, CartItem
 from Customer.models import CustomerAddress
+from Customer.permissions import ActiveAccountRequired, EmailVerifiedRequired
 from Product.models import Product
 from .models import ShippingAddress, Order, OrderItem, Payment, AuctionProduct, BidHistory, OrderTrackingEvent
 from .serializers import (
@@ -64,7 +65,7 @@ def save_customer_address(user, shipping_data):
 
 # CREATE ORDER FROM CART
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, EmailVerifiedRequired])
 def create_order_from_cart(request):
     """
     Request Example:
@@ -183,7 +184,7 @@ def create_order_from_cart(request):
 
 # OPTIONAL PAYMENT ENDPOINT
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, ActiveAccountRequired])
 def create_payment(request):
     user = request.user
     order = get_object_or_404(Order, id=request.data.get("order_id"), user=user)

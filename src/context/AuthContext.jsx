@@ -29,6 +29,17 @@ const resolveUserType = (auth) => {
     : "personal";
 };
 
+const mapSnakeToCamel = (obj) => {
+  if (!obj) return obj;
+  const out = { ...obj };
+  if ("is_verified" in out) out.isVerified = out.is_verified;
+  if ("user_status" in out) out.userStatus = out.user_status;
+  if ("email_verified" in out) out.emailVerified = out.email_verified;
+  if ("account_type" in out) out.accountType = out.account_type;
+  if ("business_name" in out) out.businessName = out.business_name;
+  return out;
+};
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(() => readStoredAuth());
   const [profileLoading, setProfileLoading] = useState(false);
@@ -62,10 +73,41 @@ export const AuthProvider = ({ children }) => {
     return authData;
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    if (!auth?.token) return;
+    try {
+      const data = await fetchProfile();
+      const profile = data?.profileData?.profile || data?.profile || data?.user;
+      if (profile) {
+        setAuth((current) => {
+          const merged = mapSnakeToCamel({ ...current?.user, ...profile });
+          const next = {
+            ...current,
+            userType: resolveUserType({ ...current, user: merged }),
+            user: merged,
+          };
+          localStorage.setItem("user", JSON.stringify(next.user || {}));
+          localStorage.setItem("userType", next.userType || "");
+          localStorage.setItem("auth", JSON.stringify(next));
+          return next;
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }, [auth?.token]);
+
   const logout = useCallback(() => {
     clearStoredAuth();
     setAuth(null);
   }, []);
+
+  const syncAuthToStorage = (next) => {
+    if (!next) return;
+    localStorage.setItem("user", JSON.stringify(next.user || {}));
+    localStorage.setItem("userType", next.userType || "");
+    localStorage.setItem("auth", JSON.stringify(next));
+  };
 
   useEffect(() => {
     if (!auth?.token) return;
@@ -78,14 +120,16 @@ export const AuthProvider = ({ children }) => {
         if (!alive) return;
         const profile = data?.profileData?.profile || data?.profile || data?.user;
         if (profile) {
-          setAuth((current) => ({
-            ...current,
-            userType: resolveUserType({ ...current, user: { ...current.user, ...profile } }),
-            user: {
-              ...current.user,
-              ...profile,
-            },
-          }));
+          setAuth((current) => {
+            const merged = mapSnakeToCamel({ ...current?.user, ...profile });
+            const next = {
+              ...current,
+              userType: resolveUserType({ ...current, user: merged }),
+              user: merged,
+            };
+            syncAuthToStorage(next);
+            return next;
+          });
         }
       })
       .catch(() => undefined)
@@ -109,8 +153,9 @@ export const AuthProvider = ({ children }) => {
       login,
       logout,
       setAuth,
+      refreshProfile,
     }),
-    [auth, login, logout, profileLoading]
+    [auth, login, logout, profileLoading, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

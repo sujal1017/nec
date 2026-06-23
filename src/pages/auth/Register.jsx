@@ -193,7 +193,7 @@ const Register = () => {
         password: formData.password,
       });
       setSuccess(true);
-      navigate("/verify-account", { replace: true, state: { email: formData.email, justRegistered: true } });
+      navigate("/signin", { replace: true, state: { registered: true } });
     } catch (error) {
       const fieldErrors = getApiFieldErrors(error, {
                     full_name: "firstName",

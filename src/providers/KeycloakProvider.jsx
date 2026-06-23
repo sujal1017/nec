@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Keycloak Authentication Provider
  *
  * Provides Keycloak OIDC authentication for the React frontend.
@@ -14,9 +14,9 @@
  *  4. Update ProtectedRoute to use keycloak.authenticated
  *
  * Required environment variables (.env):
- *   VITE_KEYCLOAK_URL=http://localhost:8080
- *   VITE_KEYCLOAK_REALM=ecommerce
- *   VITE_KEYCLOAK_CLIENT_ID=ecommerce-frontend
+ *   VITE_KEYCLOAK_URL=https://iam.astropean.com
+ *   VITE_KEYCLOAK_REALM=Buy-Sell
+ *   VITE_KEYCLOAK_CLIENT_ID=<company-frontend-client-id>
  */
 
 import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
@@ -82,9 +82,9 @@ export const useKeycloak = () => {
  * 
  *   useEffect(() => {
  *     const kc = new Keycloak({
- *       url: import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8080',
- *       realm: import.meta.env.VITE_KEYCLOAK_REALM || 'ecommerce',
- *       clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'ecommerce-frontend',
+ *       url: import.meta.env.VITE_KEYCLOAK_URL,
+ *       realm: import.meta.env.VITE_KEYCLOAK_REALM,
+ *       clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
  *     });
  * 
  *     kc.init({
@@ -134,3 +134,4 @@ export const useKeycloak = () => {
  *   );
  * };
  */
+

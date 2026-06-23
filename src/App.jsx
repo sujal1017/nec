@@ -23,7 +23,6 @@ const Bids = lazy(() => import("./pages/Bids"));
 const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
 const Help = lazy(() => import("./pages/Contact"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
-const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
 const VerifyAccount = lazy(() => import("./pages/auth/VerifyAccount"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -107,7 +106,7 @@ const App = () => {
                       element={<ResetPassword />}
                     />
 
-                    <Route path="/verify-otp" element={<VerifyOTP />} />
+                    <Route path="/verify-otp" element={<Navigate to="/verify-account" replace />} />
 
                     <Route path="/help" element={<Help />} />
 

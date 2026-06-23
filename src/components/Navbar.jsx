@@ -63,14 +63,14 @@ const Navbar = ({ darkMode, setDarkMode, ...props }) => {
   const updateCounts = useCallback(async () => {
     const [nextCartCount, nextWishlistCount, orderCount, sellerCount] = await Promise.all([
       fetchCartCount(),
-      fetchWishlistCount(),
+      isAuthenticated ? fetchWishlistCount() : Promise.resolve(0),
       isPersonal ? fetchOrderNotificationCount() : Promise.resolve(0),
       isBusiness ? fetchSellerAlertCount() : Promise.resolve(0),
     ]);
     setCartCount(nextCartCount);
     setWishlistCount(nextWishlistCount);
     setNotifications(isBusiness ? sellerCount : orderCount);
-  }, [isBusiness, isPersonal]);
+  }, [isAuthenticated, isBusiness, isPersonal]);
 
   useEffect(() => {
     updateCounts();

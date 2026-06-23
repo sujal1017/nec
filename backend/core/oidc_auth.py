@@ -1,4 +1,4 @@
-"""
+﻿"""
 Keycloak OIDC Authentication Backend
 
 Validates Keycloak JWTs using RS256 signatures.
@@ -208,8 +208,9 @@ class KeycloakOIDCAuthentication:
         return (user, token)
 
     def authenticate_header(self, request):
-        return 'Bearer realm="ecommerce"'
+        return f'Bearer realm="{settings.KEYCLOAK_REALM}"'
 
     @staticmethod
     def _derive_account_type(roles):
         return "business" if "seller" in roles else "personal"
+

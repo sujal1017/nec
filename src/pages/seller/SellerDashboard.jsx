@@ -331,7 +331,10 @@ const SellerDashboard = () => {
           <Typography variant="overline" color="text.secondary">Seller dashboard</Typography>
           <Typography variant="h4" fontWeight={900}>{displayName}</Typography>
         </Box>
-        <Button variant="contained" onClick={() => loadDashboard(true)}>Refresh</Button>
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" onClick={() => navigate("/")}>Home</Button>
+          <Button variant="contained" onClick={() => loadDashboard(true)}>Refresh</Button>
+        </Stack>
       </Stack>
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>{success}</Alert>}

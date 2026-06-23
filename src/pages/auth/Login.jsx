@@ -124,9 +124,7 @@ const Login = () => {
       setErrors((current) => ({ ...current, ...fieldErrors }));
       const apiMsg = getApiErrorMessage(error);
       setApiError(apiMsg);
-      if (apiMsg.includes("Complete OTP verification")) {
-        navigate("/verify-account", { state: { email: formData.email } });
-      } else if (apiMsg.includes("Verify your email")) {
+      if (apiMsg.includes("Verify your email")) {
         navigate("/verify-account", { state: { email: formData.email } });
       }
     } finally {

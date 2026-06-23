@@ -42,6 +42,10 @@ const buildUser = (data, fallbackEmail = "") => {
         .join(" "),
     avatar: user.avatar || data.avatar || "",
     businessName: user.businessName || user.business_name || data.businessName || "",
+    isVerified: user.isVerified ?? user.is_verified ?? data.emailVerified ?? data.verified ?? false,
+    emailVerified: user.emailVerified ?? user.email_verified ?? data.emailVerified ?? data.verified ?? false,
+    userStatus: user.userStatus || user.user_status || data.userStatus || "",
+    requiresEmailVerification: data.requiresEmailVerification ?? data.requiresVerification ?? false,
   };
 };
 
@@ -133,6 +137,7 @@ export const login = async ({ email, password, rememberMe }) => {
     refreshToken: data.refreshToken || data.refresh || "",
     userType: normalizeUserType(data.userType || data.accountType),
     user: buildUser(data, email),
+    requiresEmailVerification: data.requiresEmailVerification ?? data.requiresVerification ?? false,
   };
 
   persistAuth(authData, rememberMe);
@@ -167,7 +172,7 @@ export const googleLogin = async ({ accessToken, accountType = "personal" }) => 
   const data = response.data || {};
 
   if (data.requires_verification) {
-    sessionStorage.setItem("otp_verification_email", data.email);
+    sessionStorage.setItem("verification_email", data.email);
     const error = new Error(data.msg || "Please verify your email before logging in.");
     error.requiresVerification = true;
     error.email = data.email;
@@ -179,6 +184,7 @@ export const googleLogin = async ({ accessToken, accountType = "personal" }) => 
     refreshToken: data.refreshToken || data.refresh || "",
     userType: normalizeUserType(data.userType || accountType),
     user: buildUser(data, userInfo.email),
+    requiresEmailVerification: data.requiresEmailVerification ?? data.requiresVerification ?? false,
   };
 
   persistAuth(authData, true);
