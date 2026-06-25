@@ -20,6 +20,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { addToCart, fetchCart } from "../../services/commerceService";
 import { FALLBACK_PRODUCT_IMAGE, handleImageFallback } from "../../utils/images";
 
@@ -164,7 +165,7 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
       elevation={0}
       sx={{
         height: "100%",
-        minHeight: dense ? 318 : 354,
+        minHeight: dense ? 350 : 390,
         display: "flex",
         flexDirection: "column",
         borderRadius: 1,
@@ -215,7 +216,7 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
         onClick={() => navigate(getProductUrl(product))}
         sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "stretch" }}
       >
-        <Box sx={{ bgcolor: (theme) => (theme.palette.mode === "dark" ? "#151b2b" : "#f7f9fc"), p: 1.25, aspectRatio: "1 / 0.78" }}>
+        <Box sx={{ bgcolor: (theme) => (theme.palette.mode === "dark" ? "#151b2b" : "#f7f9fc"), p: 1.25, height: 220, }}>
           <CardMedia
             component="img"
             image={product.image || FALLBACK_PRODUCT_IMAGE}
@@ -226,6 +227,10 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
               width: "100%",
               height: "100%",
               objectFit: "contain",
+              display: "block",
+              margin: "0 auto",
+              maxWidth: "100%",
+              maxHeight: "100%",
               mixBlendMode: "multiply",
               filter: (theme) => (theme.palette.mode === "dark" ? "none" : "drop-shadow(0 8px 14px rgba(15,23,42,0.08))"),
             }}
@@ -257,6 +262,12 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
               {Number(product.rating || 0) > 0 ? Number(product.rating).toFixed(1) : "New"}
             </Typography>
           </Stack>
+
+          {product.seller_name ? (
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ mt: 0.5 }}>
+              Seller: {product.seller_name}
+            </Typography>
+          ) : null}
 
           <Box sx={{ mt: 1 }}>
             <Stack direction="row" alignItems="baseline" gap={1} flexWrap="wrap">
@@ -299,6 +310,18 @@ const EcommerceProductCard = ({ product, dense = false, onCartAdded }) => {
           >
             Buy
           </Button>
+          <Tooltip title="Quick view">
+            <IconButton
+              aria-label="Quick view"
+              onClick={(event) => {
+                event.stopPropagation();
+                navigate(getProductUrl(product));
+              }}
+              sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, width: 38, height: 38 }}
+            >
+              <VisibilityOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Box>
     </Card>

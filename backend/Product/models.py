@@ -88,6 +88,7 @@ class Product(models.Model):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=280, blank=True, db_index=True)
+    short_description = models.CharField(max_length=255, blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -104,7 +105,18 @@ class Product(models.Model):
         related_name="products",
     )
     sku = models.CharField(max_length=80, blank=True, db_index=True)
-    image = models.URLField(blank=True, null=True)
+    color = models.CharField(max_length=80, blank=True)
+    size = models.CharField(max_length=120, blank=True)
+    material = models.CharField(max_length=120, blank=True)
+    weight = models.CharField(max_length=80, blank=True)
+    keywords = models.CharField(max_length=255, blank=True)
+    shipping_information = models.CharField(max_length=180, blank=True)
+    return_policy = models.CharField(max_length=180, blank=True)
+    image = models.FileField(
+    upload_to="products/main/",
+    blank=True,
+    null=True,
+    )
     thumbnail = models.FileField(upload_to="products/thumbnails/", blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE, db_index=True)
     is_featured = models.BooleanField(default=False)
@@ -147,7 +159,6 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.FileField(upload_to="products/", blank=True, null=True)
-    image_url = models.URLField(blank=True, null=True)
     is_main = models.BooleanField(default=False)
     option = models.ForeignKey(OptionValue, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -180,6 +191,22 @@ class Review(models.Model):
     
     def __str__(self):
         return f"Review by {self.username} for {self.product.name}"
+
+
+class SellerReview(models.Model):
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="seller_reviews")
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    title = models.CharField(max_length=200)
+    comment = models.TextField()
+    date = models.DateField()
+
+    @property
+    def username(self):
+        return self.user.username
+
+    def __str__(self):
+        return f"Seller review by {self.username} for {self.seller.name}"
 
 class FAQ(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='faqs')

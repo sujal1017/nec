@@ -30,6 +30,7 @@ import AddIcon from "@mui/icons-material/Add";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useTheme } from "@mui/material/styles";
@@ -166,7 +167,10 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
           const data = res.data;
           setProduct(data);
           setReviews(data.reviews || []);
-          setSellerDetails(data.seller || {
+          setSellerDetails(data.seller ? {
+            ...data.seller,
+            shippingTime: data.seller.shipping_time || data.seller.shippingTime,
+          } : {
             name: "Verified Marketplace Seller",
             rating: 4.5,
             verificationStatus: "verified",
@@ -560,6 +564,20 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
     );
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product?.name, text: product?.short_description || product?.description, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setSnackbar({ open: true, message: "Product link copied.", severity: "success" });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Could not share this product.", severity: "info" });
+    }
+  };
+
   return (
     <>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -703,10 +721,13 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                           {currency.format(product.price)}
                         </Typography>
                       )}
+                      {Number(product.discount || 0) > 0 && (
+                        <Chip color="success" label={`${product.discount}% off`} sx={{ borderRadius: 1, fontWeight: 900 }} />
+                      )}
                     </Box>
                   )}
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    Inclusive of all taxes
+                    Inclusive of all taxes. Estimated delivery: {product.shipping_information || sellerDetails?.shippingTime || "2-4 business days"}
                   </Typography>
                 </Box>
 
@@ -821,6 +842,16 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                       >
                         Wishlist
                       </Button>
+
+                      <Button
+                        variant="outlined"
+                        size="large"
+                        startIcon={<ShareOutlinedIcon />}
+                        onClick={handleShare}
+                        sx={{ flex: 1, py: 1.5, textTransform: "none", fontSize: "1.1rem" }}
+                      >
+                        Share
+                      </Button>
                     </Stack>
                   )}
                 </Box>
@@ -851,23 +882,36 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                 {/* Seller details */}
                 {sellerDetails && (
                   <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "flex-start", sm: "center" }}>
                       <StorefrontIcon color="primary" sx={{ fontSize: 32 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography fontWeight="bold">
                           Sold by {sellerDetails.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Shipping: {sellerDetails.shippingTime || "Ships next day"}
+                          {sellerDetails.shop_name || sellerDetails.name} - {sellerDetails.total_products || 0} products
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          Shipping: {sellerDetails.shippingTime || "Ships next day"} - {sellerDetails.address || sellerDetails.location || "India"}
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: "right" }}>
                         <Rating value={sellerDetails.rating || 4} size="small" precision={0.1} readOnly />
                         <Typography variant="caption" display="block" color="text.secondary">
-                          Seller Rating
+                          {sellerDetails.total_reviews || 0} seller reviews
                         </Typography>
                       </Box>
+                      {sellerDetails.id && (
+                        <Button variant="outlined" onClick={() => navigate(`/seller/${sellerDetails.id}`)} sx={{ borderRadius: 1, fontWeight: 900, whiteSpace: "nowrap" }}>
+                          View Seller Profile
+                        </Button>
+                      )}
                     </Stack>
+                    {sellerDetails.description && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                        {sellerDetails.description}
+                      </Typography>
+                    )}
                   </Paper>
                 )}
 
@@ -880,6 +924,35 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                     {product.description}
                   </Typography>
                 </Box>
+
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, height: "100%" }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        Specifications
+                      </Typography>
+                      {Object.entries(product.specifications || {}).filter(([, value]) => value).map(([key, value]) => (
+                        <Stack key={key} direction="row" justifyContent="space-between" gap={2} sx={{ py: 0.75, borderBottom: "1px solid", borderColor: "divider" }}>
+                          <Typography variant="body2" color="text.secondary">{key}</Typography>
+                          <Typography variant="body2" fontWeight={700} textAlign="right">{value}</Typography>
+                        </Stack>
+                      ))}
+                    </Paper>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, height: "100%" }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        Shipping & Returns
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Estimated delivery: {product.shipping_information || sellerDetails?.shippingTime || "2-4 business days"}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Return policy: {product.return_policy || sellerDetails?.return_policy || "7-day return policy for eligible products."}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
 
               </Stack>
             </Grid>
@@ -897,12 +970,20 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
                 <Paper key={rev.id} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
                   <Stack spacing={1}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography fontWeight="bold">{rev.reviewerName || "Anonymous Customer"}</Typography>
+                      <Box>
+                        <Typography fontWeight="bold">{rev.customer_name || rev.reviewerName || "Anonymous Customer"}</Typography>
+                        {rev.verified ? <Chip size="small" color="success" label="Verified Purchase" sx={{ mt: 0.5, borderRadius: 1 }} /> : null}
+                      </Box>
                       <Typography variant="caption" color="text.secondary">
                         {rev.date ? new Date(rev.date).toLocaleDateString() : ""}
                       </Typography>
                     </Stack>
                     <Rating value={rev.rating} size="small" readOnly />
+                    {rev.title && (
+                      <Typography variant="subtitle2" fontWeight={900}>
+                        {rev.title}
+                      </Typography>
+                    )}
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                       {rev.comment}
                     </Typography>
@@ -916,7 +997,13 @@ const ProductDetails = ({ darkMode, setDarkMode }) => {
         {/* Mini rails for database products */}
         {!isLive && product && (
           <Box sx={{ mt: 6 }}>
-            <ProductMiniRail title="Similar Products" products={similarProducts} limit={6} />
+            <ProductMiniRail title="You may also like" products={relatedProducts.length ? relatedProducts : similarProducts} limit={8} />
+            <Box sx={{ mt: 4 }}>
+              <ProductMiniRail title="More Products from this Seller" products={product.more_from_seller || []} limit={6} />
+            </Box>
+            <Box sx={{ mt: 4 }}>
+              <ProductMiniRail title="Similar Products" products={similarProducts} limit={8} />
+            </Box>
             <Box sx={{ mt: 4 }}>
               <RecentlyViewedSection excludeId={product.id} />
             </Box>

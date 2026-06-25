@@ -8,6 +8,9 @@ export const fetchSellerDashboard = () =>
 export const fetchSellerProfile = () =>
   api.get("/api/seller/profile/").then(unwrap);
 
+export const fetchPublicSellerProfile = (id) =>
+  api.get(`/products/sellers/${id}/`).then(unwrap);
+
 export const updateSellerProfile = (payload) =>
   api.put("/api/seller/profile/", payload, {
     headers: { "Content-Type": "multipart/form-data" },

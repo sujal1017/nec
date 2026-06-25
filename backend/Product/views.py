@@ -1,5 +1,5 @@
-from .serializers import ProductRetrieveSerializer, BannerSerializer, ProductListSerializer, CategorySerializer, SearchSuggestionSerializer
-from .models import Product, Banner, Category, Brand, SearchHistory, SearchTerm, RecentlyViewedProduct
+from .serializers import ProductRetrieveSerializer, BannerSerializer, ProductListSerializer, CategorySerializer, SearchSuggestionSerializer, SellerProfileSerializer
+from .models import Product, Banner, Category, Brand, SearchHistory, SearchTerm, RecentlyViewedProduct, Seller
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import permissions, authentication
@@ -18,7 +18,7 @@ class ProductListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        products = Product.objects.filter(status=Product.STATUS_ACTIVE).select_related('category', 'brand').prefetch_related('images', 'options__option')
+        products = Product.objects.filter(status=Product.STATUS_ACTIVE).select_related('category', 'brand', 'seller').prefetch_related('images', 'options__option', 'reviews')
         category = self.request.query_params.get("category")
         in_stock = self.request.query_params.get("in_stock")
         brand = self.request.query_params.get("brand")
@@ -36,7 +36,7 @@ class ProductListView(generics.ListAPIView):
         if search and str(smart).lower() == "true":
             products = apply_smart_filters(products, parse_smart_query(search))
         elif search:
-            products = products.filter(Q(name__icontains=search) | Q(description__icontains=search) | Q(brand__name__icontains=search))
+            products = products.filter(Q(name__icontains=search) | Q(description__icontains=search) | Q(short_description__icontains=search) | Q(keywords__icontains=search) | Q(category__name__icontains=search) | Q(brand__name__icontains=search))
 
         if in_stock:
             if in_stock.lower() == 'true':
@@ -96,7 +96,7 @@ class ProductRetrieveView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return Product.objects.all().select_related('category', 'brand', 'seller', 'auction').prefetch_related('reviews', 'faqs', 'images', 'options__option')
+        return Product.objects.all().select_related('category', 'brand', 'seller', 'auction').prefetch_related('reviews__user', 'faqs', 'images', 'options__option', 'seller__reviews__user')
 
 
 class BannersListView(generics.ListAPIView):
@@ -128,11 +128,11 @@ class LandingContentView(APIView):
     def get(self, request):
         products = (
             Product.objects.filter(status=Product.STATUS_ACTIVE)
-            .select_related("category", "brand")
-            .prefetch_related("images")
+            .select_related("category", "brand", "seller")
+            .prefetch_related("images", "reviews")
             .order_by("-created_at")
         )
-        featured = products.filter(is_featured=True)[:12]
+        featured = products.filter(is_featured=True)[:20]
         trending = products.filter(stock__gt=0).order_by("-rating", "-created_at")[:12]
         recommended = products.filter(stock__gt=0)[4:16]
 
@@ -170,7 +170,7 @@ class SearchSuggestionView(APIView):
                     output_field=IntegerField(),
                 )
             )
-            .filter(Q(name__icontains=query) | Q(brand__name__icontains=query) | Q(category__name__icontains=query))
+            .filter(Q(name__icontains=query) | Q(brand__name__icontains=query) | Q(category__name__icontains=query) | Q(keywords__icontains=query) | Q(description__icontains=query) | Q(short_description__icontains=query))
             .order_by("rank", "-rating", "name")[:10]
         )
         return Response({
@@ -243,7 +243,7 @@ class RecentlyViewedView(APIView):
             product_ids = [int(pk) for pk in (ids or "").split(",") if pk.isdigit()][:10]
 
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(product_ids)], output_field=IntegerField())
-        products = Product.objects.filter(pk__in=product_ids, status=Product.STATUS_ACTIVE).select_related("category", "brand").prefetch_related("images").order_by(preserved)
+        products = Product.objects.filter(pk__in=product_ids, status=Product.STATUS_ACTIVE).select_related("category", "brand", "seller").prefetch_related("images", "reviews").order_by(preserved)
         return Response({"products": ProductListSerializer(products, many=True, context={"request": request}).data})
 
     def post(self, request):
@@ -267,6 +267,15 @@ class ProductRecommendationView(APIView):
             "similarProducts": serializer.data.get("similar_products", []),
             "frequentlyBoughtTogether": serializer.data.get("frequently_bought_together", []),
         })
+
+
+class SellerProfileView(generics.RetrieveAPIView):
+    serializer_class = SellerProfileSerializer
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return Seller.objects.all().select_related("customer_support").prefetch_related("products__images", "reviews__user")
 
 
 class ProductCompareView(APIView):

@@ -9,6 +9,7 @@ from .views import (
     SearchHistoryView,
     SearchMetaView,
     SearchSuggestionView,
+    SellerProfileView,
     TrendingSearchView,
 )
 
@@ -19,6 +20,7 @@ urlpatterns = [
     path("search/history/", SearchHistoryView.as_view()),
     path("search/trending/", TrendingSearchView.as_view()),
     path("recently-viewed/", RecentlyViewedView.as_view()),
+    path("sellers/<int:pk>/", SellerProfileView.as_view()),
     path("compare/", ProductCompareView.as_view()),
     path("<int:pk>/recommendations/", ProductRecommendationView.as_view()),
     path("", ProductListView.as_view()),

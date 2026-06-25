@@ -21,6 +21,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const PaymentGateway = lazy(() => import("./pages/PaymentGateway"));
 const Bids = lazy(() => import("./pages/Bids"));
 const SellerDashboard = lazy(() => import("./pages/seller/SellerDashboard"));
+const SellerProfile = lazy(() => import("./pages/SellerProfile"));
 const Help = lazy(() => import("./pages/Contact"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const VerifyAccount = lazy(() => import("./pages/auth/VerifyAccount"));
@@ -129,6 +130,11 @@ const App = () => {
                     <Route
                       path="/compare"
                       element={<ComparePage {...pageProps} />}
+                    />
+
+                    <Route
+                      path="/seller/:id"
+                      element={<SellerProfile {...pageProps} />}
                     />
 
                     {/* Protected User Routes */}
